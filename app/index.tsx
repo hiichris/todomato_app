@@ -10,7 +10,7 @@ import {
   Pressable,
 } from "react-native";
 
-import { migrateDbIfNeeded } from "./services/db_service";
+import { migrateDbIfNeeded, clearAllTasks } from "./services/db_service";
 import { TodoItems } from "./components/TodoItems";
 import StackScreen from "./components/StackScreen";
 import { Todo } from "./models/todo";

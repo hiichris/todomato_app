@@ -98,7 +98,12 @@ export async function addNewTask(db: SQLiteDatabase, todo_id: number, name: stri
     parseInt(duration),
     todo_id
   );
+}
   
+export async function clearAllTasks(db: SQLiteDatabase) {
+  if (db === null) {
+    db = await openDatabaseAsync("todos.db");
+  }
+  await db.runAsync("DELETE FROM tasks");
   
 }
-

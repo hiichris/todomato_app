@@ -5,19 +5,74 @@ import {
   useNavigation,
 } from "expo-router";
 import { View, Text, StyleSheet, Button, TextInput } from "react-native";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import StackScreen from "./components/StackScreen";
 import { useSQLiteContext, SQLiteProvider } from "expo-sqlite";
 import { migrateDbIfNeeded, addNewTask, getAllTasks } from "./services/db_service";
 import { PickerIOS } from "@react-native-picker/picker";
 import { Task } from "./models/task";
 import { TaskItems } from "./components/TaskItems";
+import * as Notifications from "expo-notifications";
 
 export default function TodoDetails() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const params = useLocalSearchParams();
   const [selectedTimer, setSelectedTimer] = useState(5);
   const [taskName, setTaskName] = useState();
+  const notificationListener = useRef();
+  const responseListener = useRef();
+
+  useEffect(() => {
+    // Request permissions
+    async function getPermissions() {
+      const { status } = await Notifications.getPermissionsAsync();
+      if (status !== "granted") {
+        await Notifications.requestPermissionsAsync();
+      }
+    }
+
+    getPermissions();
+
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+      }),
+    });
+
+    // Listener for foreground notifications
+    notificationListener.current =
+      Notifications.addNotificationReceivedListener((notification) => {
+        console.log("Notification received:", notification);
+      });
+
+    // Listener for response to notifications
+    responseListener.current =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        console.log("Notification response received:", response);
+      });
+
+    return () => {
+      Notifications.removeNotificationSubscription(
+        notificationListener.current
+      );
+      Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
+
+  const scheduleNotification = async (taskName: string, duration: number) => {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "Todomado Reminders",
+        body: taskName,
+      },
+      trigger: {
+        seconds: duration,
+      },
+    });
+  };
+
   return (
     <SQLiteProvider databaseName="todos.db" onInit={migrateDbIfNeeded}>
       <Stack.Screen
@@ -70,6 +125,8 @@ export default function TodoDetails() {
             }).catch((error) => {
               console.log("Error: ", error);
             });
+
+            scheduleNotification(taskName, parseInt(selectedTimer));
 
           }}
         />
