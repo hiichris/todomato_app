@@ -1,69 +1,125 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Modal,
   View,
   Text,
+  Alert,
   Pressable,
   StyleSheet,
   Dimensions,
+  TextInput,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
+import { Link } from "expo-router";
+import { useSQLiteContext } from "expo-sqlite";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {primaryColor} from "../helpers/constants";
+import { primaryColor } from "../helpers/constants";
+import { addNewTodo } from "../services/db_service";
+import { SQLiteProvider } from "expo-sqlite";
+import { migrateDbIfNeeded, getAllTodos } from "../services/db_service";
 
-export default function AddTodoModal({ modalVisible, setModalVisible }) {
+async function addNewTodoHandler(db, todoTitle) {
+  useEffect(() => {
+    async function runQuery() {
+      await addNewTodo(db, todoTitle);
+    }
+
+    runQuery();
+  }, []);
+}
+export default function AddTodoModal({
+  modalVisible,
+  setModalVisible,
+  refreshTodoItems,
+  todos,
+  setTodos,
+  ...props
+}) {
+  const db = useSQLiteContext();
+  const [todoTitle, setTodoTitle] = React.useState("");
+
   return (
-    <SafeAreaView>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          Alert.alert("Modal has been closed.");
-          setModalVisible(!modalVisible);
-        }}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>Hello World!</Text>
-            
-            <View style={styles.buttonsContainer}>
-            <Pressable
-              style={[styles.button, styles.buttonCreate]}
-              onPress={() => setModalVisible(!modalVisible)}
-            >
-                
-              <Text style={styles.textStyle}>Create</Text>
-            </Pressable>
-           
-            <Pressable
-              style={[styles.button, styles.buttonClose]}
-              onPress={() => setModalVisible(!modalVisible)}
-            >
-                
-              <Text style={styles.textStyle}>Close</Text>
-            </Pressable>
+    <SQLiteProvider databaseName="test.db" onInit={migrateDbIfNeeded}>
+      <SafeAreaView>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            Alert.alert("Modal has been closed.");
+            setModalVisible(!modalVisible);
+          }}
+        >
+          <ScrollView style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <View style={styles.modalHeaderContainer}>
+                <Text style={styles.headerText}>Create Todo</Text>
+                <Pressable
+                  style={styles.closeCirleButton}
+                  onPress={() => setModalVisible(!modalVisible)}
+                >
+                  <Text style={styles.closeCircleText}>X</Text>
+                </Pressable>
+              </View>
+              <View style={styles.modalBodyContainer}>
+                <View style={styles.inputContiner}>
+                  <Text style={styles.modalText}>Todo Title:</Text>
+                  <TextInput
+                    style={styles.modalTextInput}
+                    onChangeText={setTodoTitle}
+                    value={todoTitle}
+                  />
+                </View>
+
+                <View style={styles.buttonsContainer}>
+                  <Pressable
+                    style={[styles.button, styles.buttonCreate]}
+                    onPress={() => {
+                      console.log("todoTitle: ", todoTitle);
+
+                      addNewTodo(db, todoTitle).then((result) => {
+                        console.log("last id: ", result.lastInsertRowId);
+                      });
+
+                      getAllTodos(db).then((result) => {
+                        console.log("result: ", result);
+                        setTodos(result);
+                      });
+
+                      // Close the modal
+                      setModalVisible(!modalVisible);
+                    }}
+                  >
+                    <Text style={styles.textStyle}>Create</Text>
+                  </Pressable>
+                </View>
+              </View>
+              <View style={{ flexGrow: 2 }}></View>
             </View>
-          </View>
-        </View>
-      </Modal>
-    </SafeAreaView>
+          </ScrollView>
+        </Modal>
+      </SafeAreaView>
+    </SQLiteProvider>
   );
 }
 
 const styles = StyleSheet.create({
   centeredView: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    
   },
   modalView: {
     flex: 1,
     width: Dimensions.get("window").width,
-    marginTop: Dimensions.get("window").height / 7,
-    backgroundColor: 'rgba(250, 250, 250, 0.9)',
-    borderRadius: 10,
-    padding: 35,
+    height: Dimensions.get("window").height / 2,
+    marginTop: Dimensions.get("window").height / 2,
+    backgroundColor: "rgba(255, 87, 51, 0.95)",
+    borderRadius: 20,
+    padding: 16,
+    paddingTop: 40,
     alignItems: "center",
     shadowColor: "#000",
     shadowOpacity: 0.15,
@@ -71,29 +127,80 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   buttonsContainer: {
+    margin: 8,
     flexDirection: "row",
     justifyContent: "space-between",
   },
   button: {
     borderRadius: 20,
-    padding: 10,
-    margin: 4,
+    padding: 8,
+    paddingHorizontal: 12,
+    margin: 8,
     elevation: 2,
   },
   buttonCreate: {
-    backgroundColor: primaryColor,
-  },
-  buttonClose: {
-    backgroundColor: "#909090",
+    backgroundColor: "#B2361B",
+    borderColor: "white",
+    borderWidth: 1,
   },
   textStyle: {
     color: "white",
     fontWeight: "bold",
     textAlign: "center",
+    fontSize: 16,
   },
   modalText: {
-    marginBottom: 15,
+    flex: 2,
     textAlign: "center",
+    color: "white",
+  },
+  modalTextInput: {
+    flex: 4,
+    height: 40,
+    width: Dimensions.get("window").width - 32,
+    borderColor: "white",
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 10,
+    margin: 8,
+    color: "white",
+  },
+  inputContiner: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalHeaderContainer: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalBodyContainer: {
+    flex: 8,
+    justifyContent: "flex-start",
+    alignItems: "center",
+  },
+  headerText: {
+    color: "white",
     fontSize: 16,
+    fontWeight: "bold",
+    marginTop: -38,
+  },
+  closeCirleButton: {
+    marginTop: -38,
+    position: "absolute",
+    left: Dimensions.get("window").width / 2,
+    top: 16,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 8,
+  },
+  closeCircleText: {
+    color: primaryColor,
+    fontWeight: "bold",
+    fontSize: 10,
+    width: 13,
+    textAlign: "center",
   },
 });

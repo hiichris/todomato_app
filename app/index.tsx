@@ -10,20 +10,21 @@ import {
   Pressable,
 } from "react-native";
 
-import { migrateDbIfNeeded } from "./services/db-service";
+import { migrateDbIfNeeded } from "./services/db_service";
 import { TodoItems } from "./components/TodoItems";
 import StackScreen from "./components/StackScreen";
+import { Todo } from "../models/todo";
 
 export default function App() {
-  
+  const [todos, setTodos] = useState<Todo[]>([]);
+
   return (
     <View style={styles.container}>
-        
-      <StackScreen title="Todomato" />
       <SQLiteProvider databaseName="test.db" onInit={migrateDbIfNeeded}>
         <View style={styles.tasksContainer}>
-          <TodoItems />
+          <TodoItems todos={todos} setTodos={setTodos} />
         </View>
+      <StackScreen title="Todomato" todos={todos} setTodos={setTodos} />
       </SQLiteProvider>
     </View>
   );
@@ -42,5 +43,4 @@ const styles = StyleSheet.create({
     color: "red",
     marginRight: 10,
   },
- 
 });

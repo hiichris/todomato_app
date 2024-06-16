@@ -1,26 +1,27 @@
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
-import { getAllTasks } from "../services/db-service";
+import { getAllTodos } from "../services/db_service";
 import { Task } from "../models/task";
+import { Todo } from "../models/todo";
 import { Link } from "expo-router";
 
-export function TodoItems() {
+export function TodoItems({ todos, setTodos}) {
   const db = useSQLiteContext();
-  const [tasks, setTasks] = useState<Task[]>([]);
 
   useEffect(() => {
     async function runQuery() {
-      setTasks(await getAllTasks(db));
+      setTodos(await getAllTodos(db));
     }
 
     runQuery();
   }, []);
 
   return (
+    <>
     <FlatList
       style={styles.listContainer}
-      data={tasks}
+      data={todos}
       renderItem={({ item }) => (
         <View style={styles.taskItemContainer}>
           <Link
@@ -36,6 +37,7 @@ export function TodoItems() {
       )}
       keyExtractor={(item) => item.id.toString()}
     />
+    </>
   );
 }
 

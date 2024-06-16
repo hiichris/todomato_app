@@ -50,7 +50,11 @@ CREATE TABLE "tasks" (
   await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
 }
 
-export async function getAllTasks(db: SQLiteDatabase) {
+export async function getAllTodos(db: SQLiteDatabase) {
   const query = "SELECT * FROM todos";
   return await db.getAllAsync<Task>(query);
+}
+
+export async function addNewTodo(db: SQLiteDatabase, title: string) {
+  return db.runAsync("INSERT INTO todos (title) values (?)", title);
 }
