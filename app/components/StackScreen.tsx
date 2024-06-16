@@ -12,36 +12,46 @@ export default function StackScreen({
   title,
   todos,
   setTodos,
+  addTodoButton,
   refreshTodoItems = null,
 }) {
   const [modalVisible, setModalVisible] = useState(false);
+  const dbContext = useSQLiteContext();
+
+
+  const todoButton = () => {
+    return (
+      <Pressable
+        onPress={() => {
+          console.log("Set modal visible");
+          setModalVisible(true);
+        }}
+      >
+        <Text style={styles.naviButton}>Add</Text>
+      </Pressable>
+    );
+  }
 
   return (
-    <SQLiteProvider databaseName="test.db" onInit={migrateDbIfNeeded}>
       <View style={styles.stackContainer}>
         <Stack.Screen
           options={{
             title: title,
-            headerRight: () => (
-              <Pressable
-                onPress={() => {
-                  console.log("Set modal visible");
-                  setModalVisible(true);
-                }}
-              >
-                <Text style={styles.naviButton}>Add</Text>
-              </Pressable>
-            ),
+            headerRight: () => {
+              if (addTodoButton) {
+                return todoButton();
+              }
+            },            
           }}
         ></Stack.Screen>
         <AddTodoModal
           todos={todos}
-          setTodos={setTodos}s
+          setTodos={setTodos}
           modalVisible={modalVisible}
           setModalVisible={setModalVisible}
+          dbContext={dbContext}
         />
       </View>
-    </SQLiteProvider>
   );
 }
 

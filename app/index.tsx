@@ -13,18 +13,19 @@ import {
 import { migrateDbIfNeeded } from "./services/db_service";
 import { TodoItems } from "./components/TodoItems";
 import StackScreen from "./components/StackScreen";
-import { Todo } from "../models/todo";
+import { Todo } from "./models/todo";
+import { useSQLiteContext } from "expo-sqlite";
 
 export default function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
 
   return (
     <View style={styles.container}>
-      <SQLiteProvider databaseName="test.db" onInit={migrateDbIfNeeded}>
+      <SQLiteProvider databaseName="todos.db" onInit={migrateDbIfNeeded}>
+      <StackScreen title="Todomato" todos={todos} setTodos={setTodos} addTodoButton={true} />
         <View style={styles.tasksContainer}>
           <TodoItems todos={todos} setTodos={setTodos} />
         </View>
-      <StackScreen title="Todomato" todos={todos} setTodos={setTodos} />
       </SQLiteProvider>
     </View>
   );

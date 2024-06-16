@@ -28,7 +28,12 @@ export function TodoItems({ todos, setTodos}) {
             style={{ flex: 1 }}
             href={{
               pathname: "/todo_details",
-              params: { title: item.title.substring(0, 10), id: item.id },
+              params: { 
+                title: item.title, 
+                id: item.id,
+                todos: todos,
+                setTodos: setTodos,
+              },
             }}
           >
             {`${item.index_no} - ${item.title}`}

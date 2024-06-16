@@ -21,6 +21,7 @@ import { primaryColor } from "../helpers/constants";
 import { addNewTodo } from "../services/db_service";
 import { SQLiteProvider } from "expo-sqlite";
 import { migrateDbIfNeeded, getAllTodos } from "../services/db_service";
+import { Todo } from "../models/todo";
 
 async function addNewTodoHandler(db, todoTitle) {
   useEffect(() => {
@@ -34,16 +35,14 @@ async function addNewTodoHandler(db, todoTitle) {
 export default function AddTodoModal({
   modalVisible,
   setModalVisible,
-  refreshTodoItems,
   todos,
   setTodos,
-  ...props
+  dbContext,
 }) {
-  const db = useSQLiteContext();
   const [todoTitle, setTodoTitle] = React.useState("");
 
   return (
-    <SQLiteProvider databaseName="test.db" onInit={migrateDbIfNeeded}>
+    <SQLiteProvider databaseName="todos.db" onInit={migrateDbIfNeeded}>
       <SafeAreaView>
         <Modal
           animationType="slide"
@@ -81,15 +80,22 @@ export default function AddTodoModal({
                     onPress={() => {
                       console.log("todoTitle: ", todoTitle);
 
-                      addNewTodo(db, todoTitle).then((result) => {
-                        console.log("last id: ", result.lastInsertRowId);
-                      });
+                      addNewTodo(dbContext, todoTitle)
+                        .then((result) => {
+                          console.log("last id: ", result.lastInsertRowId);
+                        })
+                        .catch((error) => {
+                          console.log("error1: ", error);
+                        });
 
-                      getAllTodos(db).then((result) => {
-                        console.log("result: ", result);
-                        setTodos(result);
-                      });
-
+                      getAllTodos(dbContext)
+                        .then((result) => {
+                          console.log("result: ", result);
+                          setTodos(result);
+                        })
+                        .catch((error) => {
+                          console.log("error2: ", error);
+                        });
                       // Close the modal
                       setModalVisible(!modalVisible);
                     }}

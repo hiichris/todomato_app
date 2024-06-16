@@ -1,9 +1,10 @@
 import {
   SQLiteProvider,
   useSQLiteContext,
+  openDatabaseAsync,
   type SQLiteDatabase,
 } from "expo-sqlite";
-import { Task } from "../models/task";
+import { Todo } from "../models/todo";
 
 export async function migrateDbIfNeeded(db: SQLiteDatabase) {
   const DATABASE_VERSION = 1;
@@ -11,8 +12,7 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
     user_version: number;
   }>("PRAGMA user_version");
   if (currentDbVersion >= DATABASE_VERSION) {
-    currentDbVersion = 0; // Reset the database for now
-    //return;
+    return;
   }
   if (currentDbVersion === 0) {
     await db.execAsync(`
@@ -40,8 +40,17 @@ CREATE TABLE "tasks" (
 	PRIMARY KEY("id" AUTOINCREMENT)
 );
 `);
-    await db.runAsync("INSERT INTO todos (title, index_no) values (?, ?)", "helloooooo o o ooooo oooo oooo ", 1);
-    await db.runAsync("INSERT INTO todos (title, index_no) values (?, ?)", "world", 2);
+    await db.runAsync(
+      "INSERT INTO todos (title, index_no) values (?, ?)",
+      "Study Physics in the library",
+      1
+    );
+    
+    await db.runAsync(
+      "INSERT INTO todos (title, index_no) values (?, ?)",
+      "Take a walk in the park",
+      2
+    );
     currentDbVersion = 1;
   }
   // if (currentDbVersion === 1) {
@@ -51,10 +60,45 @@ CREATE TABLE "tasks" (
 }
 
 export async function getAllTodos(db: SQLiteDatabase) {
-  const query = "SELECT * FROM todos";
-  return await db.getAllAsync<Task>(query);
+  const query = "SELECT * FROM todos order by index_no asc";
+  return await db.getAllAsync<Todo>(query);
 }
 
 export async function addNewTodo(db: SQLiteDatabase, title: string) {
-  return db.runAsync("INSERT INTO todos (title) values (?)", title);
+  const statement = await db.prepareAsync("INSERT INTO todos (title) values ($title)");
+  let result;
+  try {
+    result = await statement.executeAsync({$title: title});
+  } finally {
+    await statement.finalizeAsync();
+  }
+  return result;
 }
+
+export async function getAllTasks(db: SQLiteDatabase, todo_id: number) {
+  if (db === null) {
+    db = await openDatabaseAsync("todos.db");
+  }
+  return await db.getAllAsync<Task>(
+    "select t2.id, t2.name, t2.duration, t2.content, t2.attachment, t2.todo_id, t2.index_no from todos as t1 join tasks as t2 on t1.id == t2.todo_id where t1.id == "+todo_id+" order by t2.index_no asc;"
+  );
+}
+
+
+
+
+export async function addNewTask(db: SQLiteDatabase, todo_id: number, name: string, duration: number) {
+  if (db === null) {
+    db = await openDatabaseAsync("todos.db");
+  }
+
+  await db.runAsync(
+    "INSERT INTO tasks (name, duration, todo_id) values (?, ?, ?)",
+    name,
+    parseInt(duration),
+    todo_id
+  );
+  
+  
+}
+
