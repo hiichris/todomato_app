@@ -1,5 +1,5 @@
-
 export interface Todo {
-  value: string;
-  intValue: number;
+    id: number;
+    title: string;
+    index: number;
 }

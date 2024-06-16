@@ -1,19 +1,29 @@
+import { SQLiteProvider } from "expo-sqlite";
+import React, { useState } from "react";
 import {
-  SQLiteProvider,
-  useSQLiteContext,
-  type SQLiteDatabase,
-} from "expo-sqlite";
-import { useEffect, useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
+  View,
+  Text,
+  StyleSheet,
+  Button,
+  Alert,
+  Modal,
+  Pressable,
+} from "react-native";
 
 import { migrateDbIfNeeded } from "./services/db-service";
 import { TodoItems } from "./components/TodoItems";
+import StackScreen from "./components/StackScreen";
 
 export default function App() {
+  
   return (
     <View style={styles.container}>
+        
+      <StackScreen title="Todomato" />
       <SQLiteProvider databaseName="test.db" onInit={migrateDbIfNeeded}>
-        <TodoItems />
+        <View style={styles.tasksContainer}>
+          <TodoItems />
+        </View>
       </SQLiteProvider>
     </View>
   );
@@ -24,19 +34,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
-  headerContainer: {
-    padding: 20,
-    backgroundColor: "#f0f0f0",
-  },
-  headerText: {
-    fontSize: 20,
-  },
-  contentContainer: {
+  tasksContainer: {
+    flex: 10,
     padding: 20,
   },
-  todoItemContainer: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+  naviButton: {
+    color: "red",
+    marginRight: 10,
   },
+ 
 });

@@ -1,38 +1,51 @@
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { getAllTodoItems } from "../services/db-service";
-import { Todo } from "../models/todo";
+import { View, Text, StyleSheet, FlatList } from "react-native";
+import { getAllTasks } from "../services/db-service";
+import { Task } from "../models/task";
+import { Link } from "expo-router";
 
 export function TodoItems() {
   const db = useSQLiteContext();
-  const [todos, setTodos] = useState<Todo[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
 
   useEffect(() => {
     async function runQuery() {
-      setTodos(await getAllTodoItems(db));
+      setTasks(await getAllTasks(db));
     }
 
     runQuery();
   }, []);
 
   return (
-    <View style={styles.contentContainer}>
-      {todos.map((todo, index) => (
-        <View style={styles.todoItemContainer} key={index}>
-          <Text>{`${todo.intValue} - ${todo.value}`}</Text>
+    <FlatList
+      style={styles.listContainer}
+      data={tasks}
+      renderItem={({ item }) => (
+        <View style={styles.taskItemContainer}>
+          <Link
+            style={{ flex: 1 }}
+            href={{
+              pathname: "/todo_details",
+              params: { title: item.title.substring(0, 10), id: item.id },
+            }}
+          >
+            {`${item.index_no} - ${item.title}`}
+          </Link>
         </View>
-      ))}
-    </View>
+      )}
+      keyExtractor={(item) => item.id.toString()}
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  contentContainer: {
-    padding: 20,
+  listContainer: {
+    flex: 1,
   },
-  todoItemContainer: {
-    padding: 10,
+  taskItemContainer: {
+    padding: 8,
+    paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: "#f0f0f0",
   },
