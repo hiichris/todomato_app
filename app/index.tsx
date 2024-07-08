@@ -14,7 +14,6 @@ import { migrateDbIfNeeded, clearAllTasks } from "./services/db_service";
 import { TodoItems } from "./components/TodoItems";
 import StackScreen from "./components/StackScreen";
 import { Todo } from "./models/todo";
-import { useSQLiteContext } from "expo-sqlite";
 
 export default function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
