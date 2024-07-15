@@ -23,21 +23,11 @@ import { SQLiteProvider } from "expo-sqlite";
 import { migrateDbIfNeeded, getAllTodos } from "../services/db_service";
 import { Todo } from "../models/todo";
 
-async function addNewTodoHandler(db, todoTitle) {
-  useEffect(() => {
-    async function runQuery() {
-      await addNewTodo(db, todoTitle);
-    }
-
-    runQuery();
-  }, []);
-}
 export default function AddTodoModal({
   modalVisible,
   setModalVisible,
-  todos,
   setTodos,
-  dbContext,
+  refreshTodos,
 }) {
   const [todoTitle, setTodoTitle] = React.useState("");
 
@@ -80,23 +70,18 @@ export default function AddTodoModal({
                     onPress={() => {
                       console.log("todoTitle: ", todoTitle);
 
-                      addNewTodo(dbContext, todoTitle)
-                        .then((result) => {
-                          console.log("last id: ", result.lastInsertRowId);
-                        })
-                        .catch((error) => {
-                          console.log("error1: ", error);
-                        });
-
-                      getAllTodos(dbContext)
+                      addNewTodo(setTodos, todoTitle)
                         .then((result) => {
                           console.log("result: ", result);
-                          setTodos(result);
+                          refreshTodos();
                         })
                         .catch((error) => {
-                          console.log("error2: ", error);
+                          console.log("Error: ", error);
                         });
-                      // Close the modal
+                      
+                        // Clear the todoTitle
+                        setTodoTitle("");
+
                       setModalVisible(!modalVisible);
                     }}
                   >

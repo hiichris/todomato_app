@@ -1,22 +1,11 @@
-import { useSQLiteContext } from "expo-sqlite";
+import { SQLiteProvider, useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
-import { getAllTodos } from "../services/db_service";
 import { Task } from "../models/task";
 import { Todo } from "../models/todo";
 import { Link } from "expo-router";
 
-export function TodoItems({ todos, setTodos}) {
-  const db = useSQLiteContext();
-
-  useEffect(() => {
-    async function runQuery() {
-      setTodos(await getAllTodos(db));
-    }
-
-    runQuery();
-  }, []);
-
+export function TodoItems({ todos, refreshTodos }) {
   return (
     <>
     <FlatList
@@ -32,7 +21,7 @@ export function TodoItems({ todos, setTodos}) {
                 title: item.title, 
                 id: item.id,
                 todos: todos,
-                setTodos: setTodos,
+                refreshTodos: refreshTodos,
               },
             }}
           >

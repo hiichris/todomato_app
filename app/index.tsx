@@ -1,5 +1,4 @@
-import { SQLiteProvider } from "expo-sqlite";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,23 +9,58 @@ import {
   Pressable,
 } from "react-native";
 
-import { migrateDbIfNeeded, clearAllTasks } from "./services/db_service";
+import { initializeDatabase, getTodos } from "./services/db_service";
 import { TodoItems } from "./components/TodoItems";
 import StackScreen from "./components/StackScreen";
 import { Todo } from "./models/todo";
+import { useIsFocused } from '@react-navigation/native';
 
-export default function App() {
+function useFocusEffect(callback: () => void) {
+  // Ref: https://reactnavigation.org/docs/use-is-focused/
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    if (isFocused) {
+      callback();
+    }
+  }, [isFocused]);
+}
+
+export default function HomeScreen() {
   const [todos, setTodos] = useState<Todo[]>([]);
 
+  useEffect(() => {
+    const initDB = async () => {
+      await initializeDatabase();
+      refreshTodos();
+    };
+    initDB();
+  }, []);
+
+  useFocusEffect(() => {
+    refreshTodos();
+  });
+
+  const refreshTodos = async () => {
+    console.log("Refreshing todos");
+    await getTodos(setTodos);
+  }
+
   return (
-    <View style={styles.container}>
-      <SQLiteProvider databaseName="todos.db" onInit={migrateDbIfNeeded}>
-      <StackScreen title="Todomato" todos={todos} setTodos={setTodos} addTodoButton={true} />
-        <View style={styles.tasksContainer}>
-          <TodoItems todos={todos} setTodos={setTodos} />
-        </View>
-      </SQLiteProvider>
-    </View>
+    <>
+      <StackScreen
+        title="Home"
+        todos={todos}
+        setTodos={setTodos}
+        refreshTodos={refreshTodos}
+        addTodoButton={true}
+      />
+
+      <View style={styles.container}>
+
+        <TodoItems todos={todos} refreshTodos={refreshTodos} />
+      </View>
+    </>
   );
 }
 
