@@ -35,7 +35,7 @@ export default function HomeScreen() {
       refreshTodos();
     };
     initDB();
-  }, []);
+  }, []); 
 
   useFocusEffect(() => {
     refreshTodos();
@@ -49,7 +49,7 @@ export default function HomeScreen() {
   return (
     <>
       <StackScreen
-        title="Home"
+        title="🍅"
         todos={todos}
         setTodos={setTodos}
         refreshTodos={refreshTodos}

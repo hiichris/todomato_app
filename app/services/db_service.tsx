@@ -4,7 +4,6 @@ import {
   openDatabaseAsync,
   type SQLiteDatabase,
 } from "expo-sqlite";
-// import * as SQLite from 'expo-sqlite';
 import { Todo } from "../models/todo";
 
 const todos_db = "todos.db";
@@ -107,14 +106,14 @@ export const initializeDatabase = async () => {
   await migrateDatabase(db);
 }
 
-export const getTodos = async (setTodos: (todos: Todo[]) => void) => {
+export const getTodos = async (setTodos: Function) => {
   const db: SQLiteDatabase = await openDatabase(todos_db);
   const query = "SELECT * FROM todos order by index_no asc";
   const todos = await db.getAllAsync<Todo>(query);
   setTodos(todos);
 }
 
-export const addNewTodo = async (setTodos: (todos: Todo[]) => void, title: string) => {
+export const addNewTodo = async (setTodos: Function, title: string) => {
   const db: SQLiteDatabase = await openDatabase(todos_db);
   const statement = await db.prepareAsync("INSERT INTO todos (title) values ($title)");
   let result;
@@ -126,7 +125,7 @@ export const addNewTodo = async (setTodos: (todos: Todo[]) => void, title: strin
   return result;
 }
 
-export const updateTodo = async (setTodos: (todos: Todo[]) => void, id: number, title: string) => {
+export const updateTodo = async (setTodos: Function, id: number, title: string) => {
   const db: SQLiteDatabase = await openDatabase(todos_db);
   const statement = await db.prepareAsync("UPDATE todos set title = $title where id = $id");
   let result;
@@ -138,7 +137,7 @@ export const updateTodo = async (setTodos: (todos: Todo[]) => void, id: number, 
   return result;
 }
 
-export const deleteTodo = async (setTodos: (todos: Todo[]) => void, id: number) => {
+export const deleteTodo = async (setTodos: Function, id: number) => {
   const db: SQLiteDatabase = await openDatabase(todos_db);
   const statement = await db.prepareAsync("DELETE FROM todos where id = $id");
   let result;
@@ -150,3 +149,22 @@ export const deleteTodo = async (setTodos: (todos: Todo[]) => void, id: number) 
   return result;
 }
 
+export const getAllTasks = async (setTasks: Function, todo_id: number) => {
+  const db: SQLiteDatabase = await openDatabase(todos_db);
+  const statement = await db.prepareAsync(`SELECT t2.id, t2.name, t2.duration, t2.content, t2.attachment, t2.todo_id, t2.index_no FROM todos AS t1 JOIN tasks AS t2 ON t1.id == t2.todo_id 
+  WHERE t1.id == $todo_id ORDER by t2.index_no asc`);
+  const tasks = await statement.executeAsync({ $todo_id: todo_id });
+  setTasks(tasks);
+}
+
+export const addNewTask = async (setTasks: Function, todo_id: number, name: string, duration: number) => {
+  const db: SQLiteDatabase = await openDatabase(todos_db);
+  const statement = await db.prepareAsync("INSERT INTO tasks (name, duration, todo_id) values ($name, $duration, $todo_id)");
+  let result;
+  try {
+    result = await statement.executeAsync({ $name: name, $duration: duration, $todo_id: todo_id });
+  } finally {
+    await statement.finalizeAsync();
+  }
+  return result;
+}

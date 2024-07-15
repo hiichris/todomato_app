@@ -13,7 +13,7 @@ export default function StackScreen({
   setTodos,
   refreshTodos,
   addTodoButton,
-  refreshTodoItems = null,
+  refreshTodoItems = null
 }) {
   const [modalVisible, setModalVisible] = useState(false);
 
