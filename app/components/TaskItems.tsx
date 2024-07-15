@@ -13,7 +13,7 @@ export function TaskItems({ todo_id, tasks, setTasks }) {
   useEffect(() => {
     async function runQuery() {
       try {
-        const tasks = await getAllTasks(db, todo_id);
+        // const tasks = await getAllTasks(db, todo_id);
         console.log("Tasks: ", tasks);
         setTasks(tasks);
       } catch (error) {

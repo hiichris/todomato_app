@@ -11,11 +11,11 @@ export default function StackScreen({
   title,
   todos,
   setTodos,
+  refreshTodos,
   addTodoButton,
   refreshTodoItems = null,
 }) {
   const [modalVisible, setModalVisible] = useState(false);
-  const dbContext = useSQLiteContext();
 
   const todoButton = () => {
     return (
@@ -45,9 +45,9 @@ export default function StackScreen({
       <AddTodoModal
         todos={todos}
         setTodos={setTodos}
+        refreshTodos={refreshTodos}
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}
-        dbContext={dbContext}
       />
     </View>
   );

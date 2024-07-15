@@ -3,7 +3,7 @@ import renderer from "react-test-renderer";
 import { waitFor } from "@testing-library/react-native";
 import { NativeDatabase } from "expo-sqlite";
 
-import App from "../index";
+import App from "../___index";
 
 class ErrorBoundary extends React.Component {
   // Suggested by React Native documentation to handle errors in the app

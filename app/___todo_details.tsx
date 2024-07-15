@@ -8,7 +8,7 @@ import { View, Text, StyleSheet, Button, TextInput } from "react-native";
 import { useEffect, useState, useRef } from "react";
 import StackScreen from "./components/StackScreen";
 import { useSQLiteContext, SQLiteProvider } from "expo-sqlite";
-import { migrateDbIfNeeded, addNewTask, deleteTodo, getTodos } from "./services/db_service";
+import { migrateDbIfNeeded, addNewTask, getAllTasks } from "./services/db_service";
 import { PickerIOS } from "@react-native-picker/picker";
 import { Task } from "./models/task";
 import { TaskItems } from "./components/TaskItems";
@@ -21,7 +21,6 @@ export default function TodoDetails() {
   const [taskName, setTaskName] = useState();
   const notificationListener = useRef();
   const responseListener = useRef();
-  const navigation = useNavigation();
 
   useEffect(() => {
     // Request permissions
@@ -112,7 +111,6 @@ export default function TodoDetails() {
             console.log("Reminder: ", selectedTimer);
             console.log("Todo ID: ", params.id);
             console.log("Add New Task");
-
             addNewTask(null, parseInt(params.id), taskName, selectedTimer).then(
               (result) => {
                 console.log("Result: ", result);
@@ -121,30 +119,14 @@ export default function TodoDetails() {
               console.log("Error: ", error);
             });
 
-            // getAllTasks(null, parseInt(params.id)).then((tasks) => {
-            //   console.log("Tasks: ", tasks);
-            //   setTasks(tasks);
-            // }).catch((error) => {
-            //   console.log("Error: ", error);
-            // });
+            getAllTasks(null, parseInt(params.id)).then((tasks) => {
+              console.log("Tasks: ", tasks);
+              setTasks(tasks);
+            }).catch((error) => {
+              console.log("Error: ", error);
+            });
 
             scheduleNotification(taskName, parseInt(selectedTimer));
-
-          }}
-        />
-
-        <Button
-          title={`Delete Task: ${params.id}`}
-          onPress={async () => {
-            await deleteTodo(params.setTodos, parseInt(params.id)).then((result) => {
-              console.log("Result: ", result);
-            })
-              .then(() => {
-                navigation.navigate("index");
-              }
-              ).catch((error) => {
-                console.log("Error: ", error);
-              });
 
           }}
         />
