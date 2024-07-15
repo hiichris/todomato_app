@@ -100,7 +100,7 @@ export default function AddTodoModal({
 
 const styles = StyleSheet.create({
   centeredView: {
-    flex: 1,
+  
   },
   modalView: {
     flex: 1,
