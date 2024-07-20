@@ -34,6 +34,7 @@ export default function AddTodoModal({
   return (
     <SQLiteProvider databaseName="todos.db" onInit={migrateDbIfNeeded}>
       <SafeAreaView>
+      
         <Modal
           animationType="slide"
           transparent={true}
@@ -43,56 +44,68 @@ export default function AddTodoModal({
             setModalVisible(!modalVisible);
           }}
         >
-          <ScrollView style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <View style={styles.modalHeaderContainer}>
-                <Text style={styles.headerText}>Create Todo</Text>
-                <Pressable
-                  style={styles.closeCirleButton}
-                  onPress={() => setModalVisible(!modalVisible)}
-                >
-                  <Text style={styles.closeCircleText}>X</Text>
-                </Pressable>
-              </View>
-              <View style={styles.modalBodyContainer}>
-                <View style={styles.inputContiner}>
-                  <Text style={styles.modalText}>Todo Title:</Text>
-                  <TextInput
-                    style={styles.modalTextInput}
-                    onChangeText={setTodoTitle}
-                    value={todoTitle}
-                  />
+           <KeyboardAvoidingView
+              behavior={Platform.OS === "ios" ? "padding" : "height"}
+              style={styles.centeredView}
+            >
+            <ScrollView style={styles.centeredView}>
+            
+              <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+              
+                <View style={styles.modalView}>
+                  <View style={styles.modalHeaderContainer}>
+                    <Text style={styles.headerText}>Create Todo</Text>
+                    <Pressable
+                      style={styles.closeCirleButton}
+                      onPress={() => setModalVisible(!modalVisible)}
+                    >
+                      <Text style={styles.closeCircleText}>X</Text>
+                    </Pressable>
+                  </View>
+                  <View style={styles.modalBodyContainer}>
+                    <View style={styles.inputContiner}>
+                      <Text style={styles.modalText}>Todo Title:</Text>
+                      <TextInput
+                        style={styles.modalTextInput}
+                        onChangeText={setTodoTitle}
+                        value={todoTitle}
+                      />
+                      <Text>  </Text>
+                    </View>
+
+                    <View style={styles.buttonsContainer}>
+                      <Pressable
+                        style={[styles.button, styles.buttonCreate]}
+                        onPress={() => {
+                          console.log("todoTitle: ", todoTitle);
+
+                          addNewTodo(setTodos, todoTitle)
+                            .then((result) => {
+                              console.log("result: ", result);
+                              refreshTodos();
+                            })
+                            .catch((error) => {
+                              console.log("Error: ", error);
+                            });
+
+                          // Clear the todoTitle
+                          setTodoTitle("");
+
+                          setModalVisible(!modalVisible);
+                        }}
+                      >
+                        <Text style={styles.textStyle}>Create</Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                  <View style={{ flexGrow: 2 }}></View>
                 </View>
-
-                <View style={styles.buttonsContainer}>
-                  <Pressable
-                    style={[styles.button, styles.buttonCreate]}
-                    onPress={() => {
-                      console.log("todoTitle: ", todoTitle);
-
-                      addNewTodo(setTodos, todoTitle)
-                        .then((result) => {
-                          console.log("result: ", result);
-                          refreshTodos();
-                        })
-                        .catch((error) => {
-                          console.log("Error: ", error);
-                        });
-                      
-                        // Clear the todoTitle
-                        setTodoTitle("");
-
-                      setModalVisible(!modalVisible);
-                    }}
-                  >
-                    <Text style={styles.textStyle}>Create</Text>
-                  </Pressable>
-                </View>
-              </View>
-              <View style={{ flexGrow: 2 }}></View>
-            </View>
-          </ScrollView>
+               
+              </TouchableWithoutFeedback>
+            </ScrollView>
+            </KeyboardAvoidingView>
         </Modal>
+     
       </SafeAreaView>
     </SQLiteProvider>
   );
@@ -100,7 +113,7 @@ export default function AddTodoModal({
 
 const styles = StyleSheet.create({
   centeredView: {
-  
+    flex: 1,
   },
   modalView: {
     flex: 1,
@@ -194,4 +207,5 @@ const styles = StyleSheet.create({
     width: 13,
     textAlign: "center",
   },
+
 });
