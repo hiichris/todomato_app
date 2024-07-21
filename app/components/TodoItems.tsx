@@ -8,29 +8,33 @@ import { Link } from "expo-router";
 export function TodoItems({ todos, refreshTodos }) {
   return (
     <>
-    <FlatList
-      style={styles.listContainer}
-      data={todos}
-      renderItem={({ item }) => (
-        <View style={styles.taskItemContainer}>
+      <FlatList
+        style={styles.listContainer}
+        data={todos}
+        renderItem={({ item }) => (
           <Link
-            style={{ flex: 1 }}
+            style={styles.linkContainer}
             href={{
               pathname: "/todo_details",
-              params: { 
-                title: item.title, 
+              params: {
+                title: item.title,
                 id: item.id,
                 todos: todos,
                 refreshTodos: refreshTodos,
               },
             }}
           >
-            {`${item.index_no} - ${item.title}`}
+            <View style={styles.todoListContainer}>
+              <View style={styles.todoIndex}>
+                <Text style={styles.todoIndexText}>{item.index_no}</Text>
+              </View>
+              <Text style={styles.todoTitle}>{item.title}</Text>
+            </View>
+
           </Link>
-        </View>
-      )}
-      keyExtractor={(item) => item.id.toString()}
-    />
+        )}
+        keyExtractor={(item) => item.id.toString()}
+      />
     </>
   );
 }
@@ -38,11 +42,38 @@ export function TodoItems({ todos, refreshTodos }) {
 const styles = StyleSheet.create({
   listContainer: {
     flex: 1,
+    marginTop: 8,
   },
-  taskItemContainer: {
+  linkContainer: {
+    flex: 1,
+    marginVertical: 8,
+  },
+  todoListContainer: {
+    flex: 1,
+    flexDirection: "row",
     padding: 8,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    
   },
+  todoIndex: {
+    width: 30,
+    height: 30,
+    fontSize: 16,
+    borderRadius: 50,
+    textAlign: "center",
+    justifyContent: "center",
+    marginRight: 8,
+    backgroundColor: "#FF5733",
+  },
+  todoIndexText: {
+    color: "white",
+    fontSize: 16,
+    textAlign: "center",
+    justifyContent: "center",
+  },
+  todoTitle: {
+    fontSize: 16,
+    textAlign: "center",
+    justifyContent: "center",
+    marginTop: 4,
+  }
 });
