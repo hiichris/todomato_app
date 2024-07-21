@@ -14,14 +14,18 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.hsuavely.todomato"
+      "bundleIdentifier": "com.hsuavely.todomato",
+      "runtimeVersion": "1.0.0"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.hsuavely.todomato"
+      "package": "com.hsuavely.todomato",
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "web": {
       "bundler": "metro",
@@ -42,6 +46,9 @@
         "projectId": "ab26227b-b0ff-4ea0-929b-f0ffddd8f692"
       }
     },
-    "owner": "yaostyle"
+    "owner": "yaostyle",
+    "updates": {
+      "url": "https://u.expo.dev/ab26227b-b0ff-4ea0-929b-f0ffddd8f692"
+    }
   }
 }
