@@ -28,13 +28,13 @@ export default function StackScreen({
       <Pressable
         onPress={() => {
           // Check importance
-          Alert.alert("Important?", "Is this even important?", [
+          Alert.alert("Important?", "Is this event important?", [
             {
               text: "No",
               onPress: () => {
                 setImportant(false);
                 console.log("No pressed");
-                Alert.alert("Urgent?", "Is this even urgent?", [
+                Alert.alert("Urgent?", "Is this event urgent?", [
                   {
                     text: "No",
                     onPress: () => {
@@ -65,7 +65,7 @@ export default function StackScreen({
                 setImportant(true);
                 console.log("Yes pressed");
                 // Check urgency
-                Alert.alert("Urgent?", "Is this even urgent?", [
+                Alert.alert("Urgent?", "Is this event urgent?", [
                   {
                     text: "No",
                     onPress: () => {
