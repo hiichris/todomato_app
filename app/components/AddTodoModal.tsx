@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Modal,
   View,
@@ -23,6 +23,7 @@ import { SQLiteProvider } from "expo-sqlite";
 import { migrateDbIfNeeded, getAllTodos } from "../services/db_service";
 import { Todo } from "../models/todo";
 
+
 export default function AddTodoModal({
   modalVisible,
   setModalVisible,
@@ -30,9 +31,23 @@ export default function AddTodoModal({
   refreshTodos,
 }) {
   const [todoTitle, setTodoTitle] = React.useState("");
+  const scrollViewRef = useRef(null);
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        // Scroll to the bottom of the ScrollView when the keyboard is shown
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+    };
+  }, []);
 
   return (
-    <SQLiteProvider databaseName="todos.db" onInit={migrateDbIfNeeded}>
       <SafeAreaView>
       
         <Modal
@@ -48,7 +63,7 @@ export default function AddTodoModal({
               behavior={Platform.OS === "ios" ? "padding" : "height"}
               style={styles.centeredView}
             >
-            <ScrollView style={styles.centeredView}>
+            <ScrollView style={styles.centeredView} ref={scrollViewRef} keyboardShouldPersistTaps="always" >
             
               <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
               
@@ -107,7 +122,6 @@ export default function AddTodoModal({
         </Modal>
      
       </SafeAreaView>
-    </SQLiteProvider>
   );
 }
 

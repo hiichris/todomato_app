@@ -4,21 +4,49 @@ import {
   useRouter,
   useNavigation,
 } from "expo-router";
-import { View, Text, StyleSheet, Button, TextInput } from "react-native";
+import { View, Text, StyleSheet, Button, TextInput, FlatList, ScrollView, AppRegistry, Image, Dimensions } from "react-native";
 import { useEffect, useState, useRef } from "react";
 import StackScreen from "./components/StackScreen";
 import { useSQLiteContext, SQLiteProvider } from "expo-sqlite";
-import { migrateDbIfNeeded, addNewTask, deleteTodo, getTodos } from "./services/db_service";
+import { getAllTasks, addNewTask, deleteTodo } from "./services/db_service";
 import { PickerIOS } from "@react-native-picker/picker";
 import { Task } from "./models/task";
 import { TaskItems } from "./components/TaskItems";
 import * as Notifications from "expo-notifications";
+import { name as appName } from './app.json';
+import 'react-native-gesture-handler';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { primaryColor } from "./helpers/constants";
 
-export default function TodoDetails() {
+
+/* 
+  Image Reference and Credits:
+  not_found.png - https://freesvgillustration.com/product/404-not-found/
+
+*/
+
+function NoAssignedTasks({ todoTitle }) {
+  return (
+    <View style={styles.noAssignedTaskContainer}>
+      <Text style={styles.noTextAssignText}>
+        Currently, there are no assigned tasks for
+      </Text>
+      <Text style={styles.noTextAssignText}>
+        "{todoTitle}"
+      </Text>
+      <Text style={styles.noTextAssignDescText}>
+        Press the Add Task button to add a new task.
+      </Text>
+      <Image style={styles.notFoundImage} source={require('../assets/images/not_found.png')} />
+    </View>
+  )
+}
+
+export default function TodoDetailsScreen() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const params = useLocalSearchParams();
   const [selectedTimer, setSelectedTimer] = useState(5);
-  const [taskName, setTaskName] = useState();
+  const [taskName, setTaskName] = useState("");
   const notificationListener = useRef();
   const responseListener = useRef();
   const navigation = useNavigation();
@@ -32,7 +60,9 @@ export default function TodoDetails() {
       }
     }
 
+
     getPermissions();
+    refreshTasks();
 
     Notifications.setNotificationHandler({
       handleNotification: async () => ({
@@ -63,36 +93,49 @@ export default function TodoDetails() {
   }, []);
 
   const scheduleNotification = async (taskName: string, duration: number) => {
+    console.log("Scheduling notification...", taskName, duration);
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: "Todomado Reminders",
-        body: taskName,
+        title: "Todomado",
+        body: "Times Up: " + taskName,
       },
       trigger: {
-        seconds: duration,
+        seconds: parseInt(duration),
       },
     });
   };
 
+  const refreshTasks = async () => {
+    console.log("refreshTasks...");
+    await getAllTasks(setTasks, parseInt(params.id));
+  }
+
+
   return (
-    <SQLiteProvider databaseName="todos.db" onInit={migrateDbIfNeeded}>
+    <GestureHandlerRootView style={styles.container}>
       <Stack.Screen
         options={{
           title: "",
         }}
       ></Stack.Screen>
-      <View style={styles.container}>
-        <StackScreen
-          title={params.title.substring(0, 10)}
-          todos={params.todos}
-          setTodos={params.setTodos}
-          addTodoButton={false}
-        />
+      <StackScreen
+        title={params.title.substring(0, 10)}
+        todoId={params.id}
+        setTodos={params.setTodos}
+        addTaskButton={true}
+        refreshTodos={params.refreshTodos}
+        refreshTasks={refreshTasks}
+        scheduleNotification={scheduleNotification}
+      />
+      {tasks.length > 0 ?
+        <View style={styles.TaskItemContainer}>
+          <TaskItems tasks={tasks} todoTitle={params.title} refreshTasks={refreshTasks} />
+        </View>
+        : <NoAssignedTasks todoTitle={params.title} />
 
-        <Text style={styles.TodoTitle}>{params.title}</Text>
+      }
 
-        <TaskItems todo_id={params.id} tasks={tasks} setTasks={setTasks} />
-
+      {/* 
         <Text>Task name: </Text>
         <TextInput
           style={styles.textInput}
@@ -113,22 +156,18 @@ export default function TodoDetails() {
             console.log("Todo ID: ", params.id);
             console.log("Add New Task");
 
-            addNewTask(null, parseInt(params.id), taskName, selectedTimer).then(
-              (result) => {
-                console.log("Result: ", result);
-              }
-            ).catch((error) => {
-              console.log("Error: ", error);
-            });
-
-            // getAllTasks(null, parseInt(params.id)).then((tasks) => {
-            //   console.log("Tasks: ", tasks);
-            //   setTasks(tasks);
-            // }).catch((error) => {
+            // addNewTask(setTasks, parseInt(params.id), taskName, selectedTimer).then(
+            //   (result) => {
+            //     console.log("Result: ", result);
+            //     console.log("addnewtask, Refreshing tasks...");
+            //     refreshTasks();
+            //     console.log("Scheduling notification...2", taskName, selectedTimer);
+            //      scheduleNotification(taskName, parseInt(selectedTimer));
+            //   }
+            // ).catch((error) => {
             //   console.log("Error: ", error);
             // });
-
-            scheduleNotification(taskName, parseInt(selectedTimer));
+            
 
           }}
         />
@@ -147,23 +186,23 @@ export default function TodoDetails() {
               });
 
           }}
-        />
-        <View style={styles.SpaceContainer}></View>
-      </View>
-    </SQLiteProvider>
+        /> */}
+      <View style={styles.SpaceContainer}></View>
+    </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    padding: 8,
+
   },
   TodoTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    padding: 20,
+    margin: 8,
+    marginVertical: 16,
   },
   SpaceContainer: {
     flex: 1,
@@ -187,4 +226,28 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     textAlign: "center",
   },
+  TaskItemContainer: {
+    height: "100%",
+  },
+  noAssignedTaskContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100%",
+  },
+  noTextAssignText: {
+    color: primaryColor,
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+  noTextAssignDescText: {
+    color: "gray",
+    textAlign: "center",
+    paddingVertical: 16, 
+  },
+  notFoundImage: {
+    width: Dimensions.get("window").width / 2,
+    height: Dimensions.get("window").width / 2,
+    alignSelf: "center",
+  },
+
 });

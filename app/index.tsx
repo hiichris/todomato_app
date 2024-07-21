@@ -7,6 +7,8 @@ import {
   Alert,
   Modal,
   Pressable,
+  AppRegistry,
+  LogBox,
 } from "react-native";
 
 import { initializeDatabase, getTodos } from "./services/db_service";
@@ -14,6 +16,17 @@ import { TodoItems } from "./components/TodoItems";
 import StackScreen from "./components/StackScreen";
 import { Todo } from "./models/todo";
 import { useIsFocused } from '@react-navigation/native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { name as appName } from './app.json';
+
+/*
+  Image Reference and Credits:
+  splash.png - <a href="https://www.flaticon.com/free-icons/tomato" title="tomato icons">Tomato icons created by Flat Icons Design - Flaticon</a>
+
+
+*/
+
+LogBox.ignoreAllLogs();
 
 function useFocusEffect(callback: () => void) {
   // Ref: https://reactnavigation.org/docs/use-is-focused/
@@ -47,10 +60,9 @@ export default function HomeScreen() {
   }
 
   return (
-    <>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <StackScreen
         title="🍅"
-        todos={todos}
         setTodos={setTodos}
         refreshTodos={refreshTodos}
         addTodoButton={true}
@@ -60,7 +72,7 @@ export default function HomeScreen() {
 
         <TodoItems todos={todos} refreshTodos={refreshTodos} />
       </View>
-    </>
+      </GestureHandlerRootView>
   );
 }
 
