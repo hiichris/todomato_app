@@ -26,6 +26,7 @@ import { name as appName } from './app.json';
 
 */
 
+
 LogBox.ignoreAllLogs();
 
 function useFocusEffect(callback: () => void) {
@@ -41,6 +42,13 @@ function useFocusEffect(callback: () => void) {
 
 export default function HomeScreen() {
   const [todos, setTodos] = useState<Todo[]>([]);
+  const [addTodoButtonState, setAddTodoButtonState] = useState(true);
+  const [addTaskButtonState, setAddTaskButtonState] = useState(true);
+
+  const refreshTodos = async () => {
+    console.log("Refreshing todos");
+    await getTodos(setTodos);
+  }
 
   useEffect(() => {
     const initDB = async () => {
@@ -54,18 +62,16 @@ export default function HomeScreen() {
     refreshTodos();
   });
 
-  const refreshTodos = async () => {
-    console.log("Refreshing todos");
-    await getTodos(setTodos);
-  }
-
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StackScreen
         title="🍅"
         setTodos={setTodos}
         refreshTodos={refreshTodos}
-        addTodoButton={true}
+        addTodoButtonState={addTodoButtonState}
+        setAddTodoButtonState={setAddTodoButtonState}
+        addTaskButtonState={addTaskButtonState}
+        setAddTaskButtonState={setAddTaskButtonState}
       />
 
       <View style={styles.container}>
