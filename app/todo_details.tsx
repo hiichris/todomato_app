@@ -6,18 +6,19 @@ import {
 } from "expo-router";
 import { View, Text, StyleSheet, Button, TextInput, FlatList, ScrollView, AppRegistry, Image, Dimensions, useWindowDimensions, Pressable } from "react-native";
 import { useEffect, useState, useRef } from "react";
-import StackScreen from "./components/StackScreen";
 import { useSQLiteContext, SQLiteProvider } from "expo-sqlite";
 import { getAllTasks, addNewTask, deleteTodo } from "./services/db_service";
 import { PickerIOS } from "@react-native-picker/picker";
 import { Task } from "./models/task";
+import StackScreen from "./components/StackScreen";
 import { TaskItems } from "./components/TaskItems";
-import * as Notifications from "expo-notifications";
-import { name as appName } from './app.json';
-import 'react-native-gesture-handler';
+import { TabButtons } from "./components/TabButtons";
+import { TodoDetails } from "./components/TodoDetails";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { primaryColor } from "./helpers/constants";
 import PagerView from 'react-native-pager-view';
+import * as Notifications from "expo-notifications";
+import 'react-native-gesture-handler';
 
 /* 
   Image Reference and Credits:
@@ -59,19 +60,6 @@ function NoAssignedTasks({ todoTitle, params, refreshTasks, scheduleNotification
   )
 }
 
-function TabButtons({ goToPage, currentPage }) {
-  return (
-    <View style={styles.tabViewButtonsContainer}>
-        <Pressable onPress={() => goToPage(0)}>
-          <Text style={currentPage == 1 ? styles.tabViewInactiveButton : styles.tabViewButton}>Tasks</Text>
-        </Pressable>
-        <Pressable onPress={() => goToPage(1)}>
-          <Text style={currentPage == 0 ? styles.tabViewInactiveButton : styles.tabViewButton}>Details</Text>
-        </Pressable>
-      </View>
-  )
-}
-
 export default function TodoDetailsScreen() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const params = useLocalSearchParams();
@@ -83,14 +71,11 @@ export default function TodoDetailsScreen() {
   const [addTodoButtonState, setAddTodoButtonState] = useState(false);
   const [addTaskButtonState, setAddTaskButtonState] = useState(true);
   const pagerRef = useRef<PagerView>(null);
-  const [tabViewIndex, setTabViewIndex] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
 
   const goToPage = (pageIndex) => {
     if (pagerRef.current) {
       pagerRef.current.setPage(pageIndex);
-      // Alternatively, use setPageWithoutAnimation(pageIndex) for no animation
-
     }
   };
 
@@ -191,12 +176,7 @@ export default function TodoDetailsScreen() {
               </GestureHandlerRootView>
             </View>
             <View key="2">
-              <View style={styles.detailsContainer}>
-                <TabButtons goToPage={goToPage} currentPage={currentPage} />
-                <View style={styles.detailsPlaceholder}>
-                  <Text>Details Placeholder</Text>
-                </View>
-              </View>
+              <TodoDetails goToPage={goToPage} currentPage={currentPage} todoTitle={params.title} />
             </View>
           </PagerView>
           : <NoAssignedTasks
@@ -274,44 +254,7 @@ const styles = StyleSheet.create({
     height: Dimensions.get("window").width / 2,
     alignSelf: "center",
   },
-  tabViewButtonsContainer: {
-    flex: 10,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 4,
-  },
-  tabViewButton: {
-    fontSize: 16,
-    borderWidth: 1,
-    borderBottomColor: primaryColor,
-    color: primaryColor,
-    alignItems: "center",
-    paddingVertical: 2,
-    paddingHorizontal: 20,
-    borderColor: primaryColor,
-    borderRadius: 10,
-    marginHorizontal: 2,
-  },
-  tabViewInactiveButton: {
-    fontSize: 16,
-    borderWidth: 1,
-    alignItems: "center",
-    paddingVertical: 2,
-    paddingHorizontal: 20,
-    borderColor: "gray",
-    borderRadius: 10,
-    marginHorizontal: 2,
-    color: "gray",
-  },
-  detailsContainer: {
-    flex: 1,
-  },
-  detailsPlaceholder: {
-    flex: 150,
-    height: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-  }
+
+
 
 });

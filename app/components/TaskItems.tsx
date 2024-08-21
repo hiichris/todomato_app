@@ -136,8 +136,6 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 50,
     margin: 2,
-    backgroundColor: "#FFEBE4",
-    borderWidth: 1,
     borderColor: "#FFC6B2",
     justifyContent: "flex-start",
     alignItems: "center",
