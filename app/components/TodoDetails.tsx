@@ -1,27 +1,34 @@
-import { View, Text, StyleSheet, ScrollView, Button, TextInput, Pressable } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TextInput, Pressable } from "react-native";
+import React, { useState } from 'react';
 import { TabButtons } from "./TabButtons";
 import { primaryColor } from "../helpers/constants";
 
+
 export function TodoDetails({ goToPage, currentPage, todoTitle }) {
+
     return (
         <View style={styles.detailsContainer}>
             <TabButtons goToPage={goToPage} currentPage={currentPage} />
             <View style={styles.titleContainer}>
                 <Text style={styles.TodoTitle}>{todoTitle}</Text>
             </View>
+
             <View style={styles.detailContentContainer}>
                 <ScrollView>
                     <View style={styles.noteContainer}>
-                        <Text>🗒️ Additional Note:</Text>
+                        <Text style={styles.detailsSectionTitle}>🗒️ Note:</Text>
                     </View>
                     <TextInput
                         multiline
-                        placeholder="Add a note..."
+                        placeholder="Tab here and start adding your note..."
                         style={styles.noteInput}
                     />
 
                     <View style={styles.spacer}></View>
 
+
+                </ScrollView>
+                <View style={styles.buttonsContainer}>
                     <Pressable style={styles.addMediaButton} onPress={() => { }}>
                         <Text style={styles.addMediaButtonText}>Add Text Note</Text>
                     </Pressable>
@@ -34,7 +41,8 @@ export function TodoDetails({ goToPage, currentPage, todoTitle }) {
                         <Text style={styles.addMediaButtonText}>Add GeoLocation</Text>
                     </Pressable>
 
-                </ScrollView>
+                </View>
+
             </View>
         </View>
     )
@@ -46,11 +54,10 @@ const styles = StyleSheet.create({
         padding: 8,
     },
     titleContainer: {
-        flex: 28,
+        flex: 20,
     },
     detailContentContainer: {
-        flex: 160,
-        height: "100%",
+        flex: 150,
         paddingHorizontal: 8,
         justifyContent: "center",
     },
@@ -81,15 +88,27 @@ const styles = StyleSheet.create({
     },
     noteInput: {
         flex: 1,
-        height: 100,
+        height: 200,
         borderColor: "lightgray",
-        borderWidth: 1,
         borderRadius: 10,
         padding: 10,
         margin: 8,
     },
     spacer: {
         flex: 1,
-        height: 32,
+        height: 82,
+    },
+    buttonsContainer: {
+        flex: 1,
+        flexDirection: "column",
+        justifyContent: "space-around",
+        marginBottom: 16,
+    },
+    detailsSectionTitle: {
+        fontSize: 16,
+        fontWeight: "bold",
+    },
+    pickerContainer: {
+        flex: 30,
     }
 });

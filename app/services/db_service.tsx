@@ -70,7 +70,7 @@ const setDatabaseVersion = async (db: SQLiteDatabase, version: number) => {
 
 
 const migrateDatabase = async (db: SQLiteDatabase) => {
-  //await db.execAsync("DROP TABLE IF EXISTS version;")
+  // await db.execAsync("DROP TABLE IF EXISTS version;") For flushing the version table
 
   // Get the current database version
   const currentVersion = await getDatabaseVersion(db);
@@ -96,6 +96,9 @@ const migrateDatabase = async (db: SQLiteDatabase) => {
       CREATE TABLE IF NOT EXISTS todos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
+        notes BLOB,
+        attachment BLOB,
+        geolocation TEXT,
         index_no INTEGER NOT NULL DEFAULT 0
       );
     `).then(() => {
@@ -109,8 +112,6 @@ const migrateDatabase = async (db: SQLiteDatabase) => {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         duration INTEGER DEFAULT 15,
-        content BLOB,
-        attachment BLOB,
         todo_id INTEGER,
         index_no INTEGER DEFAULT 0,
         FOREIGN KEY(todo_id) REFERENCES todos(id)
@@ -260,7 +261,7 @@ export const deleteTodo = async (setTodos: Function, id: number) => {
 
 export const getAllTasks = async (setTasks: Function, todo_id: number) => {
   const db: SQLiteDatabase = await openDatabase(todos_db);
-  const query = "SELECT t2.id, t2.name, t2.duration, t2.content, t2.attachment, t2.todo_id, t2.index_no FROM todos AS t1 JOIN tasks AS t2 ON t1.id == t2.todo_id WHERE t1.id == $todo_id ORDER by t2.index_no desc, t2.id asc";
+  const query = "SELECT t2.id, t2.name, t2.duration, t2.todo_id, t2.index_no FROM todos AS t1 JOIN tasks AS t2 ON t1.id == t2.todo_id WHERE t1.id == $todo_id ORDER by t2.index_no desc, t2.id asc";
   const tasks = await db.getAllAsync<Task>(query, { $todo_id: todo_id });
   setTasks(tasks);
 }
