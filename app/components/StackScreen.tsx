@@ -126,7 +126,8 @@ export default function StackScreen({
   var headerRightComponent = () => {
     if (addTodoButtonState) {
       return todoButton(setTodoModalVisible, setImportant, setUrgent);
-    } else if (addTaskButtonState) {
+    }
+    if (addTaskButtonState) {
       return taskButton(setTaskModalVisible);
     }
   };

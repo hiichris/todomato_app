@@ -43,7 +43,7 @@ function useFocusEffect(callback: () => void) {
 export default function HomeScreen() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [addTodoButtonState, setAddTodoButtonState] = useState(true);
-  const [addTaskButtonState, setAddTaskButtonState] = useState(true);
+  const [addTaskButtonState, setAddTaskButtonState] = useState(false);
 
   const refreshTodos = async () => {
     console.log("Refreshing todos");
@@ -56,7 +56,7 @@ export default function HomeScreen() {
       refreshTodos();
     };
     initDB();
-  }, []); 
+  }, []);
 
   useFocusEffect(() => {
     refreshTodos();
@@ -78,7 +78,7 @@ export default function HomeScreen() {
 
         <TodoItems todos={todos} refreshTodos={refreshTodos} />
       </View>
-      </GestureHandlerRootView>
+    </GestureHandlerRootView>
   );
 }
 

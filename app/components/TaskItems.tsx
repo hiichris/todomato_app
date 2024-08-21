@@ -43,7 +43,7 @@ function TaskItem({ task, index, onLongPress }) {
   return (
     <GestureHandlerRootView style={styles.taskItemsContainer}>
       {/* Wrap a Longpress component here to remove the item */}
-      <LongPressGestureHandler onHandlerStateChange={onLongPress(task.id)}
+      <LongPressGestureHandler onHandlerStateChange={onLongPress(task.id, index)}
         minDurationMs={800}>
         <View style={styles.taskItemContainer}>
           <View style={styles.taskIndexContainer}>
@@ -78,10 +78,10 @@ function TaskList({ tasks, todoTitle, onLongPress }) {
 
 export function TaskItems({ tasks, todoTitle, refreshTasks }) {
 
-  const onLongPress = (taskId) => (event: LongPressGestureHandlerStateChangeEvent) => {
+  const onLongPress = (taskId, index) => (event: LongPressGestureHandlerStateChangeEvent) => {
     if (event.nativeEvent.state === State.ACTIVE) {
       // get current event id
-      Alert.alert("Delete Task", "Are you sure you want to delete this task?", [
+      Alert.alert("Delete Task", `Are you sure you want to delete #${index + 1} task?`, [
         {
           text: "Cancel",
           onPress: () => console.log("Cancel Pressed"),
