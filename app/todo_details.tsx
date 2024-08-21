@@ -62,13 +62,13 @@ function NoAssignedTasks({ todoTitle, params, refreshTasks, scheduleNotification
 function TabButtons({ goToPage, currentPage }) {
   return (
     <View style={styles.tabViewButtonsContainer}>
-      <Pressable onPress={() => goToPage(0)}>
-        <Text style={currentPage == 1 ? styles.tabViewInactiveButton : styles.tabViewButton}>Tasks</Text>
-      </Pressable>
-      <Pressable onPress={() => goToPage(1)}>
-        <Text style={currentPage == 0 ? styles.tabViewInactiveButton : styles.tabViewButton}>Details</Text>
-      </Pressable>
-    </View>
+        <Pressable onPress={() => goToPage(0)}>
+          <Text style={currentPage == 1 ? styles.tabViewInactiveButton : styles.tabViewButton}>Tasks</Text>
+        </Pressable>
+        <Pressable onPress={() => goToPage(1)}>
+          <Text style={currentPage == 0 ? styles.tabViewInactiveButton : styles.tabViewButton}>Details</Text>
+        </Pressable>
+      </View>
   )
 }
 
@@ -187,7 +187,6 @@ export default function TodoDetailsScreen() {
                   <TaskItems tasks={tasks} todoTitle={params.title} refreshTasks={refreshTasks} />
                 </View>
 
-                <View><Button title="Next page" onPress={() => goToPage(1)} /></View>
                 <View style={styles.SpaceContainer}></View>
               </GestureHandlerRootView>
             </View>
@@ -253,7 +252,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   TaskItemContainer: {
-    height: "90%",
+    height: "94.5%",
   },
   noAssignedTaskContainer: {
     justifyContent: "center",
@@ -288,7 +287,7 @@ const styles = StyleSheet.create({
     borderBottomColor: primaryColor,
     color: primaryColor,
     alignItems: "center",
-    paddingVertical: 4,
+    paddingVertical: 2,
     paddingHorizontal: 20,
     borderColor: primaryColor,
     borderRadius: 10,
@@ -296,10 +295,10 @@ const styles = StyleSheet.create({
   },
   tabViewInactiveButton: {
     fontSize: 16,
-    borderBottomWidth: 1,
+    borderWidth: 1,
     alignItems: "center",
-    paddingVertical: 4,
-    paddingHorizontal: 16,
+    paddingVertical: 2,
+    paddingHorizontal: 20,
     borderColor: "gray",
     borderRadius: 10,
     marginHorizontal: 2,
