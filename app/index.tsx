@@ -1,3 +1,16 @@
+/*
+  TODO:
+  - Ensures that the app is working on both iOS and Android devices
+  - Run with flushed database
+  - Run depcheck for unused dependencies
+  - Remove unused imports
+  - Remove unused code
+  - Publish expo app using ens for demo
+  - Add comments to the code
+  - Update README.md
+*/
+
+
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -22,8 +35,6 @@ import { name as appName } from './app.json';
 /*
   Image Reference and Credits:
   splash.png - <a href="https://www.flaticon.com/free-icons/tomato" title="tomato icons">Tomato icons created by Flat Icons Design - Flaticon</a>
-
-
 */
 
 
