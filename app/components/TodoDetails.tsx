@@ -78,7 +78,6 @@ const styles = StyleSheet.create({
         borderRadius: 50,
         alignItems: "center",
         justifyContent: "center",
-        padding: 16,
         marginVertical: 4,
         backgroundColor: primaryColor
     },
@@ -93,6 +92,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         padding: 10,
         margin: 8,
+        textAlignVertical: "top",
     },
     spacer: {
         flex: 1,
