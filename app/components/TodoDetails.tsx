@@ -2,9 +2,12 @@ import { View, Text, StyleSheet, ScrollView, TextInput, Pressable } from "react-
 import React, { useState } from 'react';
 import { TabButtons } from "./TabButtons";
 import { primaryColor } from "../helpers/constants";
+import { updateTodoNotes } from "../services/db_service";
 
 
-export function TodoDetails({ goToPage, currentPage, todoTitle }) {
+export function TodoDetails({ goToPage, currentPage, todoTitle, params, todoNotes, todoId, refreshTodos }) {
+    
+    const [notes, setNotes] = useState(todoNotes);
 
     return (
         <View style={styles.detailsContainer}>
@@ -22,6 +25,8 @@ export function TodoDetails({ goToPage, currentPage, todoTitle }) {
                         multiline
                         placeholder="Tab here and start adding your note..."
                         style={styles.noteInput}
+                        value={notes}
+                        onChange={setNotes}
                     />
 
                     <View style={styles.spacer}></View>
@@ -29,7 +34,20 @@ export function TodoDetails({ goToPage, currentPage, todoTitle }) {
 
                 </ScrollView>
                 <View style={styles.buttonsContainer}>
-                    <Pressable style={styles.addMediaButton} onPress={() => { }}>
+                    <Pressable style={styles.addMediaButton} onPress={() => { 
+                        // Update the note
+                        updateTodoNotes(params.setTodos, todoId, todoNotes)
+                        .then((result) => {
+                            console.log("Result: ", result)
+                            console.log("Notesd updated: ", notes);
+                            // refreshTodos();
+                        })
+                        .catch((error) => {
+                            console.log("Error: ", error);
+                        }
+                        );
+
+                    }}>
                         <Text style={styles.addMediaButtonText}>Add Text Note</Text>
                     </Pressable>
 

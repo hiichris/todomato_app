@@ -20,6 +20,7 @@ export function TodoItems({ todos, refreshTodos }) {
                 title: item.title,
                 id: item.id,
                 todos: todos,
+                todoNotes: item.notes,
                 refreshTodos: refreshTodos,
               },
             }}

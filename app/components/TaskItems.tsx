@@ -76,7 +76,7 @@ function TaskList({ tasks, todoTitle, onLongPress }) {
   )
 }
 
-export function TaskItems({ tasks, todoTitle, refreshTasks }) {
+export function TaskItems({ tasks, todoTitle, refreshTasks, todos }) {
 
   const onLongPress = (taskId, index) => (event: LongPressGestureHandlerStateChangeEvent) => {
     if (event.nativeEvent.state === State.ACTIVE) {

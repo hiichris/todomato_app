@@ -20,7 +20,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { primaryColor } from "../helpers/constants";
 import { addNewTodo } from "../services/db_service";
 import { SQLiteProvider } from "expo-sqlite";
-import { migrateDbIfNeeded, getAllTodos } from "../services/db_service";
 import { Todo } from "../models/todo";
 
 

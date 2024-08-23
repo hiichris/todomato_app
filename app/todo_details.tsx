@@ -137,7 +137,13 @@ export default function TodoDetailsScreen() {
     await getAllTasks(setTasks, parseInt(params.id));
   }
 
+  const refreshTodos = async () => {
+    console.log("refreshTodos...");
+    await getTodos(params.setTodos);
+  }
+
   const handlePageSelected = (event) => {
+    event.persist();
     setCurrentPage(event.nativeEvent.position);
   }
 
@@ -176,7 +182,15 @@ export default function TodoDetailsScreen() {
               </GestureHandlerRootView>
             </View>
             <View key="2">
-              <TodoDetails goToPage={goToPage} currentPage={currentPage} todoTitle={params.title} />
+              <TodoDetails 
+                goToPage={goToPage} 
+                currentPage={currentPage} 
+                todoTitle={params.title} 
+                todoNotes={params.notes || ""}
+                todoId={params.id}
+                params={params}
+                refreshTodos={refreshTodos}
+              />
             </View>
           </PagerView>
           : <NoAssignedTasks

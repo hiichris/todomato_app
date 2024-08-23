@@ -70,7 +70,8 @@ const setDatabaseVersion = async (db: SQLiteDatabase, version: number) => {
 
 
 const migrateDatabase = async (db: SQLiteDatabase) => {
-  // await db.execAsync("DROP TABLE IF EXISTS version;") For flushing the version table
+  // For flushing the version table
+  //await db.execAsync("DROP TABLE IF EXISTS version;") 
 
   // Get the current database version
   const currentVersion = await getDatabaseVersion(db);
@@ -96,9 +97,9 @@ const migrateDatabase = async (db: SQLiteDatabase) => {
       CREATE TABLE IF NOT EXISTS todos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
-        notes BLOB,
-        attachment BLOB,
-        geolocation TEXT,
+        notes TEXT DEFAULT "",
+        attachment TEXT DEFAULT "",
+        geolocation TEXT DEFAULT "",
         index_no INTEGER NOT NULL DEFAULT 0
       );
     `).then(() => {
@@ -211,18 +212,30 @@ export const addNewTodo = async (setTodos: Function, title: string) => {
 }
 
 
-export const updateTodo = async (setTodos: Function, id: number, title: string) => {
+// export const updateTodo = async (setTodos: Function, id: number, title: string) => {
+//   const db: SQLiteDatabase = await openDatabase(todos_db);
+//   const statement = await db.prepareAsync("UPDATE todos set title = $title where id = $id");
+//   let result;
+//   try {
+//     result = await statement.executeAsync({ $title: title, $id: id });
+//   } finally {
+//     await statement.finalizeAsync();
+//     return result;
+//   }
+// }
+
+
+export const updateTodoNotes = async (setTodos: Function, id: number, notes: string) => {
   const db: SQLiteDatabase = await openDatabase(todos_db);
-  const statement = await db.prepareAsync("UPDATE todos set title = $title where id = $id");
+  const statement = await db.prepareAsync("UPDATE todos set notes = $notes where id = $id");
   let result;
   try {
-    result = await statement.executeAsync({ $title: title, $id: id });
+    result = await statement.executeAsync({ $notes: notes, $id: id });
   } finally {
     await statement.finalizeAsync();
     return result;
   }
 }
-
 
 export const deleteTodo = async (setTodos: Function, id: number) => {
   const db: SQLiteDatabase = await openDatabase(todos_db);
