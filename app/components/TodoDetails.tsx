@@ -1,13 +1,62 @@
-import { View, Text, StyleSheet, ScrollView, TextInput, Pressable } from "react-native";
-import React, { useState } from 'react';
+import {
+    View,
+    Text,
+    StyleSheet,
+    ScrollView,
+    TextInput,
+    Pressable,
+    ActivityIndicator,
+} from "react-native";
+import React, { useEffect, useState } from "react";
 import { TabButtons } from "./TabButtons";
 import { primaryColor } from "../helpers/constants";
 import { updateTodoNotes } from "../services/db_service";
 
 
-export function TodoDetails({ goToPage, currentPage, todoTitle, params, todoNotes, todoId, refreshTodos }) {
-    
-    const [notes, setNotes] = useState(todoNotes);
+const addUpdateTodoNotesHandler = (
+    todoId,
+    todoNotes,
+    setTodoNotes,
+    setUpdating,
+    setUpdateCompleted
+) => {
+    // Set updating to true and stay for 2 seconds
+    setUpdating(true);
+
+    // Update the note
+    updateTodoNotes(setTodoNotes, todoId, todoNotes)
+        .then((result) => {
+            console.log("Updated note: ", result);
+            setTimeout(() => {
+                setUpdating(false);
+                setUpdateCompleted(true);
+            }, 800);
+
+            setTimeout(() => {
+                setUpdateCompleted(false);
+            }, 2500);
+        })
+        .catch((error) => {
+            console.log("Error: ", error);
+            setTimeout(() => {
+                setUpdating(false);
+            }, 1000);
+        });
+};
+
+
+export function TodoDetails({
+    goToPage,
+    currentPage,
+    todoTitle,
+    params,
+    todoNotes,
+    setTodoNotes,
+    todoId,
+}) {
+    const [updating, setUpdating] = useState(false);
+    const [updateCompleted, setUpdateCompleted] = useState(false);
+    const [image, setImage] = useState(null);
 
     return (
         <View style={styles.detailsContainer}>
@@ -25,30 +74,42 @@ export function TodoDetails({ goToPage, currentPage, todoTitle, params, todoNote
                         multiline
                         placeholder="Tab here and start adding your note..."
                         style={styles.noteInput}
-                        value={notes}
-                        onChange={setNotes}
+                        value={todoNotes}
+                        onChangeText={(text) => {
+                            setTodoNotes(text);
+                        }}
                     />
 
                     <View style={styles.spacer}></View>
-
-
                 </ScrollView>
                 <View style={styles.buttonsContainer}>
-                    <Pressable style={styles.addMediaButton} onPress={() => { 
-                        // Update the note
-                        updateTodoNotes(params.setTodos, todoId, todoNotes)
-                        .then((result) => {
-                            console.log("Result: ", result)
-                            console.log("Notesd updated: ", notes);
-                            // refreshTodos();
-                        })
-                        .catch((error) => {
-                            console.log("Error: ", error);
-                        }
+                    <Pressable style={styles.addMediaButton} onPress={() => {
+                        addUpdateTodoNotesHandler(
+                            todoId,
+                            todoNotes,
+                            setTodoNotes,
+                            setUpdating,
+                            setUpdateCompleted
                         );
-
                     }}>
-                        <Text style={styles.addMediaButtonText}>Add Text Note</Text>
+                        <View style={styles.buttonTextContainer}>
+                            <Text style={styles.addMediaButtonText}>
+                                {todoNotes ? "Update Text Note" : "Add Text Note"}
+                            </Text>
+                            {updating ? (
+                                <ActivityIndicator
+                                    color="white"
+                                    style={styles.buttonTextStatus}
+                                />
+                            ) : (
+                                <></>
+                            )}
+                            {updateCompleted ? (
+                                <Text style={styles.buttonTextStatus}>✅</Text>
+                            ) : (
+                                <></>
+                            )}
+                        </View>
                     </Pressable>
 
                     <Pressable style={styles.addMediaButton} onPress={() => { }}>
@@ -58,12 +119,10 @@ export function TodoDetails({ goToPage, currentPage, todoTitle, params, todoNote
                     <Pressable style={styles.addMediaButton} onPress={() => { }}>
                         <Text style={styles.addMediaButtonText}>Add GeoLocation</Text>
                     </Pressable>
-
                 </View>
-
             </View>
         </View>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
@@ -97,7 +156,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         marginVertical: 4,
-        backgroundColor: primaryColor
+        backgroundColor: primaryColor,
     },
     addMediaButtonText: {
         color: "white",
@@ -128,5 +187,14 @@ const styles = StyleSheet.create({
     },
     pickerContainer: {
         flex: 30,
-    }
+    },
+    buttonTextContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        flexDirection: "row",
+    },
+    buttonTextStatus: {
+        marginHorizontal: 4,
+    },
 });

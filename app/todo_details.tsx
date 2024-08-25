@@ -72,6 +72,8 @@ export default function TodoDetailsScreen() {
   const [addTaskButtonState, setAddTaskButtonState] = useState(true);
   const pagerRef = useRef<PagerView>(null);
   const [currentPage, setCurrentPage] = useState(0);
+  const [todoNotes, setTodoNotes] = useState(params.todoNotes);
+
 
   const goToPage = (pageIndex) => {
     if (pagerRef.current) {
@@ -186,10 +188,10 @@ export default function TodoDetailsScreen() {
                 goToPage={goToPage} 
                 currentPage={currentPage} 
                 todoTitle={params.title} 
-                todoNotes={params.notes || ""}
+                todoNotes={todoNotes}
+                setTodoNotes={setTodoNotes}
                 todoId={params.id}
                 params={params}
-                refreshTodos={refreshTodos}
               />
             </View>
           </PagerView>

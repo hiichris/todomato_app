@@ -71,7 +71,7 @@ const setDatabaseVersion = async (db: SQLiteDatabase, version: number) => {
 
 const migrateDatabase = async (db: SQLiteDatabase) => {
   // For flushing the version table
-  //await db.execAsync("DROP TABLE IF EXISTS version;") 
+  // await db.execAsync("DROP TABLE IF EXISTS version;") 
 
   // Get the current database version
   const currentVersion = await getDatabaseVersion(db);
@@ -225,14 +225,16 @@ export const addNewTodo = async (setTodos: Function, title: string) => {
 // }
 
 
-export const updateTodoNotes = async (setTodos: Function, id: number, notes: string) => {
+export const updateTodoNotes = async (setTodoNotes: Function, id: number, notes: string) => {
   const db: SQLiteDatabase = await openDatabase(todos_db);
   const statement = await db.prepareAsync("UPDATE todos set notes = $notes where id = $id");
   let result;
+  console.log("notes: ", notes, "id: ", id);
   try {
     result = await statement.executeAsync({ $notes: notes, $id: id });
   } finally {
     await statement.finalizeAsync();
+    setTodoNotes(notes);
     return result;
   }
 }
