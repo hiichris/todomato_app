@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
   },
   todoTitle: {
     fontSize: 16,
-    textAlign: "center",
+    textAlign: "left",
     justifyContent: "center",
     marginTop: 4,
   }

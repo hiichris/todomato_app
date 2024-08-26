@@ -1,314 +1,304 @@
 import {
-    View,
-    Text,
-    StyleSheet,
-    ScrollView,
-    TextInput,
-    Pressable,
-    ActivityIndicator,
-    Image,
-    Dimensions,
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TextInput,
+  Pressable,
+  ActivityIndicator,
+  Image,
+  Dimensions,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { TabButtons } from "./TabButtons";
 import { primaryColor } from "../helpers/constants";
 import { updateTodoNotes, addImage } from "../services/db_service";
-import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
+import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
+import { ThumbnailImages } from "./ThumbnailImages";
+import { TextNote } from "./TextNote";
+import { GeoLocations } from "./GeoLocations";
 
 // Get the device width
 const { width: deviceWidth } = Dimensions.get("window");
+const imageWidth = (deviceWidth - 18) / 1.5;
 
 export function TodoDetails({
-    goToPage,
-    currentPage,
-    todoTitle,
-    params,
-    todoNotes,
-    setTodoNotes,
-    todoId,
-    images,
-    setImages,
+  goToPage,
+  currentPage,
+  todoTitle,
+  params,
+  todoNotes,
+  setTodoNotes,
+  todoId,
+  images,
+  setImages,
+  refreshImages,
 }) {
-    const [updating, setUpdating] = useState(false);
-    const [updateCompleted, setUpdateCompleted] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [updateCompleted, setUpdateCompleted] = useState(false);
+  const [scrollToEnd, setScrollToEnd] = useState(false);
+  const scrollViewRef = useRef();
 
-    if (images !== null && images !== undefined) {
-        images.map((image) => {
-            console.log("Image: ", image.image_url);
+  useEffect(() => {
+    if (scrollToEnd) {
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+      setScrollToEnd(false);
+    }
+  }, [scrollToEnd]);
+
+  const addUpdateTodoNotesHandler = () => {
+    // Set updating to true and stay for 2 seconds
+    setUpdating(true);
+
+    // Update the note
+    updateTodoNotes(setTodoNotes, todoId, todoNotes)
+      .then((result) => {
+        setTimeout(() => {
+          setUpdating(false);
+          setUpdateCompleted(true);
+        }, 800);
+
+        setTimeout(() => {
+          setUpdateCompleted(false);
+        }, 2500);
+      })
+      .catch((error) => {
+        console.log("Error: ", error);
+        setTimeout(() => {
+          setUpdating(false);
+        }, 1000);
+      });
+  };
+
+  const saveImage = async (uri: string) => {
+    console.log("uri: ", uri);
+    try {
+      const fileName = uri.split("/").pop();
+      const newPath = FileSystem.documentDirectory + fileName;
+
+      if (newPath === null || newPath === undefined) {
+        console.log("New path is null or undefined");
+        return;
+      }
+
+      // Move the image to the file system
+      await FileSystem.moveAsync({
+        from: uri,
+        to: newPath,
+      }).then((result) => {
+        // Update the images list and state
+        images.push({ image_url: newPath });
+        console.log("images: ", images);
+        setImages(images);
+        setTimeout(() => {
+          // Refresh the images
+          refreshImages(todoId);
+        }, 100);
+
+        // Scroll to the end
+        setScrollToEnd(true);
+      });
+
+      // Save the image to the database
+      addImage(todoId, newPath)
+        .then((result) => {
+          console.log("Image saved to DB: ", result);
+        })
+        .catch((error) => {
+          console.log("Error saving image to DB: ", error);
         });
+    } catch (error) {
+      console.log("Error saving image: ", error);
+    }
+  };
+
+  const pickImageHandler = async () => {
+    // Request permission to access the camera and media library
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (permissionResult.granted === false) {
+      alert("Permission to access camera and media library is required!");
+      return;
     }
 
-    const addUpdateTodoNotesHandler = () => {
-        // Set updating to true and stay for 2 seconds
-        setUpdating(true);
+    // Pick an image from the media library
+    const pickerResult = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [16, 9],
+      quality: 1,
+    });
 
-        // Update the note
-        updateTodoNotes(setTodoNotes, todoId, todoNotes)
-            .then((result) => {
-                console.log("Updated note: ", result);
-                setTimeout(() => {
-                    setUpdating(false);
-                    setUpdateCompleted(true);
-                }, 800);
+    // If the user cancels the image picker, return immediately
+    if (pickerResult.canceled) {
+      console.log("Image picker cancelled");
+      return;
+    }
 
-                setTimeout(() => {
-                    setUpdateCompleted(false);
-                }, 2500);
-            })
-            .catch((error) => {
-                console.log("Error: ", error);
-                setTimeout(() => {
-                    setUpdating(false);
-                }, 1000);
-            });
-    };
+    // Save the image to the file system
+    saveImage(pickerResult.assets[0].uri);
+  };
 
-    const saveImage = async (uri: string) => {
-        console.log("uri: ", uri);
-        try {
-            const fileName = uri.split("/").pop();
-            console.log("fileName: ", fileName);
-            const newPath = FileSystem.documentDirectory + fileName;
+  return (
+    <View style={styles.detailsContainer}>
+      {/* Tab Buttons */}
+      <TabButtons goToPage={goToPage} currentPage={currentPage} />
 
-            if (newPath === null || newPath === undefined) {
-                console.log("New path is null or undefined");
-                return;
-            }
-
-            // Move the image to the file system
-            await FileSystem.moveAsync({
-                from: uri,
-                to: newPath,
-            }).then((result) => {
-                console.log("Image saved: ", newPath);
-                images.push({ image_url: newPath });
-            });
-
-            // Save the image to the database
-            addImage(todoId, newPath)
-                .then((result) => {
-                    console.log("Image saved to DB: ", result);
-                }
-                ).catch((error) => {
-                    console.log("Error saving image to DB: ", error);
-                });
-
-
-
-        } catch (error) {
-            console.log("Error saving image: ", error);
-        }
-    };
-
-    const pickImageHandler = async () => {
-        // Request permission to access the camera and media library
-        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-        if (permissionResult.granted === false) {
-            alert("Permission to access camera and media library is required!");
-            return;
-        }
-
-        // Pick an image from the media library
-        const pickerResult = await ImagePicker.launchImageLibraryAsync(
-            {
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
-                allowsEditing: true,
-                aspect: [16, 9],
-                quality: 1,
-            }
-        );
-
-        // If the user cancels the image picker, return immediately
-        if (pickerResult.canceled) {
-            console.log("Image picker cancelled");
-            return;
-        }
-
-        // Save the image to the file system
-        saveImage(pickerResult.assets[0].uri);
-    };
-
-    return (
-        <View style={styles.detailsContainer}>
-            {/* Tab Buttons */}
-            <TabButtons goToPage={goToPage} currentPage={currentPage} />
-
-            <View style={styles.detailContentContainer}>
-                {/* Todo Title */}
-                <View style={styles.titleContainer}>
-                    <Text style={styles.TodoTitle}>{todoTitle}</Text>
-                </View>
-
-                {/* Todo Details */}
-                <View style={styles.scrollViewContainer}>
-
-                    <ScrollView>
-                        {/* Text Note */}
-                        <View style={styles.sectionContainer}>
-                            <Text style={styles.detailsSectionTitle}>🗒️ Something to note</Text>
-                        </View>
-                        <TextInput
-                            multiline
-                            placeholder="Tab here and start adding your note..."
-                            style={styles.noteInput}
-                            value={todoNotes}
-                            onChangeText={(text) => {
-                                setTodoNotes(text);
-                            }}
-                        />
-
-                        <View style={styles.sectionContainer}>
-                            <Text style={styles.detailsSectionTitle}>🏞️ Something to visualise</Text>
-                        </View>
-
-                        {/* Image */}
-                        <ScrollView horizontal={true}>
-                        <View style={styles.imagesContainer}>
-                            {/* Loop through the images if there are any */}
-                            {images && images.length > 0 && (
-                                images.map((image) => {
-                                    return (
-                                        <Image
-                                            source={{ uri: image.image_url }}
-                                            style={styles.image}
-                                        />
-                                    );
-                                })
-
-                            )}
-
-                        </View>
-                        </ScrollView>
-
-                        <View style={styles.spacer}></View>
-                    </ScrollView>
-
-
-                </View>
-            </View>
-            {/* Buttons */}
-            <View style={styles.buttonsContainer}>
-                <Pressable style={styles.addMediaButton} onPress={addUpdateTodoNotesHandler}>
-                    <View style={styles.buttonTextContainer}>
-                        <Text style={styles.addMediaButtonText}>
-                            {todoNotes ? "Update Text Note" : "Add Text Note"}
-                        </Text>
-                        {updating ? (
-                            <ActivityIndicator
-                                color="white"
-                                style={styles.buttonTextStatus}
-                            />
-                        ) : (
-                            <></>
-                        )}
-                        {updateCompleted ? (
-                            <Text style={styles.buttonTextStatus}>✅</Text>
-                        ) : (
-                            <></>
-                        )}
-                    </View>
-                </Pressable>
-
-                <Pressable style={styles.addMediaButton} onPress={pickImageHandler}>
-                    <Text style={styles.addMediaButtonText}>Add Images</Text>
-                </Pressable>
-
-                <Pressable style={styles.addMediaButton} onPress={() => { }}>
-                    <Text style={styles.addMediaButtonText}>Add GeoLocation</Text>
-                </Pressable>
-            </View>
+      <View style={styles.detailContentContainer}>
+        {/* Todo Title */}
+        <View style={styles.titleContainer}>
+          <Text style={styles.TodoTitle} ellipsizeMode="tail">
+            {todoTitle}
+          </Text>
         </View>
-    );
+
+        {/* Todo Details */}
+        <View style={styles.scrollViewContainer}>
+          <ScrollView>
+            {/* Text Note */}
+            <TextNote
+              todoNotes={todoNotes}
+              setTodoNotes={setTodoNotes}
+              styles={styles}
+              addUpdateTodoNotesHandler={addUpdateTodoNotesHandler}
+              updating={updating}
+              updateCompleted={updateCompleted}
+            />
+
+            {/* Images - Display only if there are images */}
+            <ThumbnailImages
+              images={images}
+              styles={styles}
+              scrollViewRef={scrollViewRef}
+            />
+
+            {/* GeoLocation - Display only if there are geolocations */}
+            <GeoLocations styles={styles}></GeoLocations>
+
+            <View style={styles.spacer}></View>
+          </ScrollView>
+        </View>
+      </View>
+      {/* Buttons */}
+      <View style={styles.buttonsContainer}>
+        <Pressable style={styles.addMediaButton} onPress={pickImageHandler}>
+          <Text style={styles.addMediaButtonText}>Add Images</Text>
+        </Pressable>
+
+        <Pressable style={styles.addMediaButton} onPress={() => {}}>
+          <Text style={styles.addMediaButtonText}>Add GeoLocation</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    detailsContainer: {
-        flex: 5,
-        padding: 8,
-    },
-    titleContainer: {
-        flex: 10,
-    },
-    detailContentContainer: {
-        flex: 180,
-        paddingHorizontal: 8,
-        justifyContent: "center",
-    },
-    scrollViewContainer: {
-        flex: 50,
-    },
-    TodoTitle: {
-        flex: 1,
-        fontSize: 24,
-        fontWeight: "bold",
-        margin: 16,
-    },
-    sectionContainer: {
-        flex: 1,
-        borderColor: "gray",
-        paddingBottom: 8,
-        marginHorizontal: 12,
-        borderBottomColor: "lightgray",
-    },
-    addMediaButton: {
-        flex: 1,
-        borderColor: "gray",
-        borderRadius: 50,
-        alignItems: "center",
-        justifyContent: "center",
-        marginVertical: 4,
-        backgroundColor: primaryColor,
-    },
-    addMediaButtonText: {
-        color: "white",
-        fontSize: 16,
-    },
-    noteInput: {
-        flex: 1,
-        height: 120,
-        borderColor: "lightgray",
-        borderRadius: 10,
-        padding: 10,
-        margin: 8,
-        textAlignVertical: "top",
-    },
-    spacer: {
-        flex: 1,
-        height: 82,
-    },
-    buttonsContainer: {
-        flex: 50,
-        flexDirection: "column",
-        justifyContent: "space-around",
-        marginBottom: 16,
-    },
-    detailsSectionTitle: {
-        fontSize: 18,
-        fontWeight: "bold",
-    },
-    pickerContainer: {
-        flex: 1,
-    },
-    buttonTextContainer: {
-        flex: 3,
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "row",
-    },
-    buttonTextStatus: {
-        marginHorizontal: 4,
-    },
-    imagesContainer: {
-        flex: 1,
-        flexDirection: "row",
-    },
-    image: {
-        flex: 1,
-        width: (deviceWidth - 18) / 1.8,
-        height: (deviceWidth - 18) / 1.8,
-        borderRadius: 20,
-        margin: 8,
-    }
+  detailsContainer: {
+    flex: 5,
+    padding: 8,
+  },
+  titleContainer: {},
+  detailContentContainer: {
+    flex: 160,
+    paddingHorizontal: 0,
+    verticalAlign: "top",
+    justifyContent: "center",
+  },
+  scrollViewContainer: {
+    flex: 80,
+  },
+  TodoTitle: {
+    fontSize: 32,
+    fontWeight: "bold",
+    margin: 16,
+    height: 90,
+    verticalAlign: "top",
+  },
+  sectionContainer: {
+    flex: 1,
+    borderColor: "gray",
+    paddingBottom: 8,
+    marginHorizontal: 12,
+    borderBottomColor: "lightgray",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+  },
+  addMediaButton: {
+    flex: 1,
+    borderColor: "gray",
+    borderRadius: 50,
+    alignItems: "center",
+    justifyContent: "center",
+    marginVertical: 4,
+    backgroundColor: primaryColor,
+  },
+  addMediaButtonText: {
+    color: "white",
+    fontSize: 16,
+  },
+  noteInput: {
+    flex: 1,
+    height: 100,
+    borderColor: "lightgray",
+    borderRadius: 20,
+    padding: 10,
+    textAlignVertical: "top",
+  },
+  spacer: {
+    flex: 1,
+    height: 40,
+  },
+  buttonsContainer: {
+    flex: 40,
+    flexDirection: "column",
+    justifyContent: "space-around",
+    marginBottom: 16,
+    marginTop: 8,
+  },
+  detailsSectionTitle: {
+    flex: 5,
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  pickerContainer: {
+    flex: 1,
+  },
+  buttonTextContainer: {
+    flex: 3,
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+  },
+  buttonTextStatus: {},
+  imagesContainer: {
+    flex: 1,
+    flexDirection: "row",
+    marginHorizontal: 8,
+  },
+  image: {
+    flex: 1,
+    width: imageWidth,
+    height: imageWidth,
+    borderRadius: 20,
+    margin: 4,
+  },
+  noteUpdateButtonContainer: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    borderColor: primaryColor,
+    borderRadius: 50,
+  },
+  noteUpdateText: {
+    color: primaryColor,
+    fontSize: 14,
+    marginHorizontal: 8,
+  },
 });

@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     borderBottomColor: "#f0f0f0",
   },
   TodoTitle: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: "bold",
     marginBottom: 8,
   },

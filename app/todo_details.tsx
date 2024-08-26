@@ -89,19 +89,9 @@ export default function TodoDetailsScreen() {
         await Notifications.requestPermissionsAsync();
       }
     }
-
-    async function getImagesFromDB(todoId: number) {
-      const images = await getImages(todoId);
-      console.log("Images: ", images);
-      // if (images.length > 0) {
-      //   images.map((image) => setImages(image.image_url));
-      // }
-      setImages(images);
-    }
-
     getPermissions();
     refreshTasks();
-    getImagesFromDB(parseInt(params.id));
+    refreshImages(parseInt(params.id));
 
     Notifications.setNotificationHandler({
       handleNotification: async () => ({
@@ -143,6 +133,12 @@ export default function TodoDetailsScreen() {
       },
     });
   };
+
+  const refreshImages = async (todoId: number) => {
+    const images = await getImages(todoId);
+    console.log("Images refr: ", images);
+    setImages(images);
+  }
 
   const refreshTasks = async () => {
     console.log("refreshTasks...");
@@ -204,6 +200,7 @@ export default function TodoDetailsScreen() {
                 params={params}
                 images={images}
                 setImages={setImages}
+                refreshImages={refreshImages}
               />
             </View>
           </PagerView>

@@ -70,6 +70,9 @@ const setDatabaseVersion = async (db: SQLiteDatabase, version: number) => {
 const migrateDatabase = async (db: SQLiteDatabase) => {
   // For flushing the version table
   // await db.execAsync("DROP TABLE IF EXISTS version;") 
+  // await db.execAsync("DROP TABLE IF EXISTS todos;") 
+  // await db.execAsync("DROP TABLE IF EXISTS tasks;") 
+  // await db.execAsync("DROP TABLE IF EXISTS images;") 
 
   // Get the current database version
   const currentVersion = await getDatabaseVersion(db);
