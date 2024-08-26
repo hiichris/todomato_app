@@ -7,7 +7,7 @@ import {
 import { View, Text, StyleSheet, Button, TextInput, FlatList, ScrollView, AppRegistry, Image, Dimensions, useWindowDimensions, Pressable } from "react-native";
 import { useEffect, useState, useRef } from "react";
 import { useSQLiteContext, SQLiteProvider } from "expo-sqlite";
-import { getAllTasks, addNewTask, deleteTodo } from "./services/db_service";
+import { getAllTasks, addNewTask, deleteTodo, getImages } from "./services/db_service";
 import { PickerIOS } from "@react-native-picker/picker";
 import { Task } from "./models/task";
 import StackScreen from "./components/StackScreen";
@@ -73,7 +73,7 @@ export default function TodoDetailsScreen() {
   const pagerRef = useRef<PagerView>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [todoNotes, setTodoNotes] = useState(params.todoNotes);
-
+  const [images, setImages] = useState(null);
 
   const goToPage = (pageIndex) => {
     if (pagerRef.current) {
@@ -82,7 +82,7 @@ export default function TodoDetailsScreen() {
   };
 
   useEffect(() => {
-    // Request permissions
+    // Request notification permissions
     async function getPermissions() {
       const { status } = await Notifications.getPermissionsAsync();
       if (status !== "granted") {
@@ -90,8 +90,18 @@ export default function TodoDetailsScreen() {
       }
     }
 
+    async function getImagesFromDB(todoId: number) {
+      const images = await getImages(todoId);
+      console.log("Images: ", images);
+      // if (images.length > 0) {
+      //   images.map((image) => setImages(image.image_url));
+      // }
+      setImages(images);
+    }
+
     getPermissions();
     refreshTasks();
+    getImagesFromDB(parseInt(params.id));
 
     Notifications.setNotificationHandler({
       handleNotification: async () => ({
@@ -192,6 +202,8 @@ export default function TodoDetailsScreen() {
                 setTodoNotes={setTodoNotes}
                 todoId={params.id}
                 params={params}
+                images={images}
+                setImages={setImages}
               />
             </View>
           </PagerView>

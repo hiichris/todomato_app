@@ -37,8 +37,7 @@ import { name as appName } from './app.json';
   splash.png - <a href="https://www.flaticon.com/free-icons/tomato" title="tomato icons">Tomato icons created by Flat Icons Design - Flaticon</a>
 */
 
-
-LogBox.ignoreAllLogs();
+// LogBox.ignoreAllLogs();
 
 function useFocusEffect(callback: () => void) {
   // Ref: https://reactnavigation.org/docs/use-is-focused/

@@ -58,7 +58,6 @@ const getDatabaseVersion = async (db: SQLiteDatabase) => {
   }
 }
 
-
 // Function to set the database version
 const setDatabaseVersion = async (db: SQLiteDatabase, version: number) => {
   try {
@@ -67,7 +66,6 @@ const setDatabaseVersion = async (db: SQLiteDatabase, version: number) => {
     console.log("Error setting database version", error);
   }
 }
-
 
 const migrateDatabase = async (db: SQLiteDatabase) => {
   // For flushing the version table
@@ -123,6 +121,20 @@ const migrateDatabase = async (db: SQLiteDatabase) => {
       console.log("Error creating table tasks", error);
     });;
 
+    // Create images table
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS images (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        todo_id INTEGER,
+        image_url TEXT NOT NULL,
+        FOREIGN KEY(todo_id) REFERENCES todos(id)
+      );
+    `).then(() => {
+      console.log("Table images created");
+    }).catch((error) => {
+      console.log("Error creating table images", error);
+    });
+
     // Insert some sample data
     await db.execAsync(`
       INSERT INTO todos (title, index_no) values ('Study Physics in the library', 1);
@@ -153,8 +165,6 @@ const migrateDatabase = async (db: SQLiteDatabase) => {
       console.log("Error insert sample #1:", error);
     });
 
-
-
     await db.execAsync(`
       INSERT INTO todos (title, index_no) values ('Take a walk in the park', 2);
     `).then(() => {
@@ -183,7 +193,6 @@ const migrateDatabase = async (db: SQLiteDatabase) => {
   }
 }
 
-
 export const initializeDatabase = async () => {
   const db: SQLiteDatabase = await openDatabase(todos_db);
   await migrateDatabase(db);
@@ -198,7 +207,6 @@ export const getTodos = async (setTodos: Function) => {
   setTodos(todos);
 }
 
-
 export const addNewTodo = async (setTodos: Function, title: string) => {
   const db: SQLiteDatabase = await openDatabase(todos_db);
   const statement = await db.prepareAsync("INSERT INTO todos (title) values ($title)");
@@ -210,20 +218,6 @@ export const addNewTodo = async (setTodos: Function, title: string) => {
     return result;
   }
 }
-
-
-// export const updateTodo = async (setTodos: Function, id: number, title: string) => {
-//   const db: SQLiteDatabase = await openDatabase(todos_db);
-//   const statement = await db.prepareAsync("UPDATE todos set title = $title where id = $id");
-//   let result;
-//   try {
-//     result = await statement.executeAsync({ $title: title, $id: id });
-//   } finally {
-//     await statement.finalizeAsync();
-//     return result;
-//   }
-// }
-
 
 export const updateTodoNotes = async (setTodoNotes: Function, id: number, notes: string) => {
   const db: SQLiteDatabase = await openDatabase(todos_db);
@@ -281,7 +275,6 @@ export const getAllTasks = async (setTasks: Function, todo_id: number) => {
   setTasks(tasks);
 }
 
-
 export const addNewTask = async (setTasks: Function, todo_id: number, name: string, duration: number) => {
   const db: SQLiteDatabase = await openDatabase(todos_db);
   const statement = await db.prepareAsync("INSERT INTO tasks (name, duration, todo_id) values ($name, $duration, $todo_id)");
@@ -299,6 +292,27 @@ export const deleteTask = async (setTasks: Function, task_id: number) => {
   let result;
   try {
     result = await statement.executeAsync({ $id: task_id });
+  } finally {
+    await statement.finalizeAsync();
+    return result;
+  }
+}
+
+// IMAGE OPERATIONS ////
+
+export const getImages = async (todo_id: number) => {
+  const db: SQLiteDatabase = await openDatabase(todos_db);
+  const query = "SELECT image_url FROM images WHERE todo_id = $todo_id";
+  const images = await db.getAllAsync<[string]>(query, { $todo_id: todo_id });
+  return images;
+}
+
+export const addImage = async (todo_id: number, image_url: string) => {
+  const db: SQLiteDatabase = await openDatabase(todos_db);
+  const statement = await db.prepareAsync("INSERT INTO images (todo_id, image_url) values ($todo_id, $image_url)");
+  let result;
+  try {
+    result = await statement.executeAsync({ $todo_id: todo_id, $image_url: image_url });
   } finally {
     await statement.finalizeAsync();
     return result;
