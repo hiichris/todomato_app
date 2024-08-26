@@ -15,15 +15,13 @@ export const TextNote = ({
   addUpdateTodoNotesHandler,
   updating,
   updateCompleted,
+  setFocusedInput,
 }) => {
   return (
     <>
       <View style={styles.sectionContainer}>
         <Text style={styles.detailsSectionTitle}>Something to note</Text>
-        <Pressable
-          
-          onPress={addUpdateTodoNotesHandler}
-        >
+        <Pressable onPress={addUpdateTodoNotesHandler}>
           <View style={styles.noteUpdateButtonContainer}>
             <Text style={styles.noteUpdateText}>
               {updating ? "Updating" : "Update Note"}
@@ -37,7 +35,7 @@ export const TextNote = ({
             ) : (
               <View style={styles.buttonTextStatus}></View>
             )}
-             {updateCompleted ? (
+            {updateCompleted ? (
               <Text style={styles.buttonTextStatus}>✅</Text>
             ) : (
               <></>
@@ -51,6 +49,7 @@ export const TextNote = ({
         placeholderTextColor="gray"
         style={styles.noteInput}
         value={todoNotes}
+        onFocus={() => {setFocusedInput}}
         onChangeText={(text) => {
           setTodoNotes(text);
         }}

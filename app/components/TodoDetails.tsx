@@ -8,6 +8,10 @@ import {
   ActivityIndicator,
   Image,
   Dimensions,
+  KeyboardAvoidingView,
+  Keyboard,
+  TouchableWithoutFeedback,
+  Platform,
 } from "react-native";
 import React, { useState, useRef, useEffect } from "react";
 import { TabButtons } from "./TabButtons";
@@ -39,15 +43,44 @@ export function TodoDetails({
   const [updateCompleted, setUpdateCompleted] = useState(false);
   const [scrollToEnd, setScrollToEnd] = useState(false);
   const scrollViewRef = useRef();
+  const scrollViewKeyboardRef = useRef();
+  const [contentWidth, setContentWidth] = useState(0);
+  const [focusedInput, setFocusedInput] = useState(null);
+
+  const handleContentSizeChange = (contentWidth, contentHeight) => {
+    setContentWidth(contentWidth);
+  };
 
   useEffect(() => {
     if (scrollToEnd) {
       setTimeout(() => {
-        scrollViewRef.current?.scrollToEnd({ animated: true });
+        const scrollPosition = contentWidth - imageWidth - imageWidth / 2 + 48;
+        scrollViewRef.current?.scrollTo({
+          x: scrollPosition,
+          animated: true,
+        });
       }, 100);
       setScrollToEnd(false);
     }
-  }, [scrollToEnd]);
+
+    if (focusedInput) {
+      if (focusedInput === "map") {
+        const keyboardDidShowListener = Keyboard.addListener(
+          "keyboardDidShow",
+          () => {
+            // Scroll to the bottom of the ScrollView when the keyboard is shown
+            setTimeout(() => {
+              scrollViewKeyboardRef.current?.scrollToEnd({ animated: true });
+            }, 100);
+          }
+        );
+        return () => {
+          setFocusedInput(null);
+          keyboardDidShowListener.remove();
+        };
+      }
+    }
+  }, [scrollToEnd, focusedInput]);
 
   const addUpdateTodoNotesHandler = () => {
     // Set updating to true and stay for 2 seconds
@@ -158,40 +191,45 @@ export function TodoDetails({
 
         {/* Todo Details */}
         <View style={styles.scrollViewContainer}>
-          <ScrollView>
-            {/* Text Note */}
-            <TextNote
-              todoNotes={todoNotes}
-              setTodoNotes={setTodoNotes}
-              styles={styles}
-              addUpdateTodoNotesHandler={addUpdateTodoNotesHandler}
-              updating={updating}
-              updateCompleted={updateCompleted}
-            />
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={styles.centeredView}
+          >
+            <ScrollView ref={scrollViewKeyboardRef}>
+              <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <>
+                  {/* Text Note */}
+                  <TextNote
+                    todoNotes={todoNotes}
+                    setTodoNotes={setTodoNotes}
+                    styles={styles}
+                    addUpdateTodoNotesHandler={addUpdateTodoNotesHandler}
+                    updating={updating}
+                    updateCompleted={updateCompleted}
+                    setFocusedInput={setFocusedInput}
+                  />
 
-            {/* Images - Display only if there are images */}
-            <ThumbnailImages
-              images={images}
-              styles={styles}
-              scrollViewRef={scrollViewRef}
-            />
+                  {/* Images - Display only if there are images */}
+                  <ThumbnailImages
+                    images={images}
+                    styles={styles}
+                    scrollViewRef={scrollViewRef}
+                    pickImageHandler={pickImageHandler}
+                    handleContentSizeChange={handleContentSizeChange}
+                  />
 
-            {/* GeoLocation - Display only if there are geolocations */}
-            <GeoLocations styles={styles}></GeoLocations>
+                  {/* GeoLocation - Display only if there are geolocations */}
+                  <GeoLocations
+                    styles={styles}
+                    setFocusedInput={setFocusedInput}
+                  ></GeoLocations>
 
-            <View style={styles.spacer}></View>
-          </ScrollView>
+                  <View style={styles.spacer}></View>
+                </>
+              </TouchableWithoutFeedback>
+            </ScrollView>
+          </KeyboardAvoidingView>
         </View>
-      </View>
-      {/* Buttons */}
-      <View style={styles.buttonsContainer}>
-        <Pressable style={styles.addMediaButton} onPress={pickImageHandler}>
-          <Text style={styles.addMediaButtonText}>Add Images</Text>
-        </Pressable>
-
-        <Pressable style={styles.addMediaButton} onPress={() => {}}>
-          <Text style={styles.addMediaButtonText}>Add GeoLocation</Text>
-        </Pressable>
       </View>
     </View>
   );
@@ -204,7 +242,7 @@ const styles = StyleSheet.create({
   },
   titleContainer: {},
   detailContentContainer: {
-    flex: 160,
+    flex: 200,
     paddingHorizontal: 0,
     verticalAlign: "top",
     justifyContent: "center",
@@ -244,11 +282,13 @@ const styles = StyleSheet.create({
   },
   noteInput: {
     flex: 1,
-    height: 100,
+    height: 80,
     borderColor: "lightgray",
     borderRadius: 20,
     padding: 10,
+    marginHorizontal: 8,
     textAlignVertical: "top",
+    borderWidth: 1,
   },
   spacer: {
     flex: 1,
@@ -300,5 +340,64 @@ const styles = StyleSheet.create({
     color: primaryColor,
     fontSize: 14,
     marginHorizontal: 8,
+  },
+  geolocContainer: {
+    flex: 1,
+    marginHorizontal: 8,
+  },
+  geolocMap: {
+    height: 250,
+    borderRadius: 20,
+  },
+  placeholderImage: {
+    flex: 1,
+    width: imageWidth,
+    height: imageWidth,
+    borderRadius: 20,
+    margin: 4,
+    justifyContent: "center",
+    alignItems: "center",
+    borderColor: primaryColor,
+    borderWidth: 1,
+  },
+  geolocInput: {
+    flex: 1,
+    borderColor: "lightgray",
+    borderWidth: 1,
+    padding: 10,
+    margin: 0,
+    borderRadius: 10,
+  },
+  addImageText: {
+    color: primaryColor,
+  },
+  geolocSerachContainer: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  geolocButtonText: {
+    color: primaryColor,
+    fontSize: 14,
+    padding: 8,
+  },
+  centeredView: {
+    flex: 1,
+  },
+  geolocLinkContainer: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: primaryColor,
+    padding: 16,
+    borderRadius: 50,
+    marginVertical: 8,
+  },
+  geolocLinkText: {
+    color: "white",
+    fontSize: 14,
   },
 });
