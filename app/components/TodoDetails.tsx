@@ -14,7 +14,7 @@ import {
   Platform,
 } from "react-native";
 import React, { useState, useRef, useEffect } from "react";
-import { TabButtons } from "./TabButtons";
+import { TapButtons } from "./TapButtons";
 import { primaryColor } from "../helpers/constants";
 import { updateTodoNotes, addImage } from "../services/db_service";
 import * as ImagePicker from "expo-image-picker";
@@ -178,8 +178,8 @@ export function TodoDetails({
 
   return (
     <View style={ styles.detailsContainer }>
-      {/* Tab Buttons */}
-      <TabButtons goToPage={goToPage} currentPage={currentPage} />
+      {/* Tap Buttons */}
+      <TapButtons goToPage={goToPage} currentPage={currentPage} />
 
       <View style={styles.detailContentContainer}>
         {/* Todo Title */}
@@ -289,6 +289,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
     textAlignVertical: "top",
     borderWidth: 1,
+    backgroundColor: "white",
   },
   spacer: {
     flex: 1,
@@ -367,6 +368,7 @@ const styles = StyleSheet.create({
     padding: 10,
     margin: 0,
     borderRadius: 10,
+    backgroundColor: "white",
   },
   addImageText: {
     color: primaryColor,

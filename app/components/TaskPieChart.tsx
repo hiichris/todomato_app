@@ -15,7 +15,7 @@ const circleRadius = 50;
 const textPositionX = circleCenter - circleRadius / 2;
 const textPositionY = circleCenter - circleRadius / 2;
 
-export function TaskPieChart({ tasks }) {
+export const TaskPieChart = ({ tasks }) => {
   const taskCount = tasks.length || 0;
   const defaultPieColor = "#FFEEE8";
 

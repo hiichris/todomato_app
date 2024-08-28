@@ -8,6 +8,21 @@ import { primaryColor } from "../helpers/constants";
 import { getTaskCount } from "../services/db_service";
 
 
+const TodoListHeader = ({ todoCount }) => {
+  return (
+    <View style={styles.listHeaderContainer}>
+      <Text style={styles.listHeaderTitle}>My to-dos</Text>
+      <Text style={styles.listHeaderDescription}>
+        { todoCount === 0 ?
+        "To add a new todo, tab the \"Add Todo\" button."
+        : "Tap on a todo to view its details."
+        }
+      </Text>
+    </View>
+
+  );
+}
+
 const fetchTaskCount = async (todoId) => {
   try {
     const count = await getTaskCount(todoId);
@@ -69,7 +84,8 @@ export function TodoItems({ todos, refreshTodos }) {
 
   useFocusEffect(
     useCallback(() => {
-      setRefresh((prev) => !prev); // Toggle the refresh state to trigger a re-fetch
+      // Toggle the refresh state to trigger a re-fetch of the task count
+      setRefresh((prev) => !prev); 
     }, [])
   );
 
@@ -87,6 +103,7 @@ export function TodoItems({ todos, refreshTodos }) {
           />
         )}
         keyExtractor={(item) => item.id.toString()}
+        ListHeaderComponent={TodoListHeader(todos.length)}
       />
     </>
   );
@@ -98,16 +115,18 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   linkContainer: {
-    marginVertical: 8,
     textAlign: "left",
     justifyContent: "flex-start",
   },
   todoListContainer: {
     width: "100%",
     flexDirection: "row",
-    padding: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 16,
     alignContent: "flex-start",
     justifyContent: "space-between",
+    borderBottomColor: "lightgray",
+    borderBottomWidth: 1,
   },
   todoIndexContainer: {
     width: 30,
@@ -131,11 +150,12 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 18,
     textAlign: "left",
-    alignContent: "flex-start",
+    alignContent: "center",
+    justifyContent: "center",
+    paddingTop: 3,
   },
   taskCountsContainer: {
     alignSelf: "flex-end",
-
     marginTop: -4,
     borderWidth: 1,
     borderRadius: 50,
@@ -146,4 +166,15 @@ const styles = StyleSheet.create({
     color: primaryColor,
     fontSize: 12,
   },
+  listHeaderContainer: {
+    margin: 16,
+  },
+  listHeaderTitle: {
+    fontSize: 36,
+    fontWeight: "bold",
+  }, 
+  listHeaderDescription: {
+    fontSize: 16,
+    color: "gray",
+  }
 });

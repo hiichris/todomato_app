@@ -12,7 +12,7 @@ import { PickerIOS } from "@react-native-picker/picker";
 import { Task } from "./models/task";
 import StackScreen from "./components/StackScreen";
 import { TaskItems } from "./components/TaskItems";
-import { TabButtons } from "./components/TabButtons";
+import { TapButtons } from "./components/TapButtons";
 import { TodoDetails } from "./components/TodoDetails";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { primaryColor } from "./helpers/constants";
@@ -179,7 +179,7 @@ export default function TodoDetailsScreen() {
                   addTaskButtonState={addTaskButtonState}
                   setAddTaskButtonState={setAddTaskButtonState}
                 />
-                <TabButtons goToPage={goToPage} currentPage={currentPage} />
+                <TapButtons goToPage={goToPage} currentPage={currentPage} />
 
                 <View style={styles.TaskItemContainer}>
 

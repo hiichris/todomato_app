@@ -11,7 +11,7 @@ import { Tasks } from "./Tasks";
 import { Link } from "expo-router";
 
 
-function ListHeaderComponent({ todoTitle, tasks }) {
+const TaskListHeader = ({ todoTitle, tasks }) => {
   return (
     <View style={styles.listHeaderContainer}>
       <Text style={styles.TodoTitle}>{todoTitle}</Text>
@@ -28,7 +28,7 @@ function ListHeaderComponent({ todoTitle, tasks }) {
   );
 }
 
-function ListFooterComponent() {
+const TaskListFooter = () => {
   return (
     <View style={styles.listFooterContainer}>
       <Text style={styles.longPressText}>
@@ -38,7 +38,7 @@ function ListFooterComponent() {
   );
 }
 
-function TaskItem({ task, index, onLongPress }) {
+const TaskItem = ({ task, index, onLongPress }) => {
 
   return (
     <GestureHandlerRootView style={styles.taskItemsContainer}>
@@ -61,7 +61,7 @@ function TaskItem({ task, index, onLongPress }) {
   )
 }
 
-function TaskList({ tasks, todoTitle, onLongPress }) {
+const TaskList = ({ tasks, todoTitle, onLongPress }) => {
   return (
     <FlatList
       style={styles.listContainer}
@@ -70,13 +70,13 @@ function TaskList({ tasks, todoTitle, onLongPress }) {
         <TaskItem task={item} index={index} onLongPress={onLongPress} />
       )}
       keyExtractor={(item) => item.id.toString()}
-      ListHeaderComponent={ListHeaderComponent({ todoTitle, tasks })}
-      ListFooterComponent={ListFooterComponent}
+      ListHeaderComponent={TaskListHeader({ todoTitle, tasks })}
+      ListFooterComponent={TaskListFooter}
     />
   )
 }
 
-export function TaskItems({ tasks, todoTitle, refreshTasks, todos }) {
+export const TaskItems = ({ tasks, todoTitle, refreshTasks, todos }) => {
 
   const onLongPress = (taskId, index) => (event: LongPressGestureHandlerStateChangeEvent) => {
     if (event.nativeEvent.state === State.ACTIVE) {
@@ -129,6 +129,7 @@ const styles = StyleSheet.create({
   },
   assignedTasksText: {
     marginBottom: 16,
+    color: "gray",
   },
   taskItemContainer: {
     flex: 1,
@@ -151,6 +152,7 @@ const styles = StyleSheet.create({
   },
   taskName: {
     flex: 4,
+    fontSize: 16,
   },
   duration: {
     flex: 1,

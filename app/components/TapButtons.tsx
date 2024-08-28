@@ -1,7 +1,7 @@
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { primaryColor } from "../helpers/constants";
 
-export function TabButtons({ goToPage, currentPage }) {
+export const TapButtons = ({ goToPage, currentPage }) => {
     return (
         <View style={styles.tabViewButtonsContainer}>
             <Pressable onPress={() => goToPage(0)}>
