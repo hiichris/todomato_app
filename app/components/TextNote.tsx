@@ -16,11 +16,13 @@ export const TextNote = ({
   updating,
   updateCompleted,
   setFocusedInput,
+  noteChanged,
+  setNoteChanged,
 }) => {
   return (
     <>
       <View style={styles.sectionContainer}>
-        <Text style={styles.detailsSectionTitle}>Something to note</Text>
+        <Text style={styles.detailsSectionTitle}>Notes</Text>
         <Pressable onPress={addUpdateTodoNotesHandler}>
           <View style={styles.noteUpdateButtonContainer}>
             <Text style={styles.noteUpdateText}>
@@ -45,15 +47,23 @@ export const TextNote = ({
       </View>
       <TextInput
         multiline
-        placeholder="Tab here and start adding your note..."
+        placeholder="Tap here and start adding your note..."
         placeholderTextColor="gray"
         style={styles.noteInput}
         value={todoNotes}
-        onFocus={() => {setFocusedInput}}
+        onFocus={() => setFocusedInput("note")}
         onChangeText={(text) => {
           setTodoNotes(text);
+          setNoteChanged(true);
         }}
       />
+      {noteChanged ? (
+        <Text style={styles.noteReminder}>
+          Don't forget to update your note!
+        </Text>
+      ) : (
+        <></>
+      )}
 
       <View style={styles.spacer}></View>
     </>

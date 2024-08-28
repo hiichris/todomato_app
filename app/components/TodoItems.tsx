@@ -7,21 +7,18 @@ import { Link, useFocusEffect } from "expo-router";
 import { primaryColor } from "../helpers/constants";
 import { getTaskCount } from "../services/db_service";
 
-
 const TodoListHeader = ({ todoCount }) => {
   return (
     <View style={styles.listHeaderContainer}>
       <Text style={styles.listHeaderTitle}>My to-dos</Text>
       <Text style={styles.listHeaderDescription}>
-        { todoCount === 0 ?
-        "To add a new todo, tab the \"Add Todo\" button."
-        : "Tap on a todo to view its details."
-        }
+        {todoCount === 0
+          ? 'To add a new todo, tab the "Add Todo" button.'
+          : "Tap on a todo to view its details."}
       </Text>
     </View>
-
   );
-}
+};
 
 const fetchTaskCount = async (todoId) => {
   try {
@@ -65,7 +62,8 @@ const TodoItem = ({ item, todos, refreshTodos, refresh }) => {
         <View style={styles.todoIndexContainer}>
           <Text style={styles.todoIndexText}>{item.index_no}</Text>
         </View>
-        <Text style={styles.todoTitle} ellipsizeMode="tail">
+        <Text style={styles.todoTitle} ellipsizeMode="tail"
+            numberOfLines={1}>
           {item.title}
         </Text>
         <View style={styles.taskCountsContainer}>
@@ -85,7 +83,7 @@ export function TodoItems({ todos, refreshTodos }) {
   useFocusEffect(
     useCallback(() => {
       // Toggle the refresh state to trigger a re-fetch of the task count
-      setRefresh((prev) => !prev); 
+      setRefresh((prev) => !prev);
     }, [])
   );
 
@@ -172,9 +170,9 @@ const styles = StyleSheet.create({
   listHeaderTitle: {
     fontSize: 36,
     fontWeight: "bold",
-  }, 
+  },
   listHeaderDescription: {
     fontSize: 16,
     color: "gray",
-  }
+  },
 });

@@ -14,6 +14,7 @@ import {
 import AddTodoModal from "./AddTodoModal";
 import { primaryColor } from "../helpers/constants";
 import AddTaskModal from "./AddTaskModal";
+import { StatusBar } from "expo-status-bar";
 
 const todoButton = (setTodoModalVisible, setImportant, setUrgent) => {
   return (
@@ -134,6 +135,7 @@ export default function StackScreen({
 
   return (
     <View style={styles.stackContainer}>
+      <StatusBar style="auto" />
       <Stack.Screen
         options={{
           title: title,

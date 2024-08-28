@@ -67,6 +67,7 @@ const setDatabaseVersion = async (db: SQLiteDatabase, version: number) => {
   }
 };
 
+// Function to migrate the database
 const migrateDatabase = async (db: SQLiteDatabase) => {
   // For flushing the version table
   // await db.execAsync("DROP TABLE IF EXISTS version;")
@@ -296,42 +297,43 @@ export const updateTodoNotes = async (
   }
 };
 
-export const deleteTodo = async (setTodos: Function, id: number) => {
-  const db: SQLiteDatabase = await openDatabase(todos_db);
+// Function to delete a todo
+// export const deleteTodo = async (setTodos: Function, id: number) => {
+//   const db: SQLiteDatabase = await openDatabase(todos_db);
 
-  // Remove all related tasks
-  const tasks = await db
-    .prepareAsync("DELETE FROM tasks where todo_id = $id")
-    .then((statement) => {
-      return statement;
-    })
-    .catch((error) => {
-      console.log("Error preparing statement", error);
-    });
-  let deleteResult;
-  try {
-    deleteResult = await tasks.executeAsync({ $id: id });
-  } finally {
-    await tasks.finalizeAsync();
-  }
+//   // Remove all related tasks
+//   const tasks = await db
+//     .prepareAsync("DELETE FROM tasks where todo_id = $id")
+//     .then((statement) => {
+//       return statement;
+//     })
+//     .catch((error) => {
+//       console.log("Error preparing statement", error);
+//     });
+//   let deleteResult;
+//   try {
+//     deleteResult = await tasks.executeAsync({ $id: id });
+//   } finally {
+//     await tasks.finalizeAsync();
+//   }
 
-  // Remove the todo
-  const statement = await db
-    .prepareAsync("DELETE FROM todos where id = $id")
-    .then((statement) => {
-      return statement;
-    })
-    .catch((error) => {
-      console.log("Error preparing statement", error);
-    });
-  let result;
-  try {
-    result = await statement.executeAsync({ $id: id });
-  } finally {
-    await statement.finalizeAsync();
-    return result;
-  }
-};
+//   // Remove the todo
+//   const statement = await db
+//     .prepareAsync("DELETE FROM todos where id = $id")
+//     .then((statement) => {
+//       return statement;
+//     })
+//     .catch((error) => {
+//       console.log("Error preparing statement", error);
+//     });
+//   let result;
+//   try {
+//     result = await statement.executeAsync({ $id: id });
+//   } finally {
+//     await statement.finalizeAsync();
+//     return result;
+//   }
+// };
 
 // TASK OPERATIONS ////
 

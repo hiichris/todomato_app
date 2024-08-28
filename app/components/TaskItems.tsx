@@ -147,12 +147,14 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     alignItems: "center",
     justifyContent: "center",
-    width: 40,
-    height: 40,
+    width: 30,
+    height: 30,
   },
   taskName: {
     flex: 4,
-    fontSize: 16,
+    fontSize: 18,
+    lineHeight: 40,
+    textAlign: "left",
   },
   duration: {
     flex: 1,

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -10,19 +10,92 @@ import {
 import { useState, useRef } from "react";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
+import { getGeolocation, updateGeolocation } from "../services/db_service";
 
-export const GeoLocations = ({ styles, setFocusedInput }) => {
+export const GeoLocations = ({ styles, setFocusedInput, todoId }) => {
   const [marker, setMarker] = useState(null);
   const [address, setAddress] = useState("");
   const mapRef = useRef(null);
+  const [searchingLocation, setSearchingLocation] = useState(false);
+  const [savedAddress, setSavedAddress] = useState("");
+  const defaultLatDelta = 0.0012;
+  const defaultLongDelta = 0.0121;
   const [region, setRegion] = useState({
     latitude: 37.78825,
     longitude: -122.4324,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
+    latitudeDelta: defaultLatDelta,
+    longitudeDelta: defaultLongDelta,
   });
 
+  useEffect(() => {
+    getGeolocationFromDB(todoId);
+  }, [todoId]);
+
+  const updateRegionAndMarker = (latitude: number, longitude: number) => {
+    setMarker({
+      latitude: latitude,
+      longitude: longitude,
+    });
+    const newRegion = {
+      latitude: latitude,
+      longitude: longitude,
+      latitudeDelta: defaultLatDelta,
+      longitudeDelta: defaultLongDelta,
+    };
+    mapRef.current?.animateToRegion(newRegion, 1000);
+    setRegion(newRegion);
+  };
+
+  const getGeolocationFromDB = async (todoId: number) => {
+    console.log("todoId: ", todoId);
+    const location = await getGeolocation(todoId);
+    const locationArray = location["geolocation"].split("|");
+    const parsedAddress = locationArray[0];
+    const latitude = parseFloat(locationArray[1]);
+    const longitude = parseFloat(locationArray[2]);
+    if (latitude && longitude) {
+      updateRegionAndMarker(latitude, longitude);
+    }
+    console.log("Addres: ", parsedAddress);
+    setAddress(parsedAddress);
+    setSavedAddress(parsedAddress);
+  };
+
+  const updateGeolocationToDB = async (todoId: number, geolocation: string) => {
+    console.log("updating geolocation: ", geolocation);
+    await updateGeolocation(todoId, geolocation)
+      .then(() => {
+        console.log("Geolocation updated");
+      })
+      .catch((error) => {
+        console.error("Error updating geolocation: ", error);
+      });
+  };
+
+  // Get the address info from the database
+  const getLocation = async () => {
+    try {
+      const location = await getLocation(todoId);
+      console.log("location:", location);
+      if (location) {
+        setAddress(location.address);
+        updateRegionAndMarker(location.latitude, location.longitude);
+      }
+    } catch (error) {
+      console.error("Error getting geolocation:", error);
+    }
+  };
+
+  const disableSearching = () => {
+    setTimeout(() => {
+      setSearchingLocation(false);
+    }, 200);
+
+    setAddress("");
+  };
+
   const findCoordinates = async () => {
+    setSearchingLocation(true);
     try {
       let geocode = await Location.geocodeAsync(address);
       if (geocode.length > 0) {
@@ -30,16 +103,34 @@ export const GeoLocations = ({ styles, setFocusedInput }) => {
         const newRegion = {
           latitude: latitude,
           longitude: longitude,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
+          latitudeDelta: defaultLatDelta,
+          longitudeDelta: defaultLongDelta,
         };
         mapRef.current?.animateToRegion(newRegion, 1000);
         setRegion(newRegion);
         setMarker({ latitude: latitude, longitude: longitude });
         console.log("Geocode:", { latitude, longitude });
+
+        // Save the geolocation to the database
+        const geolocation = `${address}|${latitude}|${longitude}`;
+        console.log("geolocation:", geolocation);
+        await updateGeolocationToDB(todoId, geolocation);
+        setSavedAddress(address);
+
+        disableSearching();
+      } else {
+        console.log("No geocode found");
+        disableSearching();
       }
     } catch (error) {
       console.error("Error getting geolocation:", error);
+      disableSearching();
+    }
+  };
+
+  const handleKeyPress = ({ nativeEvent }) => {
+    if (nativeEvent.key === "Enter") {
+      findCoordinates();
     }
   };
 
@@ -50,20 +141,55 @@ export const GeoLocations = ({ styles, setFocusedInput }) => {
       </View>
 
       <View style={styles.geolocContainer}>
+        {marker || savedAddress != "" ? (
+          <Pressable
+            style={styles.geolocLinkContainer}
+            onPress={() => {
+              const latitude = region.latitude;
+              const longitude = region.longitude;
+              const mapUrl = Platform.select({
+                ios: `http://maps.apple.com/?q=${latitude},${longitude}`,
+                android: `geo:${latitude},${longitude}?q=${latitude},${longitude}`,
+              });
+              console.log("mapUrl:", mapUrl);
+              Linking.openURL(mapUrl);
+            }}
+          >
+            <Text style={styles.geolocLinkText}>Open in Maps</Text>
+          </Pressable>
+        ) : (
+          <></>
+        )}
+        {/* if savedAddress != "" then display the following */}
+        {savedAddress != "" && (
+          <View style={styles.savedGeolocationContainer}>
+            <Text
+              style={styles.savedGeoLocationText}
+              ellipsizeMode="tail"
+              numberOfLines={1}
+            >
+              Last Pinned: {savedAddress}
+            </Text>
+          </View>
+        )}
         <View style={styles.geolocSerachContainer}>
           <TextInput
             onFocus={() => setFocusedInput("map")}
             placeholder="Enter a location or address..."
             placeholderTextColor={"gray"}
             onChangeText={(text) => setAddress(text)}
+            onKeyPress={handleKeyPress}
+            onSubmitEditing={findCoordinates}
+            returnKeyType="search"
             value={address}
             style={styles.geolocInput}
           />
           <Pressable onPress={findCoordinates} style={styles.geolocButton}>
-            <Text style={styles.geolocButtonText}>Find Location</Text>
+            <Text style={styles.geolocButtonText}>
+              {searchingLocation ? "Searching..." : " 🔍 "}
+            </Text>
           </Pressable>
         </View>
-
         <MapView
           region={region}
           onRegionChangeComplete={(region) => setRegion(region)}
@@ -80,24 +206,6 @@ export const GeoLocations = ({ styles, setFocusedInput }) => {
             />
           )}
         </MapView>
-
-        {marker && (
-          <Pressable
-            style={styles.geolocLinkContainer}
-            onPress={() => {
-              const latitude = region.latitude;
-              const longitude = region.longitude;
-              const mapUrl = Platform.select({
-                ios: `http://maps.apple.com/?q=${latitude},${longitude}`,
-                android: `geo:${latitude},${longitude}?q=${latitude},${longitude}`,
-              });
-              console.log("mapUrl:", mapUrl);
-              Linking.openURL(mapUrl);
-            }}
-          >
-            <Text style={styles.geolocLinkText}>Open in Maps</Text>
-          </Pressable>
-        )}
       </View>
     </>
   );

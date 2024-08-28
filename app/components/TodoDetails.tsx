@@ -46,6 +46,7 @@ export function TodoDetails({
   const scrollViewKeyboardRef = useRef();
   const [contentWidth, setContentWidth] = useState(0);
   const [focusedInput, setFocusedInput] = useState(null);
+  const [noteChanged, setNoteChanged] = useState(false);
 
   const handleContentSizeChange = (contentWidth, contentHeight) => {
     setContentWidth(contentWidth);
@@ -79,12 +80,29 @@ export function TodoDetails({
           keyboardDidShowListener.remove();
         };
       }
+      if (focusedInput === "note") {
+        const keyboardDidShowListener = Keyboard.addListener(
+          "keyboardDidShow",
+          () => {
+            // Scroll to the bottom of the ScrollView when the keyboard is shown
+            setTimeout(() => {
+              scrollViewKeyboardRef.current?.scrollTo({y: 0, animated: true});
+            }, 100);
+          });
+        return () => {
+          setFocusedInput(null);
+          keyboardDidShowListener.remove();
+        };
+      }
     }
   }, [scrollToEnd, focusedInput]);
 
   const addUpdateTodoNotesHandler = () => {
     // Set updating to true and stay for 2 seconds
     setUpdating(true);
+
+    // Set note changed to false so the reminder disappears
+    setNoteChanged(false);
 
     // Update the note
     updateTodoNotes(setTodoNotes, todoId, todoNotes)
@@ -184,7 +202,7 @@ export function TodoDetails({
       <View style={styles.detailContentContainer}>
         {/* Todo Title */}
         <View style={styles.titleContainer}>
-          <Text style={styles.TodoTitle} ellipsizeMode="tail">
+          <Text style={styles.TodoTitle} ellipsizeMode="tail" numberOfLines={2}>
             {todoTitle}
           </Text>
         </View>
@@ -207,6 +225,8 @@ export function TodoDetails({
                     updating={updating}
                     updateCompleted={updateCompleted}
                     setFocusedInput={setFocusedInput}
+                    noteChanged={noteChanged}
+                    setNoteChanged={setNoteChanged}
                   />
 
                   {/* Images - Display only if there are images */}
@@ -222,6 +242,7 @@ export function TodoDetails({
                   <GeoLocations
                     styles={styles}
                     setFocusedInput={setFocusedInput}
+                    todoId={todoId}
                   ></GeoLocations>
 
                   <View style={styles.spacer}></View>
@@ -240,7 +261,8 @@ const styles = StyleSheet.create({
     flex: 5,
     padding: 8,
   },
-  titleContainer: {},
+  titleContainer: {
+  },
   detailContentContainer: {
     flex: 200,
     paddingHorizontal: 0,
@@ -251,10 +273,11 @@ const styles = StyleSheet.create({
     flex: 80,
   },
   TodoTitle: {
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: "bold",
-    margin: 16,
-    height: 90,
+    margin: 8,
+    marginHorizontal: 10,
+    height: 50,
     verticalAlign: "top",
   },
   sectionContainer: {
@@ -282,18 +305,18 @@ const styles = StyleSheet.create({
   },
   noteInput: {
     flex: 1,
-    height: 80,
+    fontSize: 16,
+    height: 70,
     borderColor: "lightgray",
     borderRadius: 20,
-    padding: 10,
+    padding: 16,
     marginHorizontal: 8,
     textAlignVertical: "top",
-    borderWidth: 1,
     backgroundColor: "white",
   },
   spacer: {
     flex: 1,
-    height: 40,
+    height: 50,
   },
   buttonsContainer: {
     flex: 40,
@@ -341,6 +364,15 @@ const styles = StyleSheet.create({
     color: primaryColor,
     fontSize: 14,
     marginHorizontal: 8,
+  },
+  noteReminder: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+    color: "gray",
+    marginVertical: 8,
   },
   geolocContainer: {
     flex: 1,
@@ -393,13 +425,25 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: primaryColor,
+    borderColor: primaryColor,
+    borderWidth: 1,
     padding: 16,
     borderRadius: 50,
     marginVertical: 8,
+    marginTop: 0,
+    marginBottom: 20,
   },
   geolocLinkText: {
-    color: "white",
+    color: primaryColor,
     fontSize: 14,
+  },
+  savedGeolocationContainer: {
+    flex: 1,
+    flexDirection: "row",
+  },
+  savedGeoLocationText: {
+    color: "gray",
+    fontSize: 14,
+    padding: 2,
   },
 });

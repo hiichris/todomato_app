@@ -4,21 +4,39 @@ import {
   useRouter,
   useNavigation,
 } from "expo-router";
-import { View, Text, StyleSheet, Button, TextInput, FlatList, ScrollView, AppRegistry, Image, Dimensions, useWindowDimensions, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Button,
+  TextInput,
+  FlatList,
+  ScrollView,
+  AppRegistry,
+  Image,
+  Dimensions,
+  useWindowDimensions,
+  Pressable,
+} from "react-native";
 import { useEffect, useState, useRef } from "react";
 import { useSQLiteContext, SQLiteProvider } from "expo-sqlite";
-import { getAllTasks, addNewTask, deleteTodo, getImages } from "./services/db_service";
+import {
+  getAllTasks,
+  addNewTask,
+  deleteTodo,
+  getImages,
+} from "./services/db_service";
 import { PickerIOS } from "@react-native-picker/picker";
 import { Task } from "./models/task";
 import StackScreen from "./components/StackScreen";
 import { TaskItems } from "./components/TaskItems";
 import { TapButtons } from "./components/TapButtons";
 import { TodoDetails } from "./components/TodoDetails";
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { primaryColor } from "./helpers/constants";
-import PagerView from 'react-native-pager-view';
+import PagerView from "react-native-pager-view";
 import * as Notifications from "expo-notifications";
-import 'react-native-gesture-handler';
+import "react-native-gesture-handler";
 
 /* 
   Image Reference and Credits:
@@ -26,7 +44,16 @@ import 'react-native-gesture-handler';
 
 */
 
-function NoAssignedTasks({ todoTitle, params, refreshTasks, scheduleNotification, addTodoButtonState, setAddTodoButtonState, addTaskButtonState, setAddTaskButtonState }) {
+function NoAssignedTasks({
+  todoTitle,
+  params,
+  refreshTasks,
+  scheduleNotification,
+  addTodoButtonState,
+  setAddTodoButtonState,
+  addTaskButtonState,
+  setAddTaskButtonState,
+}) {
   return (
     <View style={styles.noAssignedTaskContainer}>
       <Stack.Screen
@@ -49,15 +76,16 @@ function NoAssignedTasks({ todoTitle, params, refreshTasks, scheduleNotification
       <Text style={styles.noTextAssignText}>
         Currently, there are no assigned tasks for
       </Text>
-      <Text style={styles.noTextAssignText}>
-        "{todoTitle}"
-      </Text>
+      <Text style={styles.noTextAssignText}>"{todoTitle}"</Text>
       <Text style={styles.noTextAssignDescText}>
         Press the Add Task button to add a new task.
       </Text>
-      <Image style={styles.notFoundImage} source={require('../assets/images/not_found.png')} />
+      <Image
+        style={styles.notFoundImage}
+        source={require("../assets/images/not_found.png")}
+      />
     </View>
-  )
+  );
 }
 
 export default function TodoDetailsScreen() {
@@ -138,83 +166,99 @@ export default function TodoDetailsScreen() {
     const images = await getImages(todoId);
     console.log("Images refr: ", images);
     setImages(images);
-  }
+  };
 
   const refreshTasks = async () => {
     console.log("refreshTasks...");
     await getAllTasks(setTasks, parseInt(params.id));
-  }
+  };
 
   const refreshTodos = async () => {
     console.log("refreshTodos...");
     await getTodos(params.setTodos);
-  }
+  };
 
   const handlePageSelected = (event) => {
     event.persist();
+
     setCurrentPage(event.nativeEvent.position);
-  }
+    if (event.nativeEvent.position === 0) {
+      setAddTodoButtonState(false);
+      setAddTaskButtonState(true);
+    } else {
+      setAddTodoButtonState(false);
+      setAddTaskButtonState(false);
+    }
+  };
 
   return (
     <>
-      {
-        tasks.length > 0 ?
-          <PagerView style={styles.pagerViewContainer} initialPage={0} ref={pagerRef} onPageSelected={handlePageSelected}>
-            <View key="1">
-              <GestureHandlerRootView style={styles.container}>
-                <Stack.Screen
-                  options={{
-                    title: "",
-                  }}
-                ></Stack.Screen>
-                <StackScreen
-                  title={params.title.substring(0, 10)}
-                  todoId={params.id}
-                  setTodos={params.setTodos}
-                  refreshTodos={params.refreshTodos}
-                  refreshTasks={refreshTasks}
-                  scheduleNotification={scheduleNotification}
-                  addTodoButtonState={addTodoButtonState}
-                  setAddTodoButtonState={setAddTodoButtonState}
-                  addTaskButtonState={addTaskButtonState}
-                  setAddTaskButtonState={setAddTaskButtonState}
-                />
-                <TapButtons goToPage={goToPage} currentPage={currentPage} />
-
-                <View style={styles.TaskItemContainer}>
-
-                  <TaskItems tasks={tasks} todoTitle={params.title} refreshTasks={refreshTasks} />
-                </View>
-
-                <View style={styles.SpaceContainer}></View>
-              </GestureHandlerRootView>
-            </View>
-            <View key="2">
-              <TodoDetails 
-                goToPage={goToPage} 
-                currentPage={currentPage} 
-                todoTitle={params.title} 
-                todoNotes={todoNotes}
-                setTodoNotes={setTodoNotes}
+      {tasks.length > 0 ? (
+        <PagerView
+          style={styles.pagerViewContainer}
+          initialPage={0}
+          ref={pagerRef}
+          onPageSelected={handlePageSelected}
+        >
+          <View key="1">
+            <GestureHandlerRootView style={styles.container}>
+              <Stack.Screen
+                options={{
+                  title: "",
+                }}
+              ></Stack.Screen>
+              <StackScreen
+                title={params.title.substring(0, 10)}
                 todoId={params.id}
-                params={params}
-                images={images}
-                setImages={setImages}
-                refreshImages={refreshImages}
+                setTodos={params.setTodos}
+                refreshTodos={params.refreshTodos}
+                refreshTasks={refreshTasks}
+                scheduleNotification={scheduleNotification}
+                addTodoButtonState={addTodoButtonState}
+                setAddTodoButtonState={setAddTodoButtonState}
+                addTaskButtonState={addTaskButtonState}
+                setAddTaskButtonState={setAddTaskButtonState}
               />
-            </View>
-          </PagerView>
-          : <NoAssignedTasks
-            todoTitle={params.title}
-            params={params}
-            refreshTasks={refreshTasks}
-            scheduleNotification={scheduleNotification}
-            addTodoButtonState={addTodoButtonState}
-            setAddTodoButtonState={setAddTodoButtonState}
-            addTaskButtonState={addTaskButtonState}
-            setAddTaskButtonState={setAddTaskButtonState}
-          />
-      }
+              <TapButtons goToPage={goToPage} currentPage={currentPage} />
+
+              <View style={styles.TaskItemContainer}>
+                <TaskItems
+                  tasks={tasks}
+                  todoTitle={params.title}
+                  refreshTasks={refreshTasks}
+                />
+              </View>
+
+              <View style={styles.SpaceContainer}></View>
+            </GestureHandlerRootView>
+          </View>
+          <View key="2">
+            <TodoDetails
+              goToPage={goToPage}
+              currentPage={currentPage}
+              todoTitle={params.title}
+              todoNotes={todoNotes}
+              setTodoNotes={setTodoNotes}
+              todoId={params.id}
+              params={params}
+              images={images}
+              setImages={setImages}
+              refreshImages={refreshImages}
+            />
+          </View>
+        </PagerView>
+      ) : (
+        <NoAssignedTasks
+          todoTitle={params.title}
+          params={params}
+          refreshTasks={refreshTasks}
+          scheduleNotification={scheduleNotification}
+          addTodoButtonState={addTodoButtonState}
+          setAddTodoButtonState={setAddTodoButtonState}
+          addTaskButtonState={addTaskButtonState}
+          setAddTaskButtonState={setAddTaskButtonState}
+        />
+      )}
     </>
   );
 }
@@ -223,7 +267,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 8,
-
   },
   pagerViewContainer: {
     flex: 1,
@@ -279,7 +322,4 @@ const styles = StyleSheet.create({
     height: Dimensions.get("window").width / 2,
     alignSelf: "center",
   },
-
-
-
 });
