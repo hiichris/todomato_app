@@ -177,7 +177,7 @@ export function TodoDetails({
   };
 
   return (
-    <View style={styles.detailsContainer}>
+    <View style={ styles.detailsContainer }>
       {/* Tab Buttons */}
       <TabButtons goToPage={goToPage} currentPage={currentPage} />
 
@@ -303,7 +303,7 @@ const styles = StyleSheet.create({
   },
   detailsSectionTitle: {
     flex: 5,
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: "bold",
   },
   pickerContainer: {

@@ -365,6 +365,15 @@ export const addNewTask = async (
   }
 };
 
+export const getTaskCount = async (todo_id: number) => {
+  const db: SQLiteDatabase = await openDatabase(todos_db);
+  const query = "SELECT count(*) as count FROM tasks WHERE todo_id = $todo_id";
+  const result = await db.getFirstAsync<{ count: number }>(query, {
+    $todo_id: todo_id,
+  });
+  return result?.count || 0;
+};
+
 export const deleteTask = async (setTasks: Function, task_id: number) => {
   const db: SQLiteDatabase = await openDatabase(todos_db);
   const statement = await db.prepareAsync("DELETE FROM tasks where id = $id");
