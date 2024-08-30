@@ -69,14 +69,8 @@ const setDatabaseVersion = async (db: SQLiteDatabase, version: number) => {
 
 // Function to migrate the database
 const migrateDatabase = async (db: SQLiteDatabase) => {
-  // For flushing the version table
-  // await db.execAsync("DROP TABLE IF EXISTS version;")
-  // await db.execAsync("DROP TABLE IF EXISTS todos;")
-  // await db.execAsync("DROP TABLE IF EXISTS tasks;")
-  // await db.execAsync("DROP TABLE IF EXISTS images;")
-
   // Get the current database version
-  const currentVersion = await getDatabaseVersion(db);
+  let currentVersion = await getDatabaseVersion(db);
   console.log("Current database version: ", currentVersion);
 
   // If the current version is 0, create the tables, insert some sample data
@@ -96,6 +90,9 @@ const migrateDatabase = async (db: SQLiteDatabase) => {
       console.log("Error dropping todos table", error);
     });
     await db.execAsync("DROP TABLE IF EXISTS version;").catch((error) => {
+      console.log("Error dropping version table", error);
+    });
+    await db.execAsync("DROP TABLE IF EXISTS images;").catch((error) => {
       console.log("Error dropping version table", error);
     });
 
@@ -126,6 +123,7 @@ const migrateDatabase = async (db: SQLiteDatabase) => {
       CREATE TABLE IF NOT EXISTS tasks (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
+        scheduled_at DATETIME DEFAULT NULL,
         duration INTEGER DEFAULT 15,
         todo_id INTEGER,
         index_no INTEGER DEFAULT 0,
@@ -246,6 +244,7 @@ const migrateDatabase = async (db: SQLiteDatabase) => {
       .catch((error) => {
         console.log("Error creating table todos", error);
       });
+    currentVersion = 1;
   }
 };
 
@@ -297,43 +296,42 @@ export const updateTodoNotes = async (
   }
 };
 
-// Function to delete a todo
-// export const deleteTodo = async (setTodos: Function, id: number) => {
-//   const db: SQLiteDatabase = await openDatabase(todos_db);
+//Function to delete a todo
+export const deleteTodo = async (todo_id: number) => {
+  const db: SQLiteDatabase = await openDatabase(todos_db);
 
-//   // Remove all related tasks
-//   const tasks = await db
-//     .prepareAsync("DELETE FROM tasks where todo_id = $id")
-//     .then((statement) => {
-//       return statement;
-//     })
-//     .catch((error) => {
-//       console.log("Error preparing statement", error);
-//     });
-//   let deleteResult;
-//   try {
-//     deleteResult = await tasks.executeAsync({ $id: id });
-//   } finally {
-//     await tasks.finalizeAsync();
-//   }
+  // Delete all related images
+  const delete_images_statement = await db.prepareAsync(
+    "DELETE FROM images where todo_id = $todo_id"
+  );
+  let result;
+  try {
+    result = await delete_images_statement.executeAsync({ $todo_id: todo_id });
+  } finally {
+    await delete_images_statement.finalizeAsync();
+  }
 
-//   // Remove the todo
-//   const statement = await db
-//     .prepareAsync("DELETE FROM todos where id = $id")
-//     .then((statement) => {
-//       return statement;
-//     })
-//     .catch((error) => {
-//       console.log("Error preparing statement", error);
-//     });
-//   let result;
-//   try {
-//     result = await statement.executeAsync({ $id: id });
-//   } finally {
-//     await statement.finalizeAsync();
-//     return result;
-//   }
-// };
+  // Delete all related tasks
+  const delete_tasks_statement = await db.prepareAsync(
+    "DELETE FROM tasks where todo_id = $todo_id"
+  );
+  try {
+    result = await delete_tasks_statement.executeAsync({ $todo_id: todo_id });
+  } finally {
+    await delete_tasks_statement.finalizeAsync();
+  }
+
+  // Finally, delete the todo record
+  const delete_todo_statement = await db.prepareAsync(
+    "DELETE FROM todos where id = $todo_id"
+  );
+  try {
+    result = await delete_todo_statement.executeAsync({ $todo_id: todo_id });
+  } finally {
+    await delete_todo_statement.finalizeAsync();
+    return result;
+  }
+};
 
 // TASK OPERATIONS ////
 

@@ -44,50 +44,6 @@ import "react-native-gesture-handler";
 
 */
 
-function NoAssignedTasks({
-  todoTitle,
-  params,
-  refreshTasks,
-  scheduleNotification,
-  addTodoButtonState,
-  setAddTodoButtonState,
-  addTaskButtonState,
-  setAddTaskButtonState,
-}) {
-  return (
-    <View style={styles.noAssignedTaskContainer}>
-      <Stack.Screen
-        options={{
-          title: "",
-        }}
-      ></Stack.Screen>
-      <StackScreen
-        title={params.title.substring(0, 10)}
-        todoId={params.id}
-        setTodos={params.setTodos}
-        refreshTodos={params.refreshTodos}
-        refreshTasks={refreshTasks}
-        scheduleNotification={scheduleNotification}
-        addTodoButtonState={addTodoButtonState}
-        setAddTodoButtonState={setAddTodoButtonState}
-        addTaskButtonState={addTaskButtonState}
-        setAddTaskButtonState={setAddTaskButtonState}
-      />
-      <Text style={styles.noTextAssignText}>
-        Currently, there are no assigned tasks for
-      </Text>
-      <Text style={styles.noTextAssignText}>"{todoTitle}"</Text>
-      <Text style={styles.noTextAssignDescText}>
-        Press the Add Task button to add a new task.
-      </Text>
-      <Image
-        style={styles.notFoundImage}
-        source={require("../assets/images/not_found.png")}
-      />
-    </View>
-  );
-}
-
 export default function TodoDetailsScreen() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const params = useLocalSearchParams();
@@ -149,12 +105,18 @@ export default function TodoDetailsScreen() {
     };
   }, []);
 
-  const scheduleNotification = async (taskName: string, duration: number) => {
+  const scheduleNotification = async (
+    taskName: string,
+    duration: number,
+    titleType = ""
+  ) => {
     console.log("Scheduling notification...", taskName, duration);
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: "Todomado",
-        body: "Times Up: " + taskName,
+        title: titleType,
+        body: taskName,
+        sound: true,
+        icon: require("../assets/icons/notification-icon.png"),
       },
       trigger: {
         seconds: parseInt(duration),
@@ -191,74 +153,67 @@ export default function TodoDetailsScreen() {
     }
   };
 
+  let strippedTitle = params.title;
+  if (params.title.length > 26) {
+   strippedTitle = params.title.substring(0, 26) + "...";
+  }
+
   return (
     <>
-      {tasks.length > 0 ? (
-        <PagerView
-          style={styles.pagerViewContainer}
-          initialPage={0}
-          ref={pagerRef}
-          onPageSelected={handlePageSelected}
-        >
-          <View key="1">
-            <GestureHandlerRootView style={styles.container}>
-              <Stack.Screen
-                options={{
-                  title: "",
-                }}
-              ></Stack.Screen>
-              <StackScreen
-                title={params.title.substring(0, 10)}
-                todoId={params.id}
-                setTodos={params.setTodos}
-                refreshTodos={params.refreshTodos}
-                refreshTasks={refreshTasks}
-                scheduleNotification={scheduleNotification}
-                addTodoButtonState={addTodoButtonState}
-                setAddTodoButtonState={setAddTodoButtonState}
-                addTaskButtonState={addTaskButtonState}
-                setAddTaskButtonState={setAddTaskButtonState}
-              />
-              <TapButtons goToPage={goToPage} currentPage={currentPage} />
-
-              <View style={styles.TaskItemContainer}>
-                <TaskItems
-                  tasks={tasks}
-                  todoTitle={params.title}
-                  refreshTasks={refreshTasks}
-                />
-              </View>
-
-              <View style={styles.SpaceContainer}></View>
-            </GestureHandlerRootView>
-          </View>
-          <View key="2">
-            <TodoDetails
-              goToPage={goToPage}
-              currentPage={currentPage}
-              todoTitle={params.title}
-              todoNotes={todoNotes}
-              setTodoNotes={setTodoNotes}
+      <PagerView
+        style={styles.pagerViewContainer}
+        initialPage={0}
+        ref={pagerRef}
+        onPageSelected={handlePageSelected}
+      >
+        <View key="1">
+          <GestureHandlerRootView style={styles.container}>
+            <Stack.Screen
+              options={{
+                title: "",
+              }}
+            ></Stack.Screen>
+            <StackScreen
+              title={strippedTitle}
               todoId={params.id}
-              params={params}
-              images={images}
-              setImages={setImages}
-              refreshImages={refreshImages}
+              setTodos={params.setTodos}
+              refreshTodos={params.refreshTodos}
+              refreshTasks={refreshTasks}
+              scheduleNotification={scheduleNotification}
+              addTodoButtonState={addTodoButtonState}
+              setAddTodoButtonState={setAddTodoButtonState}
+              addTaskButtonState={addTaskButtonState}
+              setAddTaskButtonState={setAddTaskButtonState}
             />
-          </View>
-        </PagerView>
-      ) : (
-        <NoAssignedTasks
-          todoTitle={params.title}
-          params={params}
-          refreshTasks={refreshTasks}
-          scheduleNotification={scheduleNotification}
-          addTodoButtonState={addTodoButtonState}
-          setAddTodoButtonState={setAddTodoButtonState}
-          addTaskButtonState={addTaskButtonState}
-          setAddTaskButtonState={setAddTaskButtonState}
-        />
-      )}
+            <TapButtons goToPage={goToPage} currentPage={currentPage} />
+
+            <View style={styles.TaskItemContainer}>
+              <TaskItems
+                tasks={tasks}
+                todoTitle={params.title}
+                refreshTasks={refreshTasks}
+              />
+            </View>
+
+            <View style={styles.SpaceContainer}></View>
+          </GestureHandlerRootView>
+        </View>
+        <View key="2">
+          <TodoDetails
+            goToPage={goToPage}
+            currentPage={currentPage}
+            todoTitle={params.title}
+            todoNotes={todoNotes}
+            setTodoNotes={setTodoNotes}
+            todoId={params.id}
+            params={params}
+            images={images}
+            setImages={setImages}
+            refreshImages={refreshImages}
+            navigation={navigation}
+          />
+        </View>
+      </PagerView>
     </>
   );
 }
@@ -301,25 +256,5 @@ const styles = StyleSheet.create({
   },
   TaskItemContainer: {
     height: "94.5%",
-  },
-  noAssignedTaskContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    height: "100%",
-  },
-  noTextAssignText: {
-    color: primaryColor,
-    textAlign: "center",
-    fontWeight: "bold",
-  },
-  noTextAssignDescText: {
-    color: "gray",
-    textAlign: "center",
-    paddingVertical: 16,
-  },
-  notFoundImage: {
-    width: Dimensions.get("window").width / 2,
-    height: Dimensions.get("window").width / 2,
-    alignSelf: "center",
   },
 });

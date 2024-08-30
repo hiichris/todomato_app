@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   linkContainer: {
-    textAlign: "left",
+    textAlign: "center",
     justifyContent: "flex-start",
   },
   todoListContainer: {

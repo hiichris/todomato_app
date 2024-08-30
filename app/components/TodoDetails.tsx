@@ -12,11 +12,12 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   Platform,
+  Alert,
 } from "react-native";
 import React, { useState, useRef, useEffect } from "react";
 import { TapButtons } from "./TapButtons";
 import { primaryColor } from "../helpers/constants";
-import { updateTodoNotes, addImage } from "../services/db_service";
+import { updateTodoNotes, addImage, deleteTodo } from "../services/db_service";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import { ThumbnailImages } from "./ThumbnailImages";
@@ -38,6 +39,7 @@ export function TodoDetails({
   images,
   setImages,
   refreshImages,
+  navigation,
 }) {
   const [updating, setUpdating] = useState(false);
   const [updateCompleted, setUpdateCompleted] = useState(false);
@@ -86,9 +88,10 @@ export function TodoDetails({
           () => {
             // Scroll to the bottom of the ScrollView when the keyboard is shown
             setTimeout(() => {
-              scrollViewKeyboardRef.current?.scrollTo({y: 0, animated: true});
+              scrollViewKeyboardRef.current?.scrollTo({ y: 0, animated: true });
             }, 100);
-          });
+          }
+        );
         return () => {
           setFocusedInput(null);
           keyboardDidShowListener.remove();
@@ -180,7 +183,7 @@ export function TodoDetails({
     const pickerResult = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [16, 9],
+      aspect: [1, 1],
       quality: 1,
     });
 
@@ -194,8 +197,42 @@ export function TodoDetails({
     saveImage(pickerResult.assets[0].uri);
   };
 
+  const deleteTodoHandler = async () => {
+    // Confirm if the user really wants to delete the todo
+    Alert.alert(
+      "Delete Todo",
+      "Are you sure you want to delete this todo?",
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: () => {
+            console.log("Deleting todo: ", todoId);
+            console.log("navigation: ", navigation)
+            // Update the note
+            deleteTodo(todoId)
+              .then((result) => {
+                setTimeout(() => {
+                  // Go back to the previous page
+                  navigation.pop();
+                }, 100);
+              })
+              .catch((error) => {
+                console.log("Delete Todo Error: ", error);
+              });
+          },
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
   return (
-    <View style={ styles.detailsContainer }>
+    <View style={styles.detailsContainer}>
       {/* Tap Buttons */}
       <TapButtons goToPage={goToPage} currentPage={currentPage} />
 
@@ -245,6 +282,15 @@ export function TodoDetails({
                     todoId={todoId}
                   ></GeoLocations>
 
+                  <View style={styles.deleteButtonContainer}>
+                    <Pressable
+                      style={styles.deleteButton}
+                      onPress={deleteTodoHandler}
+                    >
+                      <Text style={styles.deleteButtonText}>Delete Todo</Text>
+                    </Pressable>
+                  </View>
+
                   <View style={styles.spacer}></View>
                 </>
               </TouchableWithoutFeedback>
@@ -261,8 +307,7 @@ const styles = StyleSheet.create({
     flex: 5,
     padding: 8,
   },
-  titleContainer: {
-  },
+  titleContainer: {},
   detailContentContainer: {
     flex: 200,
     paddingHorizontal: 0,
@@ -306,13 +351,14 @@ const styles = StyleSheet.create({
   noteInput: {
     flex: 1,
     fontSize: 16,
-    height: 70,
+    height: 90,
     borderColor: "lightgray",
     borderRadius: 20,
     padding: 16,
     marginHorizontal: 8,
     textAlignVertical: "top",
     backgroundColor: "white",
+    borderWidth: 1,
   },
   spacer: {
     flex: 1,
@@ -445,5 +491,26 @@ const styles = StyleSheet.create({
     color: "gray",
     fontSize: 14,
     padding: 2,
+  },
+  deleteButtonContainer: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 40,
+  },
+  deleteButton: {
+    flex: 1,
+    backgroundColor: "red",
+    borderRadius: 50,
+    padding: 16,
+    marginVertical: 8,
+    textAlign: "center",
+  },
+  deleteButtonText: {
+    color: "red",
+    fontSize: 16,
+    textAlign: "center",
+    color: "white",
   },
 });

@@ -18,6 +18,9 @@ import { Link } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { primaryColor } from "../helpers/constants";
 import { addNewTask } from "../services/db_service";
+import { ToDoDateTimePicker } from "./TodoDateTimePicker";
+import { RadioButton } from "./RadioButton";
+import moment from "moment";
 
 export default function AddTaskModal({
   modalVisible,
@@ -30,10 +33,13 @@ export default function AddTaskModal({
   const [taskName, setTaskName] = React.useState("");
   const [duration, setDuration] = React.useState(5);
   const scrollViewRef = useRef(null);
+  const durationInterval = [5, 15, 20, 30, 60];
+  const [selectedStartOption, setSelectedStartOption] = useState("now");
+  const [selectedDate, setSelectedDate] = useState("");
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
-      'keyboardDidShow',
+      "keyboardDidShow",
       () => {
         // Scroll to the bottom of the ScrollView when the keyboard is shown
         scrollViewRef.current?.scrollToEnd({ animated: true });
@@ -45,9 +51,102 @@ export default function AddTaskModal({
     };
   }, []);
 
+  const getTimeDifferenceInSeconds = (
+    dateString: string,
+    inputFormat: string = "MMM D YYYY, h:mm A"
+  ) => {
+    // If the date is empty, set it to today's date
+    if (dateString === "" || dateString === null) {
+      dateString = moment(new Date()).format(inputFormat);
+    }
+    // Convert the selected date with today's date and convert it in seconds
+    const currentDate = new Date();
+    const selectedDateObject = moment(dateString, inputFormat).toDate();
+    const differenceInMilliseconds =
+      new Date(selectedDateObject).getTime() - currentDate.getTime();
+    const differenceInSeconds = Math.floor(differenceInMilliseconds / 1000);
+
+    return differenceInSeconds;
+  };
+
+  const addNewTaskHandler = async () => {
+    console.log(
+      "taskName: ",
+      taskName,
+      "Duration: ",
+      duration,
+      "todoID: ",
+      todoId
+    );
+
+    // Validate the input
+    if (taskName === "") {
+      Alert.alert("Task name cannot be empty!");
+      return;
+    }
+
+    if (duration < 1) {
+      Alert.alert("Duration must be greater than 0!");
+      return;
+    }
+    // Add the task to the database
+    addNewTask(setTasks, todoId, taskName, duration)
+      .then((result) => {
+        console.log("result: ", result);
+        refreshTasks();
+      })
+      .catch((error) => {
+        console.log("addNewTask Error: ", error);
+      });
+
+    // Clear the fields back to default
+    setTaskName("");
+    setDuration(5);
+
+    // Get the difference in seconds from selected date
+    const differenceInSeconds = getTimeDifferenceInSeconds(selectedDate);
+    console.log("differenceInSeconds: ", differenceInSeconds);
+
+    console.log("seelctedstartoption ", selectedStartOption);
+
+    // If the user selected "schedule" option, we will have to schedule the notification based on the selected date and time. Then scheduel another notification after the duration ends.
+    if (selectedStartOption === "scheduled") {
+      // Schedule the 1st reminder notification
+      scheduleNotification(taskName, differenceInSeconds, "Reminder")
+        .then((result) => {
+          console.log(
+            "Reminder notification scheduled in " +
+              differenceInSeconds +
+              " seconds!",
+            result
+          );
+        })
+        .catch((error) => {
+          console.log("Error scheduling reminder notification: ", error);
+        });
+    }
+
+    let alaramDuration = differenceInSeconds + duration * 60;
+
+    // Schedule the alarm notification
+    scheduleNotification(taskName, alaramDuration, "Times up!")
+      .then((result) => {
+        console.log(
+          "Alarm notification scheduled in " + alaramDuration + " seconds!",
+          result
+        );
+        Alert.alert("Task scheduled successfully!🎉");
+      })
+      .catch((error) => {
+        console.log("Error scheduling alram notification: ", error);
+      });
+
+    // Close the modal
+    setModalVisible(!modalVisible);
+  };
+
   return (
     <SafeAreaView>
-
       <Modal
         animationType="slide"
         transparent={true}
@@ -61,10 +160,12 @@ export default function AddTaskModal({
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.centeredView}
         >
-          <ScrollView style={styles.centeredView} ref={scrollViewRef} keyboardShouldPersistTaps="always">
-
+          <ScrollView
+            style={styles.centeredView}
+            ref={scrollViewRef}
+            keyboardShouldPersistTaps="always"
+          >
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-
               <View style={styles.modalView}>
                 <View style={styles.modalHeaderContainer}>
                   <Text style={styles.headerText}>Create Task</Text>
@@ -83,75 +184,97 @@ export default function AddTaskModal({
                       onChangeText={setTaskName}
                       value={taskName}
                     />
-                    <Text>  </Text>
+                    <Text> </Text>
                   </View>
-                  <View style={styles.inputContiner}>
-                    <Text style={styles.modalText}>Duration(sec):</Text>
-                    <TextInput
-                      style={styles.modalTextInput}
-                      onChangeText={setDuration}
-                      value={duration.toString()}
-                    />
 
-                    <Text>  </Text>
+                  <View style={styles.inputContiner}>
+                    <Text style={styles.modalText}>Start From:</Text>
+                    <View style={styles.inputGroupContainer}>
+                      <RadioButton
+                        selected={selectedStartOption === "now"}
+                        onPress={() => setSelectedStartOption("now")}
+                        label="Now"
+                      />
+                      <RadioButton
+                        selected={selectedStartOption === "scheduled"}
+                        onPress={() => setSelectedStartOption("scheduled")}
+                        label="Scheduled"
+                      />
+                    </View>
+                    <Text> </Text>
                   </View>
+
+                  {selectedStartOption === "scheduled" && (
+                    <View style={styles.inputContiner}>
+                      <Text style={styles.modalText}>Notify On:</Text>
+                      <ToDoDateTimePicker
+                        selectedDate={selectedDate}
+                        setSelectedDate={setSelectedDate}
+                      />
+                    </View>
+                  )}
+
+                  <View style={styles.inputContiner}>
+                    <Text style={styles.modalText}>Duration (min):</Text>
+                    <View style={styles.inputGroupContainer}>
+                      {durationInterval.map((number) => (
+                        <Pressable
+                          key={number}
+                          style={({ pressed }) => [
+                            styles.durationButton,
+                            {
+                              backgroundColor: pressed
+                                ? "orange"
+                                : duration === parseInt(number)
+                                ? "#de2500"
+                                : "white",
+                            },
+                          ]}
+                          onPress={() => setDuration(parseInt(number))}
+                        >
+                          <Text
+                            key={number}
+                            style={[
+                              styles.durationText,
+                              {
+                                color:
+                                  duration === parseInt(number)
+                                    ? "white"
+                                    : primaryColor,
+                              },
+                            ]}
+                          >
+                            {number}
+                          </Text>
+                        </Pressable>
+                      ))}
+                    </View>
+                  </View>
+
+                  {/* <View style={styles.instructionContainer}>
+                    <Text style={styles.instructionText}>
+                      💡
+                      {selectedStartOption === "scheduled" &&
+                        "A reminder notification will be sent at the scheduled time. \n"}
+                      Once the duration ends, an notification will be sent.
+                    </Text>
+                  </View> */}
 
                   <View style={styles.buttonsContainer}>
                     <Pressable
                       style={[styles.button, styles.buttonCreate]}
-                      onPress={() => {
-                        console.log("taskName: ", taskName, "Duration: ", duration, "todoID: ", todoId);
-
-                        // Validate the input
-                        if (taskName === "") {
-                          Alert.alert("Task name cannot be empty!");
-                          return;
-                        }
-
-                        if (duration < 1) {
-                          Alert.alert("Duration must be greater than 0!");
-                          return;
-                        }
-
-                        addNewTask(setTasks, todoId, taskName, parseInt(duration))
-                          .then((result) => {
-                            console.log("result: ", result);
-                            refreshTasks();
-                          })
-                          .catch((error) => {
-                            console.log("addNewTask Error: ", error);
-                          }
-                          );
-
-                        // Clear the fields back to default
-                        setTaskName("");
-                        setDuration(5);
-
-                        // Schedule notification
-                        scheduleNotification(taskName, duration)
-                          .then((result) => {
-                            console.log("Notification scheduled!", result);
-                          }
-                          ).catch((error) => {
-                            console.log("Error scheduling notification: ", error);
-                          });
-
-                        // Close the modal
-                        setModalVisible(!modalVisible);
-                      }}
+                      onPress={addNewTaskHandler}
                     >
-                      <Text style={styles.textStyle}>Create</Text>
+                      <Text style={styles.createButtonContainer}>Create</Text>
                     </Pressable>
                   </View>
                 </View>
                 <View style={{ flexGrow: 2 }}></View>
               </View>
-
             </TouchableWithoutFeedback>
           </ScrollView>
         </KeyboardAvoidingView>
       </Modal>
-
     </SafeAreaView>
   );
 }
@@ -174,6 +297,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 5,
     elevation: 5,
+    justifyContent: "space-evenly",
   },
   buttonsContainer: {
     margin: 8,
@@ -189,23 +313,28 @@ const styles = StyleSheet.create({
   },
   buttonCreate: {
     backgroundColor: "#B2361B",
-    borderColor: "white",
+    borderColor: primaryColor,
     borderWidth: 1,
+    width: "100%",
   },
-  textStyle: {
+  createButtonContainer: {
     color: "white",
     fontWeight: "bold",
     textAlign: "center",
     fontSize: 16,
+    padding: 8,
   },
   modalText: {
     flex: 2,
     textAlign: "center",
     color: "white",
+    fontSize: 14,
+    fontWeight: "bold",
   },
   modalTextInput: {
     flex: 4,
     height: 40,
+    fontSize: 14,
     width: Dimensions.get("window").width - 32,
     borderColor: "white",
     borderWidth: 1,
@@ -215,24 +344,30 @@ const styles = StyleSheet.create({
     color: "white",
   },
   inputContiner: {
+    flex: 1,
     flexDirection: "row",
-    justifyContent: "center",
     alignItems: "center",
+    textAlign: "left",
+  },
+  inputGroupContainer: {
+    flex: 4,
+    flexDirection: "row",
+    justifyContent: "space-evenly",
   },
   modalHeaderContainer: {
-    flex: 1,
+    flex: 2,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
   },
   modalBodyContainer: {
-    flex: 8,
+    flex: 50,
     justifyContent: "flex-start",
     alignItems: "center",
   },
   headerText: {
     color: "white",
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
     marginTop: -38,
   },
@@ -252,5 +387,27 @@ const styles = StyleSheet.create({
     width: 13,
     textAlign: "center",
   },
-
+  durationButton: {
+    borderRadius: 50,
+    width: 30,
+    height: 30,
+    textAlign: "center",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "white",
+  },
+  durationText: {
+    color: primaryColor,
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+  instructionContainer: {
+    fontSize: 10,
+    textAlign: "center",
+  },
+  instructionText: {
+    color: "white",
+    marginTop: 8,
+    textAlign: "center",
+  },
 });

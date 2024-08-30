@@ -135,7 +135,6 @@ export default function StackScreen({
 
   return (
     <View style={styles.stackContainer}>
-      <StatusBar style="auto" />
       <Stack.Screen
         options={{
           title: title,
@@ -164,7 +163,6 @@ export default function StackScreen({
 const styles = StyleSheet.create({
   naviButton: {
     color: primaryColor,
-    marginRight: 10,
   },
   stackContainer: {
     height: 0,

@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import React, { useEffect } from "react";
 import {
   View,
@@ -6,11 +7,18 @@ import {
   Linking,
   Pressable,
   Platform,
+  Alert,
 } from "react-native";
 import { useState, useRef } from "react";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { getGeolocation, updateGeolocation } from "../services/db_service";
+import Geocoder from "react-native-geocoding";
+
+const googleMapsApiKey = Constants.expoConfig?.extra.googleMapsApiKey;
+
+// Init the Geocoder
+Geocoder.init(googleMapsApiKey);
 
 export const GeoLocations = ({ styles, setFocusedInput, todoId }) => {
   const [marker, setMarker] = useState(null);
@@ -18,8 +26,8 @@ export const GeoLocations = ({ styles, setFocusedInput, todoId }) => {
   const mapRef = useRef(null);
   const [searchingLocation, setSearchingLocation] = useState(false);
   const [savedAddress, setSavedAddress] = useState("");
-  const defaultLatDelta = 0.0012;
-  const defaultLongDelta = 0.0121;
+  const defaultLatDelta = 0.0002;
+  const defaultLongDelta = 0.0021;
   const [region, setRegion] = useState({
     latitude: 37.78825,
     longitude: -122.4324,
@@ -57,7 +65,6 @@ export const GeoLocations = ({ styles, setFocusedInput, todoId }) => {
       updateRegionAndMarker(latitude, longitude);
     }
     console.log("Addres: ", parsedAddress);
-    setAddress(parsedAddress);
     setSavedAddress(parsedAddress);
   };
 
@@ -121,6 +128,18 @@ export const GeoLocations = ({ styles, setFocusedInput, todoId }) => {
       } else {
         console.log("No geocode found");
         disableSearching();
+        Alert.alert(
+          "⚠️ Not Found",
+          "The location or address you entered was not found. Please try again.",
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                console.log("OK Pressed");
+              },
+            },
+          ]
+        );
       }
     } catch (error) {
       console.error("Error getting geolocation:", error);
@@ -134,10 +153,33 @@ export const GeoLocations = ({ styles, setFocusedInput, todoId }) => {
     }
   };
 
+  const markerDragEndHandler = async (event) => {
+    const newCoords = event.nativeEvent.coordinate;
+    setMarker(newCoords);
+
+    // Reverse geocode to get the address
+    try {
+      const response = await Geocoder.from(
+        newCoords.latitude,
+        newCoords.longitude
+      );
+      const newAddress = response.results[0].formatted_address;
+      setAddress(newAddress);
+      setSavedAddress(newAddress);
+
+      // Save the geolocation to the database
+      const geolocation = `${newAddress}|${newCoords.latitude}|${newCoords.longitude}`;
+      console.log("Pinned geolocation updated:", geolocation);
+      await updateGeolocationToDB(todoId, geolocation);
+    } catch (error) {
+      console.error("Error reverse geocoding:", error);
+    }
+  };
+
   return (
     <>
       <View style={styles.sectionContainer}>
-        <Text style={styles.detailsSectionTitle}>Something to pin</Text>
+        <Text style={styles.detailsSectionTitle}>Somewhere to pin</Text>
       </View>
 
       <View style={styles.geolocContainer}>
@@ -175,7 +217,7 @@ export const GeoLocations = ({ styles, setFocusedInput, todoId }) => {
         <View style={styles.geolocSerachContainer}>
           <TextInput
             onFocus={() => setFocusedInput("map")}
-            placeholder="Enter a location or address..."
+            placeholder="Enter a location & drag the pin..."
             placeholderTextColor={"gray"}
             onChangeText={(text) => setAddress(text)}
             onKeyPress={handleKeyPress}
@@ -201,8 +243,10 @@ export const GeoLocations = ({ styles, setFocusedInput, todoId }) => {
           {marker && (
             <Marker
               coordinate={marker}
-              title="📍 Selected Location"
+              title="📍 Pinned Location"
               description={address}
+              draggable
+              onDragEnd={markerDragEndHandler}
             />
           )}
         </MapView>
