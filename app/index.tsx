@@ -10,7 +10,6 @@
   - Update README.md
 */
 
-
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -28,9 +27,10 @@ import { initializeDatabase, getTodos } from "./services/db_service";
 import { TodoItems } from "./components/TodoItems";
 import StackScreen from "./components/StackScreen";
 import { Todo } from "./models/todo";
-import { useIsFocused } from '@react-navigation/native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { name as appName } from './app.json';
+import { useIsFocused } from "@react-navigation/native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { name as appName } from "./app.json";
+import { TodoSearchBar } from "./components/TodoSearchBar";
 
 /*
   Image Reference and Credits:
@@ -54,11 +54,12 @@ export default function HomeScreen() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [addTodoButtonState, setAddTodoButtonState] = useState(true);
   const [addTaskButtonState, setAddTaskButtonState] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const refreshTodos = async () => {
     console.log("Refreshing todos");
-    await getTodos(setTodos);
-  }
+    await getTodos(setTodos, searchQuery);
+  };
 
   useEffect(() => {
     const initDB = async () => {
@@ -66,7 +67,11 @@ export default function HomeScreen() {
       refreshTodos();
     };
     initDB();
-  }, []);
+
+    if (searchQuery.length > 0) {
+      refreshTodos();
+    }
+  }, [searchQuery]);
 
   useFocusEffect(() => {
     refreshTodos();
@@ -83,9 +88,11 @@ export default function HomeScreen() {
         addTaskButtonState={addTaskButtonState}
         setAddTaskButtonState={setAddTaskButtonState}
       />
-
+      <TodoSearchBar
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+      />
       <View style={styles.container}>
-
         <TodoItems todos={todos} refreshTodos={refreshTodos} />
       </View>
     </GestureHandlerRootView>
@@ -95,6 +102,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginTop: -10,
   },
   tasksContainer: {
     flex: 10,
@@ -103,5 +111,9 @@ const styles = StyleSheet.create({
   naviButton: {
     color: "red",
     marginRight: 10,
+  },
+  serachContainer: {
+    padding: 20,
+    flexDirection: "row",
   },
 });

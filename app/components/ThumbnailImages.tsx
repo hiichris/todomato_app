@@ -40,7 +40,7 @@ export const ThumbnailImages = ({
             })}
           {/* Add a placeholder image */}
           <Pressable style={styles.placeholderImage} onPress={pickImageHandler}>
-            <Text style={styles.addImageText}>Tab to Add New Image</Text>
+            <Text style={styles.addImageText}>Tap to Add New Image</Text>
           </Pressable>
         </View>
       </ScrollView>

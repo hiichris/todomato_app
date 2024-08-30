@@ -255,11 +255,21 @@ export const initializeDatabase = async () => {
 
 // TODO OPERATIONS ////
 
-export const getTodos = async (setTodos: Function) => {
+export const getTodos = async (setTodos: Function, keyword = "") => {
   const db: SQLiteDatabase = await openDatabase(todos_db);
-  const query = "SELECT * FROM todos order by index_no asc";
-  const todos = await db.getAllAsync<Todo>(query);
-  setTodos(todos);
+
+  if (keyword.length > 0) {
+    const query =
+      "SELECT * FROM todos WHERE title LIKE $keyword order by index_no asc";
+    const todos = await db.getAllAsync<Todo>(query, {
+      $keyword: `%${keyword}%`,
+    });
+    setTodos(todos);
+  } else {
+    const query = "SELECT * FROM todos order by index_no asc";
+    const todos = await db.getAllAsync<Todo>(query);
+    setTodos(todos);
+  }
 };
 
 export const addNewTodo = async (setTodos: Function, title: string) => {
