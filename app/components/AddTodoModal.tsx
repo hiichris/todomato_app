@@ -20,9 +20,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { primaryColor } from "../helpers/constants";
 import { addNewTodo } from "../services/db_service";
 import { SQLiteProvider } from "expo-sqlite";
-import { migrateDbIfNeeded, getAllTodos } from "../services/db_service";
 import { Todo } from "../models/todo";
-
 
 export default function AddTodoModal({
   modalVisible,
@@ -35,7 +33,7 @@ export default function AddTodoModal({
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
-      'keyboardDidShow',
+      "keyboardDidShow",
       () => {
         // Scroll to the bottom of the ScrollView when the keyboard is shown
         scrollViewRef.current?.scrollToEnd({ animated: true });
@@ -47,81 +45,91 @@ export default function AddTodoModal({
     };
   }, []);
 
+  const createTodoHandler = async () => {
+    if (todoTitle === "") {
+      Alert.alert("Todo Title is required");
+      return;
+    }
+
+    addNewTodo(setTodos, todoTitle)
+      .then((result) => {
+        console.log("result: ", result);
+        refreshTodos();
+      })
+      .catch((error) => {
+        console.log("Error: ", error);
+      });
+
+    // Clear the todoTitle
+    setTodoTitle("");
+
+    setModalVisible(!modalVisible);
+  };
+
   return (
-      <SafeAreaView>
-      
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => {
-            Alert.alert("Modal has been closed.");
-            setModalVisible(!modalVisible);
-          }}
+    <SafeAreaView>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          Alert.alert("Modal has been closed.");
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.centeredView}
         >
-           <KeyboardAvoidingView
-              behavior={Platform.OS === "ios" ? "padding" : "height"}
-              style={styles.centeredView}
-            >
-            <ScrollView style={styles.centeredView} ref={scrollViewRef} keyboardShouldPersistTaps="always" >
-            
-              <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              
-                <View style={styles.modalView}>
-                  <View style={styles.modalHeaderContainer}>
-                    <Text style={styles.headerText}>Create Todo</Text>
+          <ScrollView
+            style={styles.centeredView}
+            ref={scrollViewRef}
+            keyboardShouldPersistTaps="always"
+          >
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+              <View style={styles.modalView}>
+                <View style={styles.modalHeaderContainer}>
+                  <Text style={styles.headerText}>Create Todo</Text>
+                  <Pressable
+                    style={styles.closeCirleButton}
+                    onPress={() => setModalVisible(!modalVisible)}
+                  >
+                    <Text style={styles.closeCircleText}>X</Text>
+                  </Pressable>
+                </View>
+                <View style={styles.modalBodyContainer}>
+                  <View style={styles.inputContiner}>
+                    <Text style={styles.modalText}>Todo Title:</Text>
+                    <TextInput
+                      style={styles.modalTextInput}
+                      onChangeText={setTodoTitle}
+                      value={todoTitle}
+                      returnKeyType="create"
+                      onSubmitEditing={createTodoHandler}
+                    />
+                    <Text> </Text>
+                  </View>
+
+                  <View style={styles.buttonsContainer}>
                     <Pressable
-                      style={styles.closeCirleButton}
-                      onPress={() => setModalVisible(!modalVisible)}
+                      style={[styles.button, styles.buttonCreate]}
+                      onPress={() => {
+                        console.log("todoTitle: ", todoTitle);
+
+                        createTodoHandler();
+                      }}
                     >
-                      <Text style={styles.closeCircleText}>X</Text>
+                      <Text style={styles.textStyle}>Create</Text>
                     </Pressable>
                   </View>
-                  <View style={styles.modalBodyContainer}>
-                    <View style={styles.inputContiner}>
-                      <Text style={styles.modalText}>Todo Title:</Text>
-                      <TextInput
-                        style={styles.modalTextInput}
-                        onChangeText={setTodoTitle}
-                        value={todoTitle}
-                      />
-                      <Text>  </Text>
-                    </View>
-
-                    <View style={styles.buttonsContainer}>
-                      <Pressable
-                        style={[styles.button, styles.buttonCreate]}
-                        onPress={() => {
-                          console.log("todoTitle: ", todoTitle);
-
-                          addNewTodo(setTodos, todoTitle)
-                            .then((result) => {
-                              console.log("result: ", result);
-                              refreshTodos();
-                            })
-                            .catch((error) => {
-                              console.log("Error: ", error);
-                            });
-
-                          // Clear the todoTitle
-                          setTodoTitle("");
-
-                          setModalVisible(!modalVisible);
-                        }}
-                      >
-                        <Text style={styles.textStyle}>Create</Text>
-                      </Pressable>
-                    </View>
-                  </View>
-                  <View style={{ flexGrow: 2 }}></View>
                 </View>
-               
-              </TouchableWithoutFeedback>
-            </ScrollView>
-            </KeyboardAvoidingView>
-        </Modal>
-     
-      </SafeAreaView>
+                <View style={{ flexGrow: 2 }}></View>
+              </View>
+            </TouchableWithoutFeedback>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </Modal>
+    </SafeAreaView>
   );
 }
 
@@ -143,6 +151,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 5,
     elevation: 5,
+    justifyContent: "space-evenly",
   },
   buttonsContainer: {
     margin: 8,
@@ -158,8 +167,8 @@ const styles = StyleSheet.create({
   },
   buttonCreate: {
     backgroundColor: "#B2361B",
-    borderColor: "white",
-    borderWidth: 1,
+    borderColor: primaryColor,
+    width: "100%",
   },
   textStyle: {
     color: "white",
@@ -171,6 +180,8 @@ const styles = StyleSheet.create({
     flex: 2,
     textAlign: "center",
     color: "white",
+    fontSize: 14,
+    fontWeight: "bold",
   },
   modalTextInput: {
     flex: 4,
@@ -189,19 +200,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalHeaderContainer: {
-    flex: 1,
+    flex: 2,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
   },
   modalBodyContainer: {
-    flex: 8,
+    flex: 50,
     justifyContent: "flex-start",
     alignItems: "center",
   },
   headerText: {
     color: "white",
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
     marginTop: -38,
   },
@@ -221,5 +232,4 @@ const styles = StyleSheet.create({
     width: 13,
     textAlign: "center",
   },
-
 });

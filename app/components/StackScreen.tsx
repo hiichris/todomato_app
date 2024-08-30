@@ -14,6 +14,7 @@ import {
 import AddTodoModal from "./AddTodoModal";
 import { primaryColor } from "../helpers/constants";
 import AddTaskModal from "./AddTaskModal";
+import { StatusBar } from "expo-status-bar";
 
 const todoButton = (setTodoModalVisible, setImportant, setUrgent) => {
   return (
@@ -126,7 +127,8 @@ export default function StackScreen({
   var headerRightComponent = () => {
     if (addTodoButtonState) {
       return todoButton(setTodoModalVisible, setImportant, setUrgent);
-    } else if (addTaskButtonState) {
+    }
+    if (addTaskButtonState) {
       return taskButton(setTaskModalVisible);
     }
   };
@@ -161,7 +163,6 @@ export default function StackScreen({
 const styles = StyleSheet.create({
   naviButton: {
     color: primaryColor,
-    marginRight: 10,
   },
   stackContainer: {
     height: 0,

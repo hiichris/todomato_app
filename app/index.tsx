@@ -1,3 +1,16 @@
+/*
+  TODO:
+  - Ensures that the app is working on both iOS and Android devices
+  - Run with flushed database
+  - Run depcheck for unused dependencies
+  - Remove unused imports
+  - Remove unused code
+  - Publish expo app using ens for demo
+  - Add comments to the code
+  - Update README.md
+*/
+
+
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -22,12 +35,9 @@ import { name as appName } from './app.json';
 /*
   Image Reference and Credits:
   splash.png - <a href="https://www.flaticon.com/free-icons/tomato" title="tomato icons">Tomato icons created by Flat Icons Design - Flaticon</a>
-
-
 */
 
-
-LogBox.ignoreAllLogs();
+// LogBox.ignoreAllLogs();
 
 function useFocusEffect(callback: () => void) {
   // Ref: https://reactnavigation.org/docs/use-is-focused/
@@ -43,7 +53,7 @@ function useFocusEffect(callback: () => void) {
 export default function HomeScreen() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [addTodoButtonState, setAddTodoButtonState] = useState(true);
-  const [addTaskButtonState, setAddTaskButtonState] = useState(true);
+  const [addTaskButtonState, setAddTaskButtonState] = useState(false);
 
   const refreshTodos = async () => {
     console.log("Refreshing todos");
@@ -56,7 +66,7 @@ export default function HomeScreen() {
       refreshTodos();
     };
     initDB();
-  }, []); 
+  }, []);
 
   useFocusEffect(() => {
     refreshTodos();
@@ -78,14 +88,13 @@ export default function HomeScreen() {
 
         <TodoItems todos={todos} refreshTodos={refreshTodos} />
       </View>
-      </GestureHandlerRootView>
+    </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
   },
   tasksContainer: {
     flex: 10,
