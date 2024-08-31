@@ -45,28 +45,27 @@ const TodoItem = ({ item, todos, refreshTodos, refresh }) => {
   }, [item.id, refresh]);
 
   return (
-    <Link
-    style={styles.linkContainer}
-        href={{
-          pathname: "/todo_details",
-          params: {
-            title: item.title,
-            id: item.id,
-            todos: todos,
-            todoNotes: item.notes,
-            refreshTodos: refreshTodos,
-          },
-        }}
-      >
     <View style={styles.todoItemsContainer}>
       <View style={styles.todoIndexContainer}>
         <Text>{item.id + 1}</Text>
       </View>
-
+      <Link
+      style={styles.linkContainer}
+          href={{
+            pathname: "/todo_details",
+            params: {
+              title: item.title,
+              id: item.id,
+              todos: todos,
+              todoNotes: item.notes,
+              refreshTodos: refreshTodos,
+            },
+          }}
+        >
       <Text style={styles.todoTitle} ellipsizeMode="tail" numberOfLines={2}>
         {item.title}
       </Text>
-    
+      </Link>
       <View style={styles.taskCountsContainer}>
 
           <Text style={styles.taskCountText}>
@@ -75,7 +74,6 @@ const TodoItem = ({ item, todos, refreshTodos, refresh }) => {
         
       </View>
     </View>
-    </Link>
   );
 };
 
