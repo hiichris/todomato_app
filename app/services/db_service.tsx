@@ -195,7 +195,8 @@ const migrateDatabase = async (db: SQLiteDatabase, version: number = -1) => {
       CREATE TABLE IF NOT EXISTS categories (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         color TEXT DEFAULT "",
-        name TEXT DEFAULT ""
+        name TEXT DEFAULT "",
+        is_fav INTEGER DEFAULT 0
       );
     `
       )
@@ -209,13 +210,13 @@ const migrateDatabase = async (db: SQLiteDatabase, version: number = -1) => {
     //Insert sample categories
     await db
       .execAsync(
-        `INSERT INTO categories (color, name) VALUES 
-        ('#009f95', 'Personal'),
-        ('#4682B4', 'Study'),
-        ('#FF6347', 'Family'),
-        ('#6e9f00', 'Shopping'),
-        ('#4169E1', 'Work'),
-        ('#808080', 'Others');`
+        `INSERT INTO categories (color, name, is_fav) VALUES 
+        ('#009f95', 'Personal', 1),
+        ('#4682B4', 'Study', 1),
+        ('#FF6347', 'Family', 1),
+        ('#6e9f00', 'Shopping', 0),
+        ('#4169E1', 'Work', 0),
+        ('#808080', 'Others', 0);`
       )
       .then(() => {
         console.log("Sample categories inserted");
@@ -332,10 +333,16 @@ export const getTodos = async (setTodos: Function, keyword = "") => {
   // Additional query to filter by keyword
   let additional_query = "";
   if (keyword.length > 0) {
-    additional_query = `WHERE t.title LIKE '%${keyword}%'`; 
+    additional_query = `WHERE (t.title LIKE '%${keyword}%' OR (c.name LIKE '%${keyword}%'))`;
   }
-  const query =
-    `SELECT t.id, t.title, t.notes, t.attachment, t.geolocation, t.category_id, t.index_no, c.name as 'category_name', c.color as 'category_color' FROM todos t LEFT JOIN categories c ON t.category_id == c.id ${additional_query} ORDER BY index_no asc`;
+
+  const query = `SELECT t.id, t.title, t.notes, t.attachment, t.geolocation, t.category_id, 
+    t.index_no, c.name as 'category_name', c.color as 'category_color',
+    CASE WHEN t.notes IS "" THEN 0 ELSE 1 END as 'has_notes',
+    (SELECT count(*) FROM images WHERE todo_id = t.id) as 'image_count',
+    CASE WHEN t.geolocation IS "" THEN 0 ELSE 1 END as 'has_geolocation'
+    FROM todos t LEFT JOIN categories c ON t.category_id == c.id 
+    ${additional_query} ORDER BY index_no asc`;
   const todos = await db.getAllAsync<Todo>(query);
   setTodos(todos);
 };

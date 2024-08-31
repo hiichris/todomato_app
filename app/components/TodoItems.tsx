@@ -6,6 +6,7 @@ import { Todo } from "../models/todo";
 import { Link, useFocusEffect, useRouter } from "expo-router";
 import { primaryColor } from "../helpers/constants";
 import { getTaskCount } from "../services/db_service";
+import Icon from "react-native-vector-icons/FontAwesome";
 
 const TodoListHeader = ({ todoCount }) => {
   return (
@@ -60,28 +61,51 @@ const TodoItem = ({ index, item, todos, refreshTodos, refresh }) => {
 
   return (
     <Pressable
-      style={styles.todoItemsContainer}
+      style={({pressed}) => [
+        styles.todoItemsContainer,
+        {
+          backgroundColor: pressed ? "lightgray" : "transparent",
+        }
+      ]
+      }
       onPress={routingTodoDetailHandler}
     >
-      {/* <View style={styles.todoIndexContainer}>
-        <Text style={styles.todoIndexText}>{index + 1}</Text>
-      </View> */}
       <View style={styles.titleContainer}>
         <Text style={styles.todoTitle} ellipsizeMode="tail" numberOfLines={2}>
           {item.title}
         </Text>
-        <View
-          style={[
-            styles.categoryContainer,
-            {
-              backgroundColor:
-                item.category_color === null
-                  ? "transparent"
-                  : item.category_color,
-            },
-          ]}
-        >
-          <Text style={styles.categoryText}>{item.category_name}</Text>
+
+        <View style={styles.subSectionContainer}>
+          <View
+            style={[
+              styles.categoryContainer,
+              {
+                backgroundColor:
+                  item.category_color === null
+                    ? "transparent"
+                    : item.category_color,
+              },
+            ]}
+          >
+            <Text style={styles.categoryText}>{item.category_name}</Text>
+          </View>
+          <View style={styles.attributesContainer}>
+            
+            <View style={styles.attributeContainer}>
+            <Icon name="sticky-note" style={styles.attributeIcon} color="gray" />
+              <Text style={styles.attributeText}>{item.has_notes}</Text>
+            </View>
+            
+            <View style={styles.attributeContainer}>
+            <Icon name="image" style={styles.attributeIcon} color="gray" />
+              <Text style={styles.attributeText}>{item.image_count}</Text>
+            </View>
+
+            <View style={styles.attributeContainer}>
+            <Icon name="map-pin" style={styles.attributeIcon} color="gray" />
+              <Text style={styles.attributeText}>{item.has_geolocation}</Text>
+            </View>
+          </View>
         </View>
       </View>
       {/* </Link> */}
@@ -95,7 +119,6 @@ const TodoItem = ({ index, item, todos, refreshTodos, refresh }) => {
 };
 
 export function TodoItems({ todos, refreshTodos }) {
-  const [taskCount, setTaskCount] = useState(null);
   const [refresh, setRefresh] = useState(false);
 
   useFocusEffect(
@@ -164,11 +187,12 @@ const styles = StyleSheet.create({
   todoTitle: {
     fontSize: 18,
     textAlign: "left",
-    alignContent: "center",
+    alignContent: "space-between",
     justifyContent: "center",
     padding: 0,
     margin: 0,
     marginRight: 8,
+    height: 45,
   },
   taskCountsContainer: {
     flex: 2,
@@ -195,13 +219,36 @@ const styles = StyleSheet.create({
     color: "gray",
   },
   categoryContainer: {
-    marginTop: 4,
     width: 80,
     borderRadius: 20,
+  },
+  subSectionContainer: {
+    justifyContent: "flex-start",
+    alignContent: "center",
+    flexDirection: "row",
   },
   categoryText: {
     fontSize: 10,
     color: "white",
     textAlign: "center",
   },
+  attributesContainer: {
+    flexDirection: "row",
+    marginRight: 4,
+  },
+  attributeIcon: {
+    fontSize: 12,
+    marginHorizontal: 4,
+  },
+  attributeContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 4,
+  },
+  attributeText: {
+    fontSize: 10,
+    color: "gray",
+    fontWeight: "bold",
+
+  }
 });

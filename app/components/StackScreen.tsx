@@ -15,6 +15,7 @@ import AddTodoModal from "./AddTodoModal";
 import { primaryColor } from "../helpers/constants";
 import AddTaskModal from "./AddTaskModal";
 import { StatusBar } from "expo-status-bar";
+import Icon from "react-native-vector-icons/FontAwesome";
 
 const todoButton = (setTodoModalVisible, setImportant, setUrgent) => {
   return (
@@ -107,17 +108,21 @@ const taskButton = (setTaskModalVisible) => {
   );
 };
 
-const settingsButton = ({gotoSettingsScreen}) => {
+const settingsButton = ({ gotoSettingsScreen }) => {
   return (
     <Pressable
       onPress={() => {
         gotoSettingsScreen();
       }}
     >
-      <Text style={styles.naviButton}>  ⚙️  </Text>
+      <Icon
+        name="cog"
+        style={[styles.naviButton, { paddingHorizontal: 4 }]}
+        size={24}
+      />
     </Pressable>
   );
-}
+};
 
 export default function StackScreen({
   title,
@@ -148,10 +153,10 @@ export default function StackScreen({
 
   let headerLeftComponent = () => {
     if (addTodoButtonState && !addTaskButtonState) {
-      return settingsButton({gotoSettingsScreen});
+      return settingsButton({ gotoSettingsScreen });
     }
     return;
-  }
+  };
 
   return (
     <View style={styles.stackContainer}>
@@ -184,6 +189,7 @@ export default function StackScreen({
 const styles = StyleSheet.create({
   naviButton: {
     color: primaryColor,
+    paddingVertical: 6,
   },
   stackContainer: {
     height: 0,

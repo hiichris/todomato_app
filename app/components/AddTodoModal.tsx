@@ -59,6 +59,8 @@ export default function AddTodoModal({
       return;
     }
 
+    console.log("Todo Title: ", todoTitle, "selectedCategory: ", selectedCategory);
+
     addNewTodo(setTodos, todoTitle, selectedCategory)
       .then((result) => {
         console.log("result: ", result);
@@ -79,6 +81,14 @@ export default function AddTodoModal({
     const dbCategories = await getCategories();
     console.log("dbCategories: ", dbCategories);
     setCategories(dbCategories);
+  };
+
+  const onFocusHandler = () => {
+    if (selectedCategory === null) {
+      Alert.alert("Please select a category first!");
+      Keyboard.dismiss();
+      return;
+    }
   };
 
   return (
@@ -138,7 +148,7 @@ export default function AddTodoModal({
                                       selectedCategory === category.id
                                         ? "#B2361B"
                                         : "white",
-                                  }
+                                  },
                                 ]}
                                 onPress={() => setSelectedCategory(category.id)}
                               >
@@ -158,6 +168,7 @@ export default function AddTodoModal({
                     <TextInput
                       style={styles.modalTextInput}
                       onChangeText={setTodoTitle}
+                      onFocus={onFocusHandler}
                       value={todoTitle}
                       returnKeyType="create"
                       numberOfLines={2}
@@ -171,11 +182,7 @@ export default function AddTodoModal({
                   <View style={styles.buttonsContainer}>
                     <Pressable
                       style={[styles.button, styles.buttonCreate]}
-                      onPress={() => {
-                        console.log("todoTitle: ", todoTitle);
-
-                        createTodoHandler();
-                      }}
+                      onPress={createTodoHandler}
                     >
                       <Text style={styles.createButtonText}>Create</Text>
                     </Pressable>
@@ -328,5 +335,5 @@ const styles = StyleSheet.create({
   },
   spacer: {
     height: 100,
-  }
+  },
 });

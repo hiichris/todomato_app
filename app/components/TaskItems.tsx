@@ -10,6 +10,7 @@ import {
 } from "react-native-gesture-handler";
 import { TaskPieChart } from "./TaskPieChart";
 import { NoAssignedTasks } from "./NoAssignTasks";
+import Icon from "react-native-vector-icons/FontAwesome";
 import { TodoSearchBar } from "./TodoSearchBar";
 
 import { Task } from "../models/task";
@@ -63,11 +64,12 @@ const TaskItem = ({ task, index, onLongPress }) => {
             {task.name}
           </Text>
           <View style={styles.attributeContainer}>
-            <Text style={styles.iconContainer}>⏱️</Text>
+            {/* <Text style={styles.iconContainer}>⏱️</Text> */}
+            <Icon name="clock-o" size={16} color="gray" style={styles.iconContainer}/>
             <Text style={styles.duration}>{task.duration}m</Text>
           </View>
           <View style={styles.attributeContainer}>
-            <Text style={styles.iconContainer}>⏰</Text>
+            <Icon name="calendar" size={16} color="gray" style={styles.iconContainer}/>
             <Text style={styles.timestamp}>{task.scheduled_at}</Text>
           </View>
         </View>
@@ -197,6 +199,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   timestamp: {
+    flex: 1,
     textAlign: "center",
     fontSize: 8,
   },
@@ -206,8 +209,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   iconContainer: {
-    alignSelf: "stretch",
+    flex: 1,
     textAlign: "center",
-    height: 20,
   },
 });

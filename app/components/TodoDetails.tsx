@@ -204,7 +204,7 @@ export function TodoDetails({
   const deleteTodoHandler = async () => {
     // Confirm if the user really wants to delete the todo
     Alert.alert(
-      "Delete Todo",
+      "🗑️ Delete Todo",
       "Are you sure you want to delete this todo?",
       [
         {

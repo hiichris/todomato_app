@@ -9,7 +9,7 @@ export const TodoSearchBar = ({ searchQuery, setSearchQuery }) => {
     <View style={styles.searchBarContainer}>
       <TextInput
         style={styles.searchBar}
-        placeholder="Search"
+        placeholder="Search a todo or a category"
         placeholderTextColor={"gray"}
         value={searchQuery}
         onChangeText={(text) => updateSearchHandler(text)}
