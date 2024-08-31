@@ -86,14 +86,14 @@ const deleteDatabaseFile = async () => {
 };
 
 // Function to migrate the database
-const migrateDatabase = async (db: SQLiteDatabase, version: number=-1) => {
+const migrateDatabase = async (db: SQLiteDatabase, version: number = -1) => {
   // Get the current database version
   var currentVersion = await getDatabaseVersion(db);
   console.log("Current database version: ", currentVersion);
 
   // If a version is provided, set the current version to the provided version
   // This is useful for resetting the database to a specific version or resetting the database
-  if (version > -1){
+  if (version > -1) {
     currentVersion = version;
   }
 
@@ -136,7 +136,7 @@ const migrateDatabase = async (db: SQLiteDatabase, version: number=-1) => {
         notes TEXT DEFAULT "",
         attachment TEXT DEFAULT "",
         geolocation TEXT DEFAULT "",
-        category_id INTEGER DEFAULT 0,
+        category_id INTEGER DEFAULT -1,
         index_no INTEGER NOT NULL DEFAULT 0
       );
     `
@@ -228,7 +228,7 @@ const migrateDatabase = async (db: SQLiteDatabase, version: number=-1) => {
     await db
       .execAsync(
         `
-      INSERT INTO todos (title, index_no) values ('Study Physics in the library', 1);
+      INSERT INTO todos (title, index_no, category_id) values ('Study Physics in the library', 1, (SELECT id FROM categories WHERE name = 'Study'));
     `
       )
       .then(() => {
@@ -240,7 +240,7 @@ const migrateDatabase = async (db: SQLiteDatabase, version: number=-1) => {
     await db
       .execAsync(
         `
-      INSERT INTO tasks (name, duration, todo_id, index_no, scheduled_at) values ('Read Chapter 1 by Monday', 15, 1, 1, 'Jan 01, 2024, 01:01 PM');
+      INSERT INTO tasks (name, duration, todo_id, index_no, scheduled_at, category_id) values ('Read Chapter 1 by Monday', 15, 1, 1, 'Jan 01, 2024, 01:01 PM');
         `
       )
       .then(() => {
@@ -277,7 +277,7 @@ const migrateDatabase = async (db: SQLiteDatabase, version: number=-1) => {
     await db
       .execAsync(
         `
-      INSERT INTO todos (title, index_no) values ('Take a walk in the park', 2);
+      INSERT INTO todos (title, index_no, category_id) values ('Take a walk in the park', 2, (SELECT id FROM categories WHERE name = 'Personal'));
     `
       )
       .then(() => {
@@ -314,7 +314,6 @@ const migrateDatabase = async (db: SQLiteDatabase, version: number=-1) => {
   }
 };
 
-
 export const resetDatabase = async () => {
   const db: SQLiteDatabase = await openDatabase(todos_db);
   await setDatabaseVersion(db, 0);
@@ -330,29 +329,32 @@ export const initializeDatabase = async () => {
 
 export const getTodos = async (setTodos: Function, keyword = "") => {
   const db: SQLiteDatabase = await openDatabase(todos_db);
-
+  // Additional query to filter by keyword
+  let additional_query = "";
   if (keyword.length > 0) {
-    const query =
-      "SELECT * FROM todos WHERE title LIKE $keyword order by index_no asc";
-    const todos = await db.getAllAsync<Todo>(query, {
-      $keyword: `%${keyword}%`,
-    });
-    setTodos(todos);
-  } else {
-    const query = "SELECT * FROM todos order by index_no asc";
-    const todos = await db.getAllAsync<Todo>(query);
-    setTodos(todos);
+    additional_query = `WHERE t.title LIKE '%${keyword}%'`; 
   }
+  const query =
+    `SELECT t.id, t.title, t.notes, t.attachment, t.geolocation, t.category_id, t.index_no, c.name as 'category_name', c.color as 'category_color' FROM todos t LEFT JOIN categories c ON t.category_id == c.id ${additional_query} ORDER BY index_no asc`;
+  const todos = await db.getAllAsync<Todo>(query);
+  setTodos(todos);
 };
 
-export const addNewTodo = async (setTodos: Function, title: string) => {
+export const addNewTodo = async (
+  setTodos: Function,
+  title: string,
+  category_id: number
+) => {
   const db: SQLiteDatabase = await openDatabase(todos_db);
   const statement = await db.prepareAsync(
-    "INSERT INTO todos (title, index_no) values ($title, (SELECT max(index_no) + 1 FROM todos))"
+    "INSERT INTO todos (title, index_no, category_id) values ($title, (SELECT max(index_no) + 1 FROM todos), $category_id)"
   );
   let result;
   try {
-    result = await statement.executeAsync({ $title: title });
+    result = await statement.executeAsync({
+      $title: title,
+      $category_id: category_id,
+    });
   } finally {
     await statement.finalizeAsync();
     return result;
@@ -548,10 +550,15 @@ export const deleteCategory = async (category_id: number) => {
   );
   let update_result;
   try {
-    update_result = await update_catid_statement.executeAsync({ $id: category_id });
+    update_result = await update_catid_statement.executeAsync({
+      $id: category_id,
+    });
   } finally {
     await update_catid_statement.finalizeAsync();
-    console.log("Category id updated to null for todos with category id: ", category_id);
+    console.log(
+      "Category id updated to null for todos with category id: ",
+      category_id
+    );
   }
 
   const statement = await db.prepareAsync(
@@ -564,7 +571,7 @@ export const deleteCategory = async (category_id: number) => {
     await statement.finalizeAsync();
     return result;
   }
-}
+};
 
 export const addCategory = async (color: string, name: string) => {
   const db: SQLiteDatabase = await openDatabase(todos_db);
@@ -578,4 +585,4 @@ export const addCategory = async (color: string, name: string) => {
     await statement.finalizeAsync();
     return result;
   }
-}
+};

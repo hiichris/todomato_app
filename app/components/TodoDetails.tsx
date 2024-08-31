@@ -45,6 +45,7 @@ export function TodoDetails({
   const [updateCompleted, setUpdateCompleted] = useState(false);
   const [scrollToEnd, setScrollToEnd] = useState(false);
   const scrollViewRef = useRef();
+  const [contentHeight, setContentHeight] = useState(0);
   const scrollViewKeyboardRef = useRef();
   const [contentWidth, setContentWidth] = useState(0);
   const [focusedInput, setFocusedInput] = useState(null);
@@ -71,9 +72,12 @@ export function TodoDetails({
         const keyboardDidShowListener = Keyboard.addListener(
           "keyboardDidShow",
           () => {
-            // Scroll to the bottom of the ScrollView when the keyboard is shown
+            // Scroll to half of the content height when the keyboard is shown for the map
             setTimeout(() => {
-              scrollViewKeyboardRef.current?.scrollToEnd({ animated: true });
+              scrollViewKeyboardRef.current?.scrollTo({
+                y: contentHeight / 2,
+                animated: true,
+              });
             }, 100);
           }
         );
@@ -212,7 +216,7 @@ export function TodoDetails({
           text: "Delete",
           onPress: () => {
             console.log("Deleting todo: ", todoId);
-            console.log("navigation: ", navigation)
+            console.log("navigation: ", navigation);
             // Update the note
             deleteTodo(todoId)
               .then((result) => {
@@ -230,6 +234,10 @@ export function TodoDetails({
       ],
       { cancelable: false }
     );
+  };
+
+  const contentSizeChangeHandler = (contentWidth, contentHeight) => {
+    setContentHeight(contentHeight);
   };
 
   return (
@@ -251,7 +259,10 @@ export function TodoDetails({
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={styles.centeredView}
           >
-            <ScrollView ref={scrollViewKeyboardRef}>
+            <ScrollView
+              ref={scrollViewKeyboardRef}
+              onContentSizeChange={contentSizeChangeHandler}
+            >
               <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <>
                   {/* Text Note */}

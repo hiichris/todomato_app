@@ -21,13 +21,13 @@ const todoButton = (setTodoModalVisible, setImportant, setUrgent) => {
     <Pressable
       onPress={() => {
         // Check importance
-        Alert.alert("Important?", "Is this event important?", [
+        Alert.alert("🧐 Important?", "Is this event important?", [
           {
             text: "No",
             onPress: () => {
               setImportant(false);
               console.log("No pressed");
-              Alert.alert("Urgent?", "Is this event urgent?", [
+              Alert.alert("🔥 Urgent?", "Is this event urgent?", [
                 {
                   text: "No",
                   onPress: () => {
@@ -61,7 +61,7 @@ const todoButton = (setTodoModalVisible, setImportant, setUrgent) => {
               setImportant(true);
               console.log("Yes pressed");
               // Check urgency
-              Alert.alert("Urgent?", "Is this event urgent?", [
+              Alert.alert("🔥 Urgent?", "Is this event urgent?", [
                 {
                   text: "No",
                   onPress: () => {

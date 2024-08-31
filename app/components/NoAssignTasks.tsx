@@ -45,6 +45,9 @@ export const NoAssignedTasks = ({
     },
     noTextAssignTextTitle: {
       fontSize: 24,
+      padding: 10,
+      width: "80%",
+      textAlign: "center",
       color: primaryColor,
       fontWeight: "bold",
     },

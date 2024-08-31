@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback } from "react";
 import { View, Text, StyleSheet, FlatList, Pressable } from "react-native";
 import { Task } from "../models/task";
 import { Todo } from "../models/todo";
-import { Link, useFocusEffect } from "expo-router";
+import { Link, useFocusEffect, useRouter } from "expo-router";
 import { primaryColor } from "../helpers/constants";
 import { getTaskCount } from "../services/db_service";
 
@@ -32,8 +32,9 @@ const fetchTaskCount = async (todoId) => {
   }
 };
 
-const TodoItem = ({ item, todos, refreshTodos, refresh }) => {
+const TodoItem = ({ index, item, todos, refreshTodos, refresh }) => {
   const [taskCount, setTaskCount] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
     const getCount = async () => {
@@ -44,36 +45,52 @@ const TodoItem = ({ item, todos, refreshTodos, refresh }) => {
     getCount();
   }, [item.id, refresh]);
 
-  return (
-    <View style={styles.todoItemsContainer}>
-      <View style={styles.todoIndexContainer}>
-        <Text>{item.id + 1}</Text>
-      </View>
-      <Link
-      style={styles.linkContainer}
-          href={{
-            pathname: "/todo_details",
-            params: {
-              title: item.title,
-              id: item.id,
-              todos: todos,
-              todoNotes: item.notes,
-              refreshTodos: refreshTodos,
-            },
-          }}
-        >
-      <Text style={styles.todoTitle} ellipsizeMode="tail" numberOfLines={2}>
-        {item.title}
-      </Text>
-      </Link>
-      <View style={styles.taskCountsContainer}>
+  const routingTodoDetailHandler = () => {
+    router.push({
+      pathname: "/todo_details",
+      params: {
+        title: item.title,
+        id: item.id,
+        todos: todos,
+        todoNotes: item.notes,
+        refreshTodos: refreshTodos,
+      },
+    });
+  };
 
-          <Text style={styles.taskCountText}>
-            {taskCount !== null ? taskCount : "Loading..."}
-          </Text>
-        
+  return (
+    <Pressable
+      style={styles.todoItemsContainer}
+      onPress={routingTodoDetailHandler}
+    >
+      {/* <View style={styles.todoIndexContainer}>
+        <Text style={styles.todoIndexText}>{index + 1}</Text>
+      </View> */}
+      <View style={styles.titleContainer}>
+        <Text style={styles.todoTitle} ellipsizeMode="tail" numberOfLines={2}>
+          {item.title}
+        </Text>
+        <View
+          style={[
+            styles.categoryContainer,
+            {
+              backgroundColor:
+                item.category_color === null
+                  ? "transparent"
+                  : item.category_color,
+            },
+          ]}
+        >
+          <Text style={styles.categoryText}>{item.category_name}</Text>
+        </View>
       </View>
-    </View>
+      {/* </Link> */}
+      <View style={styles.taskCountsContainer}>
+        <Text style={styles.taskCountText}>
+          {taskCount !== null ? taskCount : "Loading..."} Tasks
+        </Text>
+      </View>
+    </Pressable>
   );
 };
 
@@ -93,8 +110,9 @@ export function TodoItems({ todos, refreshTodos }) {
       <FlatList
         style={styles.todosListContainer}
         data={todos}
-        renderItem={({ item }) => (
+        renderItem={({ index, item }) => (
           <TodoItem
+            index={index}
             item={item}
             todos={todos}
             refreshTodos={refreshTodos}
@@ -109,32 +127,40 @@ export function TodoItems({ todos, refreshTodos }) {
 }
 
 const styles = StyleSheet.create({
-  
   todoItemsContainer: {
     flex: 1,
-    marginHorizontal: 16,
     flexDirection: "row",
-    paddingHorizontal: 4,
+    paddingHorizontal: 16,
     paddingVertical: 10,
     borderColor: "lightgrey",
     alignItems: "center",
     alignContent: "center",
-    height: 70,
+    height: 80,
     borderBottomWidth: 1,
   },
   todosListContainer: {
     flex: 1,
+    marginBottom: 24,
   },
   todoIndexContainer: {
-    flex: 1,
+    justifyContent: "center",
+    width: 26,
+    height: 26,
+    borderRadius: 50,
+    backgroundColor: primaryColor,
+    marginRight: 8,
   },
-  linkContainer: {
+  titleContainer: {
     flex: 8,
-    width: "80%",
+    flexDirection: "column",
+    justifyContent: "space-between",
   },
-  todoIndexText: {},
-  todoItemContainer: {
+  todoIndexText: {
+    textAlign: "center",
+    color: "white",
+    fontSize: 10,
   },
+  todoItemContainer: {},
   todoTitle: {
     fontSize: 18,
     textAlign: "left",
@@ -145,10 +171,11 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   taskCountsContainer: {
-    flex: 1,
+    flex: 2,
     borderWidth: 1,
     borderRadius: 50,
-    padding: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 2,
     borderColor: primaryColor,
   },
   taskCountText: {
@@ -166,5 +193,15 @@ const styles = StyleSheet.create({
   listHeaderDescription: {
     fontSize: 16,
     color: "gray",
+  },
+  categoryContainer: {
+    marginTop: 4,
+    width: 80,
+    borderRadius: 20,
+  },
+  categoryText: {
+    fontSize: 10,
+    color: "white",
+    textAlign: "center",
   },
 });

@@ -371,7 +371,10 @@ const styles = StyleSheet.create({
     top: 16,
     backgroundColor: "white",
     borderRadius: 20,
-    padding: 8,
+    width: 30,
+    height: 30,
+    justifyContent: "center",
+    alignItems: "center",
   },
   closeCircleText: {
     color: primaryColor,

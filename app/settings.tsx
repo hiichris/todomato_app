@@ -200,7 +200,7 @@ export default function SettingsScreen() {
               </Text>
               <Pressable onPress={resetDatabaseHandler}>
                 <View style={styles.resetButtonContainer}>
-                  <Text style={styles.resetButtonText}>Rest</Text>
+                  <Text style={styles.resetButtonText}>Reset</Text>
                 </View>
               </Pressable>
             </View>

@@ -20,7 +20,7 @@ const googleMapsApiKey = Constants.expoConfig?.extra.googleMapsApiKey;
 // Init the Geocoder
 Geocoder.init(googleMapsApiKey);
 
-export const GeoLocations = ({ styles, setFocusedInput, todoId }) => {
+export const GeoLocations = ({ styles, setFocusedInput, todoId, setGeoInputYpos }) => {
   const [marker, setMarker] = useState(null);
   const [address, setAddress] = useState("");
   const mapRef = useRef(null);

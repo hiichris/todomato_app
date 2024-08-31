@@ -59,7 +59,7 @@ export default function AddTodoModal({
       return;
     }
 
-    addNewTodo(setTodos, todoTitle)
+    addNewTodo(setTodos, todoTitle, selectedCategory)
       .then((result) => {
         console.log("result: ", result);
         refreshTodos();
@@ -70,7 +70,7 @@ export default function AddTodoModal({
 
     // Clear the todoTitle
     setTodoTitle("");
-
+    setSelectedCategory(null);
     setModalVisible(!modalVisible);
   };
 
@@ -114,22 +114,12 @@ export default function AddTodoModal({
                 </View>
                 <View style={styles.modalBodyContainer}>
                   <View style={styles.inputContiner}>
-                    <Text style={styles.modalText}>Todo Title:</Text>
-                    <TextInput
-                      style={styles.modalTextInput}
-                      onChangeText={setTodoTitle}
-                      value={todoTitle}
-                      returnKeyType="create"
-                      onSubmitEditing={createTodoHandler}
-                    />
-                  </View>
-
-                  <View style={styles.inputContiner}>
                     <Text style={styles.modalText}>Category:</Text>
                     <View style={styles.inputGroupContainer}>
                       <ScrollView
                         style={styles.categoryScrollView}
                         horizontal={true}
+                        showsHorizontalScrollIndicator={false}
                       >
                         <View style={styles.categoryContainer}>
                           {categories &&
@@ -141,10 +131,14 @@ export default function AddTodoModal({
                                   {
                                     backgroundColor: pressed
                                       ? "lightgray"
-                                      : selectedCategory === category.id
-                                      ? "#ffc8a0"
                                       : "white",
                                   },
+                                  {
+                                    borderColor:
+                                      selectedCategory === category.id
+                                        ? "#B2361B"
+                                        : "white",
+                                  }
                                 ]}
                                 onPress={() => setSelectedCategory(category.id)}
                               >
@@ -156,6 +150,22 @@ export default function AddTodoModal({
                         </View>
                       </ScrollView>
                     </View>
+                    <View style={styles.spacer}></View>
+                  </View>
+
+                  <View style={styles.inputContiner}>
+                    <Text style={styles.modalText}>Todo Title:</Text>
+                    <TextInput
+                      style={styles.modalTextInput}
+                      onChangeText={setTodoTitle}
+                      value={todoTitle}
+                      returnKeyType="create"
+                      numberOfLines={2}
+                      multiline={true}
+                      textAlign="left"
+                      textAlignVertical="top"
+                      onSubmitEditing={createTodoHandler}
+                    />
                   </View>
 
                   <View style={styles.buttonsContainer}>
@@ -242,6 +252,9 @@ const styles = StyleSheet.create({
     padding: 10,
     margin: 8,
     color: "white",
+    height: 60,
+    verticalAlign: "top",
+    justifyContent: "flex-start",
   },
   inputContiner: {
     flexDirection: "row",
@@ -272,7 +285,10 @@ const styles = StyleSheet.create({
     top: 16,
     backgroundColor: "white",
     borderRadius: 20,
-    padding: 8,
+    width: 30,
+    height: 30,
+    justifyContent: "center",
+    alignItems: "center",
   },
   closeCircleText: {
     color: primaryColor,
@@ -287,19 +303,20 @@ const styles = StyleSheet.create({
     justifyContent: "space-evenly",
   },
   categoryContainer: {
-    flex: 4,
     padding: 0,
-    borderRadius: 20,
     flexDirection: "row",
-    flexWrap: "wrap",
+    height: 50,
+    width: "100%",
   },
   categoryButton: {
+    flex: 1,
     margin: 4,
     backgroundColor: "white",
-    padding: 8,
+    padding: 12,
+    paddingVertical: 0,
     borderRadius: 20,
     justifyContent: "center",
-    alignContent: "center",
+    borderWidth: 4,
   },
   categoryButtonText: {
     color: primaryColor,
@@ -309,4 +326,7 @@ const styles = StyleSheet.create({
   categoryScrollView: {
     marginRight: 8,
   },
+  spacer: {
+    height: 100,
+  }
 });
