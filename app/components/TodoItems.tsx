@@ -1,6 +1,6 @@
 import { SQLiteProvider, useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState, useCallback } from "react";
-import { View, Text, StyleSheet, FlatList } from "react-native";
+import { View, Text, StyleSheet, FlatList, Pressable } from "react-native";
 import { Task } from "../models/task";
 import { Todo } from "../models/todo";
 import { Link, useFocusEffect } from "expo-router";
@@ -46,32 +46,35 @@ const TodoItem = ({ item, todos, refreshTodos, refresh }) => {
 
   return (
     <Link
-      style={styles.linkContainer}
-      href={{
-        pathname: "/todo_details",
-        params: {
-          title: item.title,
-          id: item.id,
-          todos: todos,
-          todoNotes: item.notes,
-          refreshTodos: refreshTodos,
-        },
-      }}
-    >
-      <View style={styles.todoListContainer}>
-        <View style={styles.todoIndexContainer}>
-          <Text style={styles.todoIndexText}>{item.index_no}</Text>
-        </View>
-        <Text style={styles.todoTitle} ellipsizeMode="tail"
-            numberOfLines={1}>
-          {item.title}
-        </Text>
-        <View style={styles.taskCountsContainer}>
-          <Text style={styles.taskCountText}>
-            <Text>{taskCount !== null ? taskCount : "Loading..."}</Text> Tasks
-          </Text>
-        </View>
+    style={styles.linkContainer}
+        href={{
+          pathname: "/todo_details",
+          params: {
+            title: item.title,
+            id: item.id,
+            todos: todos,
+            todoNotes: item.notes,
+            refreshTodos: refreshTodos,
+          },
+        }}
+      >
+    <View style={styles.todoItemsContainer}>
+      <View style={styles.todoIndexContainer}>
+        <Text>{item.id + 1}</Text>
       </View>
+
+      <Text style={styles.todoTitle} ellipsizeMode="tail" numberOfLines={2}>
+        {item.title}
+      </Text>
+    
+      <View style={styles.taskCountsContainer}>
+
+          <Text style={styles.taskCountText}>
+            {taskCount !== null ? taskCount : "Loading..."}
+          </Text>
+        
+      </View>
+    </View>
     </Link>
   );
 };
@@ -90,7 +93,7 @@ export function TodoItems({ todos, refreshTodos }) {
   return (
     <>
       <FlatList
-        style={styles.listContainer}
+        style={styles.todosListContainer}
         data={todos}
         renderItem={({ item }) => (
           <TodoItem
@@ -108,53 +111,43 @@ export function TodoItems({ todos, refreshTodos }) {
 }
 
 const styles = StyleSheet.create({
-  listContainer: {
+  
+  todoItemsContainer: {
     flex: 1,
-    marginTop: 8,
-  },
-  linkContainer: {
-    textAlign: "center",
-    justifyContent: "flex-start",
-  },
-  todoListContainer: {
-    width: "100%",
+    marginHorizontal: 16,
     flexDirection: "row",
-    paddingHorizontal: 8,
-    paddingVertical: 16,
-    alignContent: "flex-start",
-    justifyContent: "space-between",
-    borderBottomColor: "lightgray",
+    paddingHorizontal: 4,
+    paddingVertical: 10,
+    borderColor: "lightgrey",
+    alignItems: "center",
+    alignContent: "center",
+    height: 70,
     borderBottomWidth: 1,
   },
-  todoIndexContainer: {
-    width: 30,
-    height: 30,
-    fontSize: 16,
-    borderRadius: 50,
-    textAlign: "center",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 8,
-    backgroundColor: "#FF5733",
+  todosListContainer: {
+    flex: 1,
   },
-  todoIndexText: {
-    color: "white",
-    fontSize: 16,
-    textAlign: "left",
-    alignItems: "center",
-    justifyContent: "center",
+  todoIndexContainer: {
+    flex: 1,
+  },
+  linkContainer: {
+    flex: 8,
+    width: "80%",
+  },
+  todoIndexText: {},
+  todoItemContainer: {
   },
   todoTitle: {
-    flex: 1,
     fontSize: 18,
     textAlign: "left",
     alignContent: "center",
     justifyContent: "center",
-    paddingTop: 3,
+    padding: 0,
+    margin: 0,
+    marginRight: 8,
   },
   taskCountsContainer: {
-    alignSelf: "flex-end",
-    marginTop: -4,
+    flex: 1,
     borderWidth: 1,
     borderRadius: 50,
     padding: 8,
@@ -162,7 +155,8 @@ const styles = StyleSheet.create({
   },
   taskCountText: {
     color: primaryColor,
-    fontSize: 12,
+    fontSize: 10,
+    textAlign: "center",
   },
   listHeaderContainer: {
     margin: 16,

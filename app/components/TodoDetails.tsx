@@ -225,6 +225,7 @@ export function TodoDetails({
                 console.log("Delete Todo Error: ", error);
               });
           },
+          style: "destructive",
         },
       ],
       { cancelable: false }

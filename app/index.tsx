@@ -31,6 +31,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { name as appName } from "./app.json";
 import { TodoSearchBar } from "./components/TodoSearchBar";
+import { useRouter } from "expo-router";
 
 /*
   Image Reference and Credits:
@@ -55,6 +56,7 @@ export default function HomeScreen() {
   const [addTodoButtonState, setAddTodoButtonState] = useState(true);
   const [addTaskButtonState, setAddTaskButtonState] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
 
   const refreshTodos = async () => {
     console.log("Refreshing todos");
@@ -77,6 +79,10 @@ export default function HomeScreen() {
     refreshTodos();
   });
 
+  const gotoSettingsScreen = () => {
+    router.push("/settings");
+  }
+  
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StackScreen
@@ -87,6 +93,7 @@ export default function HomeScreen() {
         setAddTodoButtonState={setAddTodoButtonState}
         addTaskButtonState={addTaskButtonState}
         setAddTaskButtonState={setAddTaskButtonState}
+        gotoSettingsScreen={gotoSettingsScreen}
       />
       <TodoSearchBar
         searchQuery={searchQuery}

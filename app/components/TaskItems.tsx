@@ -10,6 +10,7 @@ import {
 } from "react-native-gesture-handler";
 import { TaskPieChart } from "./TaskPieChart";
 import { NoAssignedTasks } from "./NoAssignTasks";
+import { TodoSearchBar } from "./TodoSearchBar";
 
 import { Task } from "../models/task";
 import { Todo } from "../models/todo";
@@ -63,11 +64,11 @@ const TaskItem = ({ task, index, onLongPress }) => {
           </Text>
           <View style={styles.attributeContainer}>
             <Text style={styles.iconContainer}>⏱️</Text>
-            <Text style={styles.duration}>{task.duration}s</Text>
+            <Text style={styles.duration}>{task.duration}m</Text>
           </View>
           <View style={styles.attributeContainer}>
-            <Text style={styles.iconContainer}>🏁</Text>
-            <Text style={styles.timestamp}>08/01/24 10:12p</Text>
+            <Text style={styles.iconContainer}>⏰</Text>
+            <Text style={styles.timestamp}>{task.scheduled_at}</Text>
           </View>
         </View>
       </LongPressGestureHandler>
@@ -162,7 +163,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     paddingVertical: 10,
     borderColor: "lightgrey",
-    height: 60,
+    height: 70,
   },
   taskIndexContainer: {
     backgroundColor: "#FFC6B2",
@@ -184,9 +185,7 @@ const styles = StyleSheet.create({
   duration: {
     flex: 1,
     alignItems: "center",
-    fontSize: 10,
-    margin: 4,
-    paddingTop: 4,
+    fontSize: 8,
   },
   listFooterContainer: {},
   longPressText: {
@@ -199,7 +198,7 @@ const styles = StyleSheet.create({
   },
   timestamp: {
     textAlign: "center",
-    fontSize: 10,
+    fontSize: 8,
   },
   attributeContainer: {
     flex: 2,
@@ -209,5 +208,6 @@ const styles = StyleSheet.create({
   iconContainer: {
     alignSelf: "stretch",
     textAlign: "center",
+    height: 20,
   },
 });

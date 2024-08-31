@@ -18,7 +18,7 @@ import { Link } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { primaryColor } from "../helpers/constants";
-import { addNewTodo } from "../services/db_service";
+import { addNewTodo, getCategories } from "../services/db_service";
 import { SQLiteProvider } from "expo-sqlite";
 import { Todo } from "../models/todo";
 
@@ -27,8 +27,11 @@ export default function AddTodoModal({
   setModalVisible,
   setTodos,
   refreshTodos,
+  router,
 }) {
   const [todoTitle, setTodoTitle] = React.useState("");
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const scrollViewRef = useRef(null);
 
   useEffect(() => {
@@ -39,6 +42,7 @@ export default function AddTodoModal({
         scrollViewRef.current?.scrollToEnd({ animated: true });
       }
     );
+    retrieveDBCategories();
 
     return () => {
       keyboardDidShowListener.remove();
@@ -48,6 +52,10 @@ export default function AddTodoModal({
   const createTodoHandler = async () => {
     if (todoTitle === "") {
       Alert.alert("Todo Title is required");
+      return;
+    }
+    if (selectedCategory === null) {
+      Alert.alert("Please select a category");
       return;
     }
 
@@ -64,6 +72,13 @@ export default function AddTodoModal({
     setTodoTitle("");
 
     setModalVisible(!modalVisible);
+  };
+
+  const retrieveDBCategories = async () => {
+    console.log("Retrieving categories");
+    const dbCategories = await getCategories();
+    console.log("dbCategories: ", dbCategories);
+    setCategories(dbCategories);
   };
 
   return (
@@ -107,7 +122,40 @@ export default function AddTodoModal({
                       returnKeyType="create"
                       onSubmitEditing={createTodoHandler}
                     />
-                    <Text> </Text>
+                  </View>
+
+                  <View style={styles.inputContiner}>
+                    <Text style={styles.modalText}>Category:</Text>
+                    <View style={styles.inputGroupContainer}>
+                      <ScrollView
+                        style={styles.categoryScrollView}
+                        horizontal={true}
+                      >
+                        <View style={styles.categoryContainer}>
+                          {categories &&
+                            categories.map((category) => (
+                              <Pressable
+                                key={category.id}
+                                style={({ pressed }) => [
+                                  styles.categoryButton,
+                                  {
+                                    backgroundColor: pressed
+                                      ? "lightgray"
+                                      : selectedCategory === category.id
+                                      ? "#ffc8a0"
+                                      : "white",
+                                  },
+                                ]}
+                                onPress={() => setSelectedCategory(category.id)}
+                              >
+                                <Text style={styles.categoryButtonText}>
+                                  {category.name}
+                                </Text>
+                              </Pressable>
+                            ))}
+                        </View>
+                      </ScrollView>
+                    </View>
                   </View>
 
                   <View style={styles.buttonsContainer}>
@@ -119,7 +167,7 @@ export default function AddTodoModal({
                         createTodoHandler();
                       }}
                     >
-                      <Text style={styles.textStyle}>Create</Text>
+                      <Text style={styles.createButtonText}>Create</Text>
                     </Pressable>
                   </View>
                 </View>
@@ -157,10 +205,11 @@ const styles = StyleSheet.create({
     margin: 8,
     flexDirection: "row",
     justifyContent: "space-between",
+    marginTop: 16,
   },
   button: {
     borderRadius: 20,
-    padding: 8,
+    padding: 16,
     paddingHorizontal: 12,
     margin: 8,
     elevation: 2,
@@ -170,7 +219,7 @@ const styles = StyleSheet.create({
     borderColor: primaryColor,
     width: "100%",
   },
-  textStyle: {
+  createButtonText: {
     color: "white",
     fontWeight: "bold",
     textAlign: "center",
@@ -231,5 +280,33 @@ const styles = StyleSheet.create({
     fontSize: 10,
     width: 13,
     textAlign: "center",
+  },
+  inputGroupContainer: {
+    flex: 4,
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+  },
+  categoryContainer: {
+    flex: 4,
+    padding: 0,
+    borderRadius: 20,
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+  categoryButton: {
+    margin: 4,
+    backgroundColor: "white",
+    padding: 8,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignContent: "center",
+  },
+  categoryButtonText: {
+    color: primaryColor,
+    fontSize: 14,
+    textAlign: "center",
+  },
+  categoryScrollView: {
+    marginRight: 8,
   },
 });

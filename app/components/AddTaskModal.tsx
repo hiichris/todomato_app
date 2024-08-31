@@ -66,19 +66,10 @@ export default function AddTaskModal({
       new Date(selectedDateObject).getTime() - currentDate.getTime();
     const differenceInSeconds = Math.floor(differenceInMilliseconds / 1000);
 
-    return differenceInSeconds;
+    return [differenceInSeconds, dateString];
   };
 
   const addNewTaskHandler = async () => {
-    console.log(
-      "taskName: ",
-      taskName,
-      "Duration: ",
-      duration,
-      "todoID: ",
-      todoId
-    );
-
     // Validate the input
     if (taskName === "") {
       Alert.alert("Task name cannot be empty!");
@@ -89,28 +80,16 @@ export default function AddTaskModal({
       Alert.alert("Duration must be greater than 0!");
       return;
     }
-    // Add the task to the database
-    addNewTask(setTasks, todoId, taskName, duration)
-      .then((result) => {
-        console.log("result: ", result);
-        refreshTasks();
-      })
-      .catch((error) => {
-        console.log("addNewTask Error: ", error);
-      });
 
-    // Clear the fields back to default
-    setTaskName("");
-    setDuration(5);
-
-    // Get the difference in seconds from selected date
-    const differenceInSeconds = getTimeDifferenceInSeconds(selectedDate);
-    console.log("differenceInSeconds: ", differenceInSeconds);
-
-    console.log("seelctedstartoption ", selectedStartOption);
+    const [differenceInSeconds, selectedDateString] =
+        getTimeDifferenceInSeconds(selectedDate);
+      console.log("differenceInSeconds: ", differenceInSeconds);
 
     // If the user selected "schedule" option, we will have to schedule the notification based on the selected date and time. Then scheduel another notification after the duration ends.
     if (selectedStartOption === "scheduled") {
+      // Get the difference in seconds from selected date
+      
+      console.log("seelctedstartoption ", selectedStartOption);
       // Schedule the 1st reminder notification
       scheduleNotification(taskName, differenceInSeconds, "Reminder")
         .then((result) => {
@@ -125,8 +104,17 @@ export default function AddTaskModal({
           console.log("Error scheduling reminder notification: ", error);
         });
     }
-
-    let alaramDuration = differenceInSeconds + duration * 60;
+    // Calculate the total duration in seconds for the alarm notification
+    // If the difference is negative, it means there's no selected date and time.
+    // We'll use the duration as the total duration for the alarm notification.
+    var alaramDuration = 0;
+    if (differenceInSeconds < 0) {
+      alaramDuration = duration * 60;
+    } else {
+      alaramDuration = differenceInSeconds + duration * 60;
+    }
+    
+    console.log("alaramDuration::: ", alaramDuration);
 
     // Schedule the alarm notification
     scheduleNotification(taskName, alaramDuration, "Times up!")
@@ -140,6 +128,20 @@ export default function AddTaskModal({
       .catch((error) => {
         console.log("Error scheduling alram notification: ", error);
       });
+
+    // Add the task to the database
+    addNewTask(setTasks, todoId, taskName, duration, selectedDateString)
+      .then((result) => {
+        console.log("result: ", result);
+        refreshTasks();
+      })
+      .catch((error) => {
+        console.log("addNewTask Error: ", error);
+      });
+
+    // Clear the fields back to default
+    setTaskName("");
+    setDuration(5);
 
     // Close the modal
     setModalVisible(!modalVisible);
@@ -250,15 +252,6 @@ export default function AddTaskModal({
                       ))}
                     </View>
                   </View>
-
-                  {/* <View style={styles.instructionContainer}>
-                    <Text style={styles.instructionText}>
-                      💡
-                      {selectedStartOption === "scheduled" &&
-                        "A reminder notification will be sent at the scheduled time. \n"}
-                      Once the duration ends, an notification will be sent.
-                    </Text>
-                  </View> */}
 
                   <View style={styles.buttonsContainer}>
                     <Pressable
