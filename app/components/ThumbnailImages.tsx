@@ -24,7 +24,7 @@ export const ThumbnailImages = ({
         <Text style={styles.detailsSectionTitle}>Something to visualise</Text>
       </View>
 
-      <ScrollView horizontal={true} ref={scrollViewRef} onContentSizeChange={handleContentSizeChange}>
+      <ScrollView horizontal={true} ref={scrollViewRef} onContentSizeChange={handleContentSizeChange} showsHorizontalScrollIndicator={false}>
         <View style={styles.imagesContainer}>
           {/* Loop through the images if there are any */}
           {images &&

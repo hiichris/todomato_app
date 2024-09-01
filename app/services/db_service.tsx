@@ -215,7 +215,7 @@ const migrateDatabase = async (db: SQLiteDatabase, version: number = -1) => {
         ('#4682B4', 'Study', 1),
         ('#FF6347', 'Family', 1),
         ('#6e9f00', 'Shopping', 0),
-        ('#4169E1', 'Work', 0),
+        ('#9933ff', 'Work', 1),
         ('#808080', 'Others', 0);`
       )
       .then(() => {
@@ -540,12 +540,20 @@ export const updateGeolocation = async (
 
 // CATEGORY OPERATIONS ////
 
-export const getCategories = async () => {
+export const getCategories = async (is_fav: boolean) => {
   const db: SQLiteDatabase = await openDatabase(todos_db);
-  const query = "SELECT id, color, name FROM categories ORDER BY id ASC";
-  const categories = await db.getAllAsync<{ color: string; name: string }>(
-    query
-  );
+  let filter_query = "";
+  console.log("is_fav: ", is_fav);
+  if (is_fav) {
+    filter_query = "WHERE is_fav = 1";
+  }
+
+  const query = `SELECT id, color, name, is_fav FROM categories ${filter_query} ORDER BY id ASC`;
+  const categories = await db.getAllAsync<{
+    color: string;
+    name: string;
+    is_fav: number;
+  }>(query);
   return categories;
 };
 

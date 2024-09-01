@@ -61,13 +61,12 @@ const TodoItem = ({ index, item, todos, refreshTodos, refresh }) => {
 
   return (
     <Pressable
-      style={({pressed}) => [
+      style={({ pressed }) => [
         styles.todoItemsContainer,
         {
           backgroundColor: pressed ? "lightgray" : "transparent",
-        }
-      ]
-      }
+        },
+      ]}
       onPress={routingTodoDetailHandler}
     >
       <View style={styles.titleContainer}>
@@ -90,19 +89,22 @@ const TodoItem = ({ index, item, todos, refreshTodos, refresh }) => {
             <Text style={styles.categoryText}>{item.category_name}</Text>
           </View>
           <View style={styles.attributesContainer}>
-            
             <View style={styles.attributeContainer}>
-            <Icon name="sticky-note" style={styles.attributeIcon} color="gray" />
+              <Icon
+                name="sticky-note"
+                style={styles.attributeIcon}
+                color="gray"
+              />
               <Text style={styles.attributeText}>{item.has_notes}</Text>
             </View>
-            
+
             <View style={styles.attributeContainer}>
-            <Icon name="image" style={styles.attributeIcon} color="gray" />
+              <Icon name="image" style={styles.attributeIcon} color="gray" />
               <Text style={styles.attributeText}>{item.image_count}</Text>
             </View>
 
             <View style={styles.attributeContainer}>
-            <Icon name="map-pin" style={styles.attributeIcon} color="gray" />
+              <Icon name="map-pin" style={styles.attributeIcon} color="gray" />
               <Text style={styles.attributeText}>{item.has_geolocation}</Text>
             </View>
           </View>
@@ -111,7 +113,7 @@ const TodoItem = ({ index, item, todos, refreshTodos, refresh }) => {
       {/* </Link> */}
       <View style={styles.taskCountsContainer}>
         <Text style={styles.taskCountText}>
-          {taskCount !== null ? taskCount : "Loading..."} Tasks
+          <Text style={styles.taskCountNumber}>{taskCount !== null ? taskCount : "..."}</Text> Tasks
         </Text>
       </View>
     </Pressable>
@@ -130,21 +132,35 @@ export function TodoItems({ todos, refreshTodos }) {
 
   return (
     <>
-      <FlatList
-        style={styles.todosListContainer}
-        data={todos}
-        renderItem={({ index, item }) => (
-          <TodoItem
-            index={index}
-            item={item}
-            todos={todos}
-            refreshTodos={refreshTodos}
-            refresh={refresh}
-          />
-        )}
-        keyExtractor={(item) => item.id.toString()}
-        ListHeaderComponent={TodoListHeader(todos.length)}
-      />
+      {todos.length > 0 ? (
+        <FlatList
+          style={styles.todosListContainer}
+          data={todos}
+          renderItem={({ index, item }) => (
+            <TodoItem
+              index={index}
+              item={item}
+              todos={todos}
+              refreshTodos={refreshTodos}
+              refresh={refresh}
+            />
+          )}
+          keyExtractor={(item) => item.id.toString()}
+          ListHeaderComponent={TodoListHeader(todos.length)}
+        />
+      ) : (
+        <View style={styles.listHeaderContainer}>
+          <Text style={styles.listHeaderTitle}>My to-dos</Text>
+          <Text style={styles.listHeaderDescription}>
+            To add a new todo, tap the "Add Todo" button.
+          </Text>
+          <View style={styles.notFoundContainer}>
+            <Text style={styles.notFoundText}>
+              😅 Uh oh! There's no matching to-dos.
+            </Text>
+          </View>
+        </View>
+      )}
     </>
   );
 }
@@ -192,7 +208,6 @@ const styles = StyleSheet.create({
     padding: 0,
     margin: 0,
     marginRight: 8,
-    height: 45,
   },
   taskCountsContainer: {
     flex: 2,
@@ -226,6 +241,8 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignContent: "center",
     flexDirection: "row",
+    marginVertical: 4,
+    padding: 2,
   },
   categoryText: {
     fontSize: 10,
@@ -249,6 +266,18 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: "gray",
     fontWeight: "bold",
-
+  },
+  notFoundContainer: {
+    marginVertical: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+  },
+  notFoundText: {
+    fontSize: 14,
+    color: primaryColor,
+  },
+  taskCountNumber: {
+    fontWeight: "bold",
   }
 });

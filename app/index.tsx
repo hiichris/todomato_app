@@ -32,13 +32,15 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { name as appName } from "./app.json";
 import { TodoSearchBar } from "./components/TodoSearchBar";
 import { useRouter } from "expo-router";
+import { FavCategories } from "./components/FavCategories";
 
 /*
   Image Reference and Credits:
   splash.png - <a href="https://www.flaticon.com/free-icons/tomato" title="tomato icons">Tomato icons created by Flat Icons Design - Flaticon</a>
 */
 
-// LogBox.ignoreAllLogs();
+// Ignore all logs for demoing purposes
+LogBox.ignoreAllLogs();
 
 function useFocusEffect(callback: () => void) {
   // Ref: https://reactnavigation.org/docs/use-is-focused/
@@ -81,8 +83,8 @@ export default function HomeScreen() {
 
   const gotoSettingsScreen = () => {
     router.push("/settings");
-  }
-  
+  };
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StackScreen
@@ -95,11 +97,15 @@ export default function HomeScreen() {
         setAddTaskButtonState={setAddTaskButtonState}
         gotoSettingsScreen={gotoSettingsScreen}
       />
+
       <TodoSearchBar
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
       />
-      <View style={styles.container}>
+
+      <FavCategories setSearchQuery={setSearchQuery} />
+
+      <View style={styles.todoItemsContainer}>
         <TodoItems todos={todos} refreshTodos={refreshTodos} />
       </View>
     </GestureHandlerRootView>
@@ -107,9 +113,9 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    marginTop: -10,
+  todoItemsContainer: {
+    flex: 6,
+    marginTop: 10,
   },
   tasksContainer: {
     flex: 10,

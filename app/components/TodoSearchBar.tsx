@@ -1,4 +1,5 @@
 import { View, TextInput, StyleSheet, Text, Pressable } from "react-native";
+import { primaryColor } from "../helpers/constants";
 
 export const TodoSearchBar = ({ searchQuery, setSearchQuery }) => {
   const updateSearchHandler = (text, refreshTodos) => {
@@ -49,8 +50,8 @@ const styles = StyleSheet.create({
     top: 17,
     width: 25,
     height: 25,
-    backgroundColor: "lightgray",
-    padding: 8,
+    backgroundColor: primaryColor,
+    justifyContent: "center",
     borderRadius: 50,
   },
   clearButtonText: {
@@ -58,6 +59,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 8,
     fontWeight: "bold",
-    color: "gray",
+    color: "white",
   },
 });
