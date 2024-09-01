@@ -1,33 +1,163 @@
 import { Stack, Link } from "expo-router";
 import { useSQLiteContext, SQLiteProvider } from "expo-sqlite";
-import { useState } from "react";
-import { Text, StyleSheet, Pressable, Modal, View, Button } from "react-native";
+import { useEffect, useState } from "react";
+import {
+  Text,
+  StyleSheet,
+  Pressable,
+  Modal,
+  View,
+  Alert,
+  Button,
+} from "react-native";
 
 import AddTodoModal from "./AddTodoModal";
 import { primaryColor } from "../helpers/constants";
-import { migrateDbIfNeeded } from "../services/db_service";
+import AddTaskModal from "./AddTaskModal";
+import { StatusBar } from "expo-status-bar";
+import Icon from "react-native-vector-icons/FontAwesome";
+
+const todoButton = (setTodoModalVisible, setImportant, setUrgent) => {
+  return (
+    <Pressable
+      onPress={() => {
+        // Check importance
+        Alert.alert("🧐 Important?", "Is this event important?", [
+          {
+            text: "No",
+            onPress: () => {
+              setImportant(false);
+              console.log("No pressed");
+              Alert.alert("🔥 Urgent?", "Is this event urgent?", [
+                {
+                  text: "No",
+                  onPress: () => {
+                    setUrgent(false);
+                    console.log("No pressed");
+
+                    Alert.alert(
+                      "Unfortunately...",
+                      "Events that are not important and not urgent can wait. Todo creation is skipped for now. A future feature will allow you to create this event in a different category. Stay tuned.🥹"
+                    );
+                  },
+                  style: "cancel",
+                },
+                {
+                  text: "Yes",
+                  onPress: () => {
+                    setUrgent(true);
+                    console.log("Yes pressed");
+
+                    console.log("Set modal visible");
+                    setTodoModalVisible(true);
+                  },
+                },
+              ]);
+            },
+            style: "cancel",
+          },
+          {
+            text: "Yes",
+            onPress: () => {
+              setImportant(true);
+              console.log("Yes pressed");
+              // Check urgency
+              Alert.alert("🔥 Urgent?", "Is this event urgent?", [
+                {
+                  text: "No",
+                  onPress: () => {
+                    setUrgent(false);
+                    console.log("No pressed");
+
+                    console.log("Set modal visible");
+                    setTodoModalVisible(true);
+                  },
+                  style: "cancel",
+                },
+                {
+                  text: "Yes",
+                  onPress: () => {
+                    setUrgent(true);
+                    console.log("Yes pressed");
+
+                    console.log("Set modal visible");
+                    setTodoModalVisible(true);
+                  },
+                },
+              ]);
+            },
+          },
+        ]);
+      }}
+    >
+      <Text style={styles.naviButton}>Add Todo</Text>
+    </Pressable>
+  );
+};
+
+const taskButton = (setTaskModalVisible) => {
+  return (
+    <Pressable
+      onPress={() => {
+        console.log("Set modal visible");
+        setTaskModalVisible(true);
+      }}
+    >
+      <Text style={styles.naviButton}>Add Task</Text>
+    </Pressable>
+  );
+};
+
+const settingsButton = ({ gotoSettingsScreen }) => {
+  return (
+    <Pressable
+      onPress={() => {
+        gotoSettingsScreen();
+      }}
+    >
+      <Icon
+        name="cog"
+        style={[styles.naviButton, { paddingHorizontal: 4 }]}
+        size={24}
+      />
+    </Pressable>
+  );
+};
 
 export default function StackScreen({
   title,
-  todos,
+  todoId,
   setTodos,
-  addTodoButton,
-  refreshTodoItems = null,
+  refreshTodos,
+  refreshTasks,
+  addTodoButtonState,
+  setAddTodoButtonState,
+  addTaskButtonState,
+  setAddTaskButtonState,
+  gotoSettingsScreen,
+  categories,
+  setCategories,
+  scheduleNotification = null,
 }) {
-  const [modalVisible, setModalVisible] = useState(false);
-  const dbContext = useSQLiteContext();
+  const [todoModalVisible, setTodoModalVisible] = useState(false);
+  const [taskModalVisible, setTaskModalVisible] = useState(false);
+  const [important, setImportant] = useState(false);
+  const [urgent, setUrgent] = useState(false);
 
-  const todoButton = () => {
-    return (
-      <Pressable
-        onPress={() => {
-          console.log("Set modal visible");
-          setModalVisible(true);
-        }}
-      >
-        <Text style={styles.naviButton}>Add</Text>
-      </Pressable>
-    );
+  let headerRightComponent = () => {
+    if (addTodoButtonState) {
+      return todoButton(setTodoModalVisible, setImportant, setUrgent);
+    }
+    if (addTaskButtonState) {
+      return taskButton(setTaskModalVisible);
+    }
+  };
+
+  let headerLeftComponent = () => {
+    if (addTodoButtonState && !addTaskButtonState) {
+      return settingsButton({ gotoSettingsScreen });
+    }
+    return;
   };
 
   return (
@@ -35,19 +165,26 @@ export default function StackScreen({
       <Stack.Screen
         options={{
           title: title,
-          headerRight: () => {
-            if (addTodoButton) {
-              return todoButton();
-            }
-          },
+          headerLeft: headerLeftComponent,
+          headerRight: headerRightComponent,
         }}
       ></Stack.Screen>
       <AddTodoModal
-        todos={todos}
         setTodos={setTodos}
-        modalVisible={modalVisible}
-        setModalVisible={setModalVisible}
-        dbContext={dbContext}
+        refreshTodos={refreshTodos}
+        modalVisible={todoModalVisible}
+        setModalVisible={setTodoModalVisible}
+        categories={categories}
+        setCategories={setCategories}
+      />
+      <AddTaskModal
+        todoId={todoId}
+        setTodos={setTodos}
+        refreshTodos={refreshTodos}
+        refreshTasks={refreshTasks}
+        modalVisible={taskModalVisible}
+        setModalVisible={setTaskModalVisible}
+        scheduleNotification={scheduleNotification}
       />
     </View>
   );
@@ -56,7 +193,7 @@ export default function StackScreen({
 const styles = StyleSheet.create({
   naviButton: {
     color: primaryColor,
-    marginRight: 10,
+    paddingVertical: 6,
   },
   stackContainer: {
     height: 0,

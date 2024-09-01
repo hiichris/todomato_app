@@ -14,14 +14,22 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.hsuavely.todomato"
+      "bundleIdentifier": "com.hsuavely.todomato",
+      "runtimeVersion": "1.0.0"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.hsuavely.todomato"
+      "package": "com.hsuavely.todomato",
+      "runtimeVersion": {
+        "policy": "appVersion"
+      },
+      "notification": {
+        "icon": "./assets/images/notification-icon.png",
+        "color": "#ffffff"
+      }
     },
     "web": {
       "bundler": "metro",
@@ -29,7 +37,14 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/notification-icon.png",
+          "color": "#ffffff"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
@@ -40,8 +55,12 @@
       },
       "eas": {
         "projectId": "ab26227b-b0ff-4ea0-929b-f0ffddd8f692"
-      }
+      },
+      "googleMapsApiKey": "AIzaSyAp0iQc5oKArkL-vhwI4Ml1P1TXwgzzlpI"
     },
-    "owner": "yaostyle"
+    "owner": "yaostyle",
+    "updates": {
+      "url": "https://u.expo.dev/ab26227b-b0ff-4ea0-929b-f0ffddd8f692"
+    }
   }
 }
