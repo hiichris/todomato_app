@@ -10,17 +10,28 @@ import {
 } from "react-native-gesture-handler";
 import { TaskPieChart } from "./TaskPieChart";
 import { NoAssignedTasks } from "./NoAssignTasks";
+import Icon from "react-native-vector-icons/FontAwesome";
+import { TodoSearchBar } from "./TodoSearchBar";
 
 import { Task } from "../models/task";
 import { Todo } from "../models/todo";
 import { Tasks } from "./Tasks";
 import { Link } from "expo-router";
 
-const TaskListHeader = ({ todoTitle, tasks }) => {
+const TaskListHeader = ({ todoTitle, tasks, categoryName, categoryColor }) => {
   return (
     <View style={styles.listHeaderContainer}>
       <Text style={styles.TodoTitle}>{todoTitle}</Text>
-
+      <View
+        style={[
+          styles.categoryContainer,
+          {
+            backgroundColor: categoryColor,
+          },
+        ]}
+      >
+        <Text style={styles.categoryName}>{categoryName}</Text>
+      </View>
       {/* Add a PieChart if tasks exist */}
       {tasks.length > 0 ? (
         <View>
@@ -62,12 +73,23 @@ const TaskItem = ({ task, index, onLongPress }) => {
             {task.name}
           </Text>
           <View style={styles.attributeContainer}>
-            <Text style={styles.iconContainer}>⏱️</Text>
-            <Text style={styles.duration}>{task.duration}s</Text>
+            {/* <Text style={styles.iconContainer}>⏱️</Text> */}
+            <Icon
+              name="clock-o"
+              size={16}
+              color="gray"
+              style={styles.iconContainer}
+            />
+            <Text style={styles.duration}>{task.duration}m</Text>
           </View>
           <View style={styles.attributeContainer}>
-            <Text style={styles.iconContainer}>🏁</Text>
-            <Text style={styles.timestamp}>08/01/24 10:12p</Text>
+            <Icon
+              name="calendar"
+              size={16}
+              color="gray"
+              style={styles.iconContainer}
+            />
+            <Text style={styles.timestamp}>{task.scheduled_at}</Text>
           </View>
         </View>
       </LongPressGestureHandler>
@@ -75,7 +97,13 @@ const TaskItem = ({ task, index, onLongPress }) => {
   );
 };
 
-const TaskList = ({ tasks, todoTitle, onLongPress }) => {
+const TaskList = ({
+  tasks,
+  todoTitle,
+  onLongPress,
+  categoryName,
+  categoryColor,
+}) => {
   return (
     <FlatList
       style={styles.listContainer}
@@ -84,13 +112,25 @@ const TaskList = ({ tasks, todoTitle, onLongPress }) => {
         <TaskItem task={item} index={index} onLongPress={onLongPress} />
       )}
       keyExtractor={(item) => item.id.toString()}
-      ListHeaderComponent={TaskListHeader({ todoTitle, tasks })}
+      ListHeaderComponent={TaskListHeader({
+        todoTitle,
+        tasks,
+        categoryName,
+        categoryColor,
+      })}
       ListFooterComponent={TaskListFooter}
     />
   );
 };
 
-export const TaskItems = ({ tasks, todoTitle, refreshTasks, todos }) => {
+export const TaskItems = ({
+  tasks,
+  todoTitle,
+  refreshTasks,
+  todos,
+  categoryName,
+  categoryColor,
+}) => {
   const onLongPress =
     (taskId, index) => (event: LongPressGestureHandlerStateChangeEvent) => {
       if (event.nativeEvent.state === State.ACTIVE) {
@@ -124,14 +164,19 @@ export const TaskItems = ({ tasks, todoTitle, refreshTasks, todos }) => {
     };
   {
     if (tasks.length > 0) {
-     return (<TaskList tasks={tasks} todoTitle={todoTitle} onLongPress={onLongPress} />);
+      return (
+        <TaskList
+          tasks={tasks}
+          todoTitle={todoTitle}
+          onLongPress={onLongPress}
+          categoryName={categoryName}
+          categoryColor={categoryColor}
+        />
+      );
     } else {
       return (
-        <NoAssignedTasks
-        todoTitle={todoTitle}
-        refreshTasks={refreshTasks}
-      />
-      )
+        <NoAssignedTasks todoTitle={todoTitle} refreshTasks={refreshTasks} />
+      );
     }
   }
 };
@@ -147,6 +192,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "bold",
     marginBottom: 8,
+    height: 80,
   },
   listHeaderContainer: {
     margin: 8,
@@ -162,7 +208,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     paddingVertical: 10,
     borderColor: "lightgrey",
-    height: 60,
+    height: 70,
   },
   taskIndexContainer: {
     backgroundColor: "#FFC6B2",
@@ -184,9 +230,7 @@ const styles = StyleSheet.create({
   duration: {
     flex: 1,
     alignItems: "center",
-    fontSize: 10,
-    margin: 4,
-    paddingTop: 4,
+    fontSize: 8,
   },
   listFooterContainer: {},
   longPressText: {
@@ -198,8 +242,9 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   timestamp: {
+    flex: 1,
     textAlign: "center",
-    fontSize: 10,
+    fontSize: 8,
   },
   attributeContainer: {
     flex: 2,
@@ -207,7 +252,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   iconContainer: {
-    alignSelf: "stretch",
+    flex: 1,
+    textAlign: "center",
+  },
+  categoryContainer: {
+    justifyContent: "center",
+    alignContent: "center",
+    width: 100,
+    backgroundColor: "gray",
+    borderRadius: 50,
+    marginVertical: 8,
+  },
+  categoryName: {
+    color: "white",
     textAlign: "center",
   },
 });

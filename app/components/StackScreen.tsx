@@ -15,19 +15,20 @@ import AddTodoModal from "./AddTodoModal";
 import { primaryColor } from "../helpers/constants";
 import AddTaskModal from "./AddTaskModal";
 import { StatusBar } from "expo-status-bar";
+import Icon from "react-native-vector-icons/FontAwesome";
 
 const todoButton = (setTodoModalVisible, setImportant, setUrgent) => {
   return (
     <Pressable
       onPress={() => {
         // Check importance
-        Alert.alert("Important?", "Is this event important?", [
+        Alert.alert("🧐 Important?", "Is this event important?", [
           {
             text: "No",
             onPress: () => {
               setImportant(false);
               console.log("No pressed");
-              Alert.alert("Urgent?", "Is this event urgent?", [
+              Alert.alert("🔥 Urgent?", "Is this event urgent?", [
                 {
                   text: "No",
                   onPress: () => {
@@ -61,7 +62,7 @@ const todoButton = (setTodoModalVisible, setImportant, setUrgent) => {
               setImportant(true);
               console.log("Yes pressed");
               // Check urgency
-              Alert.alert("Urgent?", "Is this event urgent?", [
+              Alert.alert("🔥 Urgent?", "Is this event urgent?", [
                 {
                   text: "No",
                   onPress: () => {
@@ -107,6 +108,22 @@ const taskButton = (setTaskModalVisible) => {
   );
 };
 
+const settingsButton = ({ gotoSettingsScreen }) => {
+  return (
+    <Pressable
+      onPress={() => {
+        gotoSettingsScreen();
+      }}
+    >
+      <Icon
+        name="cog"
+        style={[styles.naviButton, { paddingHorizontal: 4 }]}
+        size={24}
+      />
+    </Pressable>
+  );
+};
+
 export default function StackScreen({
   title,
   todoId,
@@ -117,6 +134,9 @@ export default function StackScreen({
   setAddTodoButtonState,
   addTaskButtonState,
   setAddTaskButtonState,
+  gotoSettingsScreen,
+  categories,
+  setCategories,
   scheduleNotification = null,
 }) {
   const [todoModalVisible, setTodoModalVisible] = useState(false);
@@ -124,7 +144,7 @@ export default function StackScreen({
   const [important, setImportant] = useState(false);
   const [urgent, setUrgent] = useState(false);
 
-  var headerRightComponent = () => {
+  let headerRightComponent = () => {
     if (addTodoButtonState) {
       return todoButton(setTodoModalVisible, setImportant, setUrgent);
     }
@@ -133,11 +153,19 @@ export default function StackScreen({
     }
   };
 
+  let headerLeftComponent = () => {
+    if (addTodoButtonState && !addTaskButtonState) {
+      return settingsButton({ gotoSettingsScreen });
+    }
+    return;
+  };
+
   return (
     <View style={styles.stackContainer}>
       <Stack.Screen
         options={{
           title: title,
+          headerLeft: headerLeftComponent,
           headerRight: headerRightComponent,
         }}
       ></Stack.Screen>
@@ -146,6 +174,8 @@ export default function StackScreen({
         refreshTodos={refreshTodos}
         modalVisible={todoModalVisible}
         setModalVisible={setTodoModalVisible}
+        categories={categories}
+        setCategories={setCategories}
       />
       <AddTaskModal
         todoId={todoId}
@@ -163,6 +193,7 @@ export default function StackScreen({
 const styles = StyleSheet.create({
   naviButton: {
     color: primaryColor,
+    paddingVertical: 6,
   },
   stackContainer: {
     height: 0,

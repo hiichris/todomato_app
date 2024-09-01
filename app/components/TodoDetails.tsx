@@ -45,6 +45,7 @@ export function TodoDetails({
   const [updateCompleted, setUpdateCompleted] = useState(false);
   const [scrollToEnd, setScrollToEnd] = useState(false);
   const scrollViewRef = useRef();
+  const [contentHeight, setContentHeight] = useState(0);
   const scrollViewKeyboardRef = useRef();
   const [contentWidth, setContentWidth] = useState(0);
   const [focusedInput, setFocusedInput] = useState(null);
@@ -71,9 +72,12 @@ export function TodoDetails({
         const keyboardDidShowListener = Keyboard.addListener(
           "keyboardDidShow",
           () => {
-            // Scroll to the bottom of the ScrollView when the keyboard is shown
+            // Scroll to half of the content height when the keyboard is shown for the map
             setTimeout(() => {
-              scrollViewKeyboardRef.current?.scrollToEnd({ animated: true });
+              scrollViewKeyboardRef.current?.scrollTo({
+                y: contentHeight / 2,
+                animated: true,
+              });
             }, 100);
           }
         );
@@ -200,7 +204,7 @@ export function TodoDetails({
   const deleteTodoHandler = async () => {
     // Confirm if the user really wants to delete the todo
     Alert.alert(
-      "Delete Todo",
+      "🗑️ Delete Todo",
       "Are you sure you want to delete this todo?",
       [
         {
@@ -212,7 +216,7 @@ export function TodoDetails({
           text: "Delete",
           onPress: () => {
             console.log("Deleting todo: ", todoId);
-            console.log("navigation: ", navigation)
+            console.log("navigation: ", navigation);
             // Update the note
             deleteTodo(todoId)
               .then((result) => {
@@ -225,10 +229,15 @@ export function TodoDetails({
                 console.log("Delete Todo Error: ", error);
               });
           },
+          style: "destructive",
         },
       ],
       { cancelable: false }
     );
+  };
+
+  const contentSizeChangeHandler = (contentWidth, contentHeight) => {
+    setContentHeight(contentHeight);
   };
 
   return (
@@ -242,6 +251,16 @@ export function TodoDetails({
           <Text style={styles.TodoTitle} ellipsizeMode="tail" numberOfLines={2}>
             {todoTitle}
           </Text>
+          <View
+        style={[
+          styles.categoryContainer,
+          {
+            backgroundColor: params.categoryColor,
+          },
+        ]}
+      >
+        <Text style={styles.categoryName}>{params.categoryName}</Text>
+      </View>
         </View>
 
         {/* Todo Details */}
@@ -250,7 +269,10 @@ export function TodoDetails({
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={styles.centeredView}
           >
-            <ScrollView ref={scrollViewKeyboardRef}>
+            <ScrollView
+              ref={scrollViewKeyboardRef}
+              onContentSizeChange={contentSizeChangeHandler}
+            >
               <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <>
                   {/* Text Note */}
@@ -307,7 +329,8 @@ const styles = StyleSheet.create({
     flex: 5,
     padding: 8,
   },
-  titleContainer: {},
+  titleContainer: {
+  },
   detailContentContainer: {
     flex: 200,
     paddingHorizontal: 0,
@@ -322,7 +345,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     margin: 8,
     marginHorizontal: 10,
-    height: 50,
+    height: 80,
     verticalAlign: "top",
   },
   sectionContainer: {
@@ -330,6 +353,7 @@ const styles = StyleSheet.create({
     borderColor: "gray",
     paddingBottom: 8,
     marginHorizontal: 12,
+    marginTop: 8,
     borderBottomColor: "lightgray",
     flexDirection: "row",
     justifyContent: "space-around",
@@ -512,5 +536,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
     color: "white",
+  },
+  categoryContainer: {
+    justifyContent: "center",
+    alignContent: "center",
+    width: 100,
+    backgroundColor: "gray",
+    borderRadius: 50,
+    marginHorizontal: 8,
+    marginVertical: 4,
+  },
+  categoryName: {
+    color: "white",
+    textAlign: "center",
   },
 });

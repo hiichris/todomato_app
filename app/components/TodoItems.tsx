@@ -1,11 +1,12 @@
 import { SQLiteProvider, useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState, useCallback } from "react";
-import { View, Text, StyleSheet, FlatList } from "react-native";
+import { View, Text, StyleSheet, FlatList, Pressable } from "react-native";
 import { Task } from "../models/task";
 import { Todo } from "../models/todo";
-import { Link, useFocusEffect } from "expo-router";
+import { Link, useFocusEffect, useRouter } from "expo-router";
 import { primaryColor } from "../helpers/constants";
 import { getTaskCount } from "../services/db_service";
+import Icon from "react-native-vector-icons/FontAwesome";
 
 const TodoListHeader = ({ todoCount }) => {
   return (
@@ -32,8 +33,9 @@ const fetchTaskCount = async (todoId) => {
   }
 };
 
-const TodoItem = ({ item, todos, refreshTodos, refresh }) => {
+const TodoItem = ({ index, item, todos, refreshTodos, refresh }) => {
   const [taskCount, setTaskCount] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
     const getCount = async () => {
@@ -44,40 +46,83 @@ const TodoItem = ({ item, todos, refreshTodos, refresh }) => {
     getCount();
   }, [item.id, refresh]);
 
+  const routingTodoDetailHandler = () => {
+    router.push({
+      pathname: "/todo_details",
+      params: {
+        title: item.title,
+        id: item.id,
+        todos: todos,
+        todoNotes: item.notes,
+        categoryName: item.category_name,
+        categoryColor: item.category_color,
+        refreshTodos: refreshTodos,
+      },
+    });
+  };
+
   return (
-    <Link
-      style={styles.linkContainer}
-      href={{
-        pathname: "/todo_details",
-        params: {
-          title: item.title,
-          id: item.id,
-          todos: todos,
-          todoNotes: item.notes,
-          refreshTodos: refreshTodos,
+    <Pressable
+      style={({ pressed }) => [
+        styles.todoItemsContainer,
+        {
+          backgroundColor: pressed ? "lightgray" : "transparent",
         },
-      }}
+      ]}
+      onPress={routingTodoDetailHandler}
     >
-      <View style={styles.todoListContainer}>
-        <View style={styles.todoIndexContainer}>
-          <Text style={styles.todoIndexText}>{item.index_no}</Text>
-        </View>
-        <Text style={styles.todoTitle} ellipsizeMode="tail"
-            numberOfLines={1}>
+      <View style={styles.titleContainer}>
+        <Text style={styles.todoTitle} ellipsizeMode="tail" numberOfLines={2}>
           {item.title}
         </Text>
-        <View style={styles.taskCountsContainer}>
-          <Text style={styles.taskCountText}>
-            <Text>{taskCount !== null ? taskCount : "Loading..."}</Text> Tasks
-          </Text>
+
+        <View style={styles.subSectionContainer}>
+          <View
+            style={[
+              styles.categoryContainer,
+              {
+                backgroundColor:
+                  item.category_color === null
+                    ? "transparent"
+                    : item.category_color,
+              },
+            ]}
+          >
+            <Text style={styles.categoryText}>{item.category_name}</Text>
+          </View>
+          <View style={styles.attributesContainer}>
+            <View style={styles.attributeContainer}>
+              <Icon
+                name="sticky-note"
+                style={styles.attributeIcon}
+                color="gray"
+              />
+              <Text style={styles.attributeText}>{item.has_notes}</Text>
+            </View>
+
+            <View style={styles.attributeContainer}>
+              <Icon name="image" style={styles.attributeIcon} color="gray" />
+              <Text style={styles.attributeText}>{item.image_count}</Text>
+            </View>
+
+            <View style={styles.attributeContainer}>
+              <Icon name="map-pin" style={styles.attributeIcon} color="gray" />
+              <Text style={styles.attributeText}>{item.has_geolocation}</Text>
+            </View>
+          </View>
         </View>
       </View>
-    </Link>
+      {/* </Link> */}
+      <View style={styles.taskCountsContainer}>
+        <Text style={styles.taskCountText}>
+          <Text style={styles.taskCountNumber}>{taskCount !== null ? taskCount : "..."}</Text> Tasks
+        </Text>
+      </View>
+    </Pressable>
   );
 };
 
 export function TodoItems({ todos, refreshTodos }) {
-  const [taskCount, setTaskCount] = useState(null);
   const [refresh, setRefresh] = useState(false);
 
   useFocusEffect(
@@ -89,80 +134,95 @@ export function TodoItems({ todos, refreshTodos }) {
 
   return (
     <>
-      <FlatList
-        style={styles.listContainer}
-        data={todos}
-        renderItem={({ item }) => (
-          <TodoItem
-            item={item}
-            todos={todos}
-            refreshTodos={refreshTodos}
-            refresh={refresh}
-          />
-        )}
-        keyExtractor={(item) => item.id.toString()}
-        ListHeaderComponent={TodoListHeader(todos.length)}
-      />
+      {todos.length > 0 ? (
+        <FlatList
+          style={styles.todosListContainer}
+          data={todos}
+          renderItem={({ index, item }) => (
+            <TodoItem
+              index={index}
+              item={item}
+              todos={todos}
+              refreshTodos={refreshTodos}
+              refresh={refresh}
+            />
+          )}
+          keyExtractor={(item) => item.id.toString()}
+          ListHeaderComponent={TodoListHeader(todos.length)}
+        />
+      ) : (
+        <View style={styles.listHeaderContainer}>
+          <Text style={styles.listHeaderTitle}>My to-dos</Text>
+          <Text style={styles.listHeaderDescription}>
+            To add a new todo, tap the "Add Todo" button.
+          </Text>
+          <View style={styles.notFoundContainer}>
+            <Text style={styles.notFoundText}>
+              😅 Uh oh! There's no matching to-dos.
+            </Text>
+          </View>
+        </View>
+      )}
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  listContainer: {
+  todoItemsContainer: {
     flex: 1,
-    marginTop: 8,
-  },
-  linkContainer: {
-    textAlign: "center",
-    justifyContent: "flex-start",
-  },
-  todoListContainer: {
-    width: "100%",
     flexDirection: "row",
-    paddingHorizontal: 8,
-    paddingVertical: 16,
-    alignContent: "flex-start",
-    justifyContent: "space-between",
-    borderBottomColor: "lightgray",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderColor: "lightgrey",
+    alignItems: "center",
+    alignContent: "center",
+    height: 80,
     borderBottomWidth: 1,
   },
+  todosListContainer: {
+    flex: 1,
+    marginBottom: 24,
+  },
   todoIndexContainer: {
-    width: 30,
-    height: 30,
-    fontSize: 16,
-    borderRadius: 50,
-    textAlign: "center",
-    alignItems: "center",
     justifyContent: "center",
+    width: 26,
+    height: 26,
+    borderRadius: 50,
+    backgroundColor: primaryColor,
     marginRight: 8,
-    backgroundColor: "#FF5733",
+  },
+  titleContainer: {
+    flex: 8,
+    flexDirection: "column",
+    justifyContent: "space-between",
   },
   todoIndexText: {
+    textAlign: "center",
     color: "white",
-    fontSize: 16,
-    textAlign: "left",
-    alignItems: "center",
-    justifyContent: "center",
+    fontSize: 10,
   },
+  todoItemContainer: {},
   todoTitle: {
-    flex: 1,
     fontSize: 18,
     textAlign: "left",
-    alignContent: "center",
+    alignContent: "space-between",
     justifyContent: "center",
-    paddingTop: 3,
+    padding: 0,
+    margin: 0,
+    marginRight: 8,
   },
   taskCountsContainer: {
-    alignSelf: "flex-end",
-    marginTop: -4,
+    flex: 2,
     borderWidth: 1,
     borderRadius: 50,
-    padding: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 2,
     borderColor: primaryColor,
   },
   taskCountText: {
     color: primaryColor,
-    fontSize: 12,
+    fontSize: 10,
+    textAlign: "center",
   },
   listHeaderContainer: {
     margin: 16,
@@ -175,4 +235,51 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "gray",
   },
+  categoryContainer: {
+    width: 80,
+    borderRadius: 20,
+  },
+  subSectionContainer: {
+    justifyContent: "flex-start",
+    alignContent: "center",
+    flexDirection: "row",
+    marginVertical: 4,
+    padding: 2,
+  },
+  categoryText: {
+    fontSize: 10,
+    color: "white",
+    textAlign: "center",
+  },
+  attributesContainer: {
+    flexDirection: "row",
+    marginRight: 4,
+  },
+  attributeIcon: {
+    fontSize: 12,
+    marginHorizontal: 4,
+  },
+  attributeContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 4,
+  },
+  attributeText: {
+    fontSize: 10,
+    color: "gray",
+    fontWeight: "bold",
+  },
+  notFoundContainer: {
+    marginVertical: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+  },
+  notFoundText: {
+    fontSize: 14,
+    color: primaryColor,
+  },
+  taskCountNumber: {
+    fontWeight: "bold",
+  }
 });

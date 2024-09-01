@@ -1,4 +1,4 @@
-import Constants from 'expo-constants';
+import Constants from "expo-constants";
 import React, { useEffect } from "react";
 import {
   View,
@@ -20,7 +20,7 @@ const googleMapsApiKey = Constants.expoConfig?.extra.googleMapsApiKey;
 // Init the Geocoder
 Geocoder.init(googleMapsApiKey);
 
-export const GeoLocations = ({ styles, setFocusedInput, todoId }) => {
+export const GeoLocations = ({ styles, setFocusedInput, todoId, setGeoInputYpos }) => {
   const [marker, setMarker] = useState(null);
   const [address, setAddress] = useState("");
   const mapRef = useRef(null);
@@ -105,6 +105,7 @@ export const GeoLocations = ({ styles, setFocusedInput, todoId }) => {
     setSearchingLocation(true);
     try {
       let geocode = await Location.geocodeAsync(address);
+
       if (geocode.length > 0) {
         const { latitude, longitude } = geocode[0];
         const newRegion = {
@@ -142,7 +143,21 @@ export const GeoLocations = ({ styles, setFocusedInput, todoId }) => {
         );
       }
     } catch (error) {
-      console.error("Error getting geolocation:", error);
+      console.log("error code:", error.code)
+      if (error.code === 'ERR_LOCATION_UNAUTHORIZED') {
+        Alert.alert(
+          "⚠️ Permission Denied",
+          "Please enable location services in your device settings.",
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                console.log("OK Pressed");
+              },
+            },
+          ]
+        );
+      }
       disableSearching();
     }
   };

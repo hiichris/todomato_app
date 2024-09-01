@@ -10,7 +10,6 @@
   - Update README.md
 */
 
-
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -24,20 +23,24 @@ import {
   LogBox,
 } from "react-native";
 
-import { initializeDatabase, getTodos } from "./services/db_service";
+import { initializeDatabase, getTodos, getCategories } from "./services/db_service";
 import { TodoItems } from "./components/TodoItems";
 import StackScreen from "./components/StackScreen";
 import { Todo } from "./models/todo";
-import { useIsFocused } from '@react-navigation/native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { name as appName } from './app.json';
+import { useIsFocused } from "@react-navigation/native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { name as appName } from "./app.json";
+import { TodoSearchBar } from "./components/TodoSearchBar";
+import { useRouter } from "expo-router";
+import { FavCategories } from "./components/FavCategories";
 
 /*
   Image Reference and Credits:
   splash.png - <a href="https://www.flaticon.com/free-icons/tomato" title="tomato icons">Tomato icons created by Flat Icons Design - Flaticon</a>
 */
 
-// LogBox.ignoreAllLogs();
+// Ignore all logs for demoing purposes
+LogBox.ignoreAllLogs();
 
 function useFocusEffect(callback: () => void) {
   // Ref: https://reactnavigation.org/docs/use-is-focused/
@@ -54,11 +57,14 @@ export default function HomeScreen() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [addTodoButtonState, setAddTodoButtonState] = useState(true);
   const [addTaskButtonState, setAddTaskButtonState] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
+  const [categories, setCategories] = useState([]);
 
   const refreshTodos = async () => {
     console.log("Refreshing todos");
-    await getTodos(setTodos);
-  }
+    await getTodos(setTodos, searchQuery);
+  };
 
   useEffect(() => {
     const initDB = async () => {
@@ -66,11 +72,26 @@ export default function HomeScreen() {
       refreshTodos();
     };
     initDB();
-  }, []);
+
+    if (searchQuery.length > 0) {
+      refreshTodos();
+    }
+  }, [searchQuery]);
 
   useFocusEffect(() => {
     refreshTodos();
   });
+
+  const gotoSettingsScreen = () => {
+    router.push("/settings");
+  };
+
+  const retrieveDBCategories = async () => {
+    console.log("Retrieving categories");
+    const dbCategories = await getCategories(false);
+    console.log("..dbCategories: ", dbCategories);
+    setCategories(dbCategories);
+  };
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -82,10 +103,19 @@ export default function HomeScreen() {
         setAddTodoButtonState={setAddTodoButtonState}
         addTaskButtonState={addTaskButtonState}
         setAddTaskButtonState={setAddTaskButtonState}
+        gotoSettingsScreen={gotoSettingsScreen}
+        categories={categories}
+        setCategories={setCategories}
       />
 
-      <View style={styles.container}>
+      <TodoSearchBar
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+      />
 
+      <FavCategories setSearchQuery={setSearchQuery} />
+
+      <View style={styles.todoItemsContainer}>
         <TodoItems todos={todos} refreshTodos={refreshTodos} />
       </View>
     </GestureHandlerRootView>
@@ -93,8 +123,9 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  todoItemsContainer: {
+    flex: 6,
+    marginTop: 10,
   },
   tasksContainer: {
     flex: 10,
@@ -103,5 +134,9 @@ const styles = StyleSheet.create({
   naviButton: {
     color: "red",
     marginRight: 10,
+  },
+  serachContainer: {
+    padding: 20,
+    flexDirection: "row",
   },
 });

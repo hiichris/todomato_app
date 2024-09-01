@@ -24,7 +24,7 @@ export const ThumbnailImages = ({
         <Text style={styles.detailsSectionTitle}>Something to visualise</Text>
       </View>
 
-      <ScrollView horizontal={true} ref={scrollViewRef} onContentSizeChange={handleContentSizeChange}>
+      <ScrollView horizontal={true} ref={scrollViewRef} onContentSizeChange={handleContentSizeChange} showsHorizontalScrollIndicator={false}>
         <View style={styles.imagesContainer}>
           {/* Loop through the images if there are any */}
           {images &&
@@ -40,7 +40,7 @@ export const ThumbnailImages = ({
             })}
           {/* Add a placeholder image */}
           <Pressable style={styles.placeholderImage} onPress={pickImageHandler}>
-            <Text style={styles.addImageText}>Tab to Add New Image</Text>
+            <Text style={styles.addImageText}>Tap to Add New Image</Text>
           </Pressable>
         </View>
       </ScrollView>
