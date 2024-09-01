@@ -82,13 +82,13 @@ export default function AddTaskModal({
     }
 
     const [differenceInSeconds, selectedDateString] =
-        getTimeDifferenceInSeconds(selectedDate);
-      console.log("differenceInSeconds: ", differenceInSeconds);
+      getTimeDifferenceInSeconds(selectedDate);
+    console.log("differenceInSeconds: ", differenceInSeconds);
 
     // If the user selected "schedule" option, we will have to schedule the notification based on the selected date and time. Then scheduel another notification after the duration ends.
     if (selectedStartOption === "scheduled") {
       // Get the difference in seconds from selected date
-      
+
       console.log("seelctedstartoption ", selectedStartOption);
       // Schedule the 1st reminder notification
       scheduleNotification(taskName, differenceInSeconds, "Reminder")
@@ -113,7 +113,7 @@ export default function AddTaskModal({
     } else {
       alaramDuration = differenceInSeconds + duration * 60;
     }
-    
+
     console.log("alaramDuration::: ", alaramDuration);
 
     // Schedule the alarm notification
@@ -168,7 +168,16 @@ export default function AddTaskModal({
             keyboardShouldPersistTaps="always"
           >
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              <View style={styles.modalView}>
+              <View
+                style={[
+                  styles.modalView,
+                  {
+                    width: Dimensions.get("window").width,
+                    height: Dimensions.get("window").height / 2,
+                    marginTop: Dimensions.get("window").height / 2,
+                  },
+                ]}
+              >
                 <View style={styles.modalHeaderContainer}>
                   <Text style={styles.headerText}>Create Task</Text>
                   <Pressable
@@ -278,9 +287,6 @@ const styles = StyleSheet.create({
   },
   modalView: {
     flex: 1,
-    width: Dimensions.get("window").width,
-    height: Dimensions.get("window").height / 2,
-    marginTop: Dimensions.get("window").height / 2,
     backgroundColor: "rgba(255, 87, 51, 0.95)",
     borderRadius: 20,
     padding: 16,

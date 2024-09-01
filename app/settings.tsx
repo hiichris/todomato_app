@@ -65,7 +65,7 @@ export default function SettingsScreen() {
   const addNewCategoryHandler = async () => {
     if (addNewCategoryName && addNewCategoryColor) {
       console.log("Adding new category: ", addNewCategoryName, addNewCategoryColor);
-      await addCategory(addNewCategoryColor, addNewCategoryName);
+      await addCategory(addNewCategoryColor, addNewCategoryName, 0);
       setAddNewCategoryName("");
       setAddNewCategoryColor("");
       await refreshCategories();
@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
     width: 80,
   },
   resetButtonContainer: {
-    padding: 16,
+    padding: 8,
     borderRadius: 50,
     alignItems: "center",
     justifyContent: "center",
@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderWidth: 1,
     borderRadius: 50,
-    padding: 16,
+    padding: 8,
     borderColor: "gray",
   },
   addNewCategoryInput: {
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   addNewButton: {
-    padding: 16,
+    padding: 8,
     borderRadius: 50,
     alignItems: "center",
     justifyContent: "center",

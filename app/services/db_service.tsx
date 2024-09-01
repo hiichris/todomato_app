@@ -125,6 +125,12 @@ const migrateDatabase = async (db: SQLiteDatabase, version: number = -1) => {
     await db.execAsync("DROP TABLE IF EXISTS categories;").catch((error) => {
       console.log("Error dropping version table", error);
     });
+    await db.execAsync("DROP TABLE IF EXISTS settings;").catch((error) => {
+      console.log("Error dropping version table", error);
+    });
+    await db.execAsync("DROP TABLE IF EXISTS passive_assignments;").catch((error) => {
+      console.log("Error dropping version table", error);
+    });
 
     // Create the todos and tasks tables
     await db
@@ -205,6 +211,47 @@ const migrateDatabase = async (db: SQLiteDatabase, version: number = -1) => {
       })
       .catch((error) => {
         console.log("Error creating table categories", error);
+      });
+
+    // Create settings table
+    await db
+      .execAsync(
+        `
+      CREATE TABLE IF NOT EXISTS settings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        exports TEXT DEFAULT "",
+        theme_color TEXT DEFAULT ""
+        is_first_time INTEGER DEFAULT 1
+        has_read_privacy INTEGER DEFAULT 0
+        send_from_email TEXT DEFAULT ""
+        send_from_name TEXT DEFAULT ""
+      );
+    `
+      )
+      .then(() => {
+        console.log("Table settings created");
+      })
+      .catch((error) => {
+        console.log("Error creating table settings", error);
+      });
+    
+    // Create passive_assignments table
+    await db
+      .execAsync(
+        `
+      CREATE TABLE IF NOT EXISTS passive_assignments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        request_ref TEXT DEFAULT "",
+        request_token TEXT DEFAULT "",
+        todo_id_ref INTEGER,
+      );
+    `
+      )
+      .then(() => {
+        console.log("Table passive_assignments created");
+      })
+      .catch((error) => {
+        console.log("Error creating table passive_assignments", error);
       });
 
     //Insert sample categories
@@ -319,6 +366,7 @@ export const resetDatabase = async () => {
   const db: SQLiteDatabase = await openDatabase(todos_db);
   await setDatabaseVersion(db, 0);
   await migrateDatabase(db, 0);
+  await setDatabaseVersion(db, 0);
 };
 
 export const initializeDatabase = async () => {
@@ -588,14 +636,22 @@ export const deleteCategory = async (category_id: number) => {
   }
 };
 
-export const addCategory = async (color: string, name: string) => {
+export const addCategory = async (
+  color: string,
+  name: string,
+  is_fav: number = 0
+) => {
   const db: SQLiteDatabase = await openDatabase(todos_db);
   const statement = await db.prepareAsync(
-    "INSERT INTO categories (color, name) values ($color, $name)"
+    "INSERT INTO categories (color, name, is_fav) values ($color, $name, $is_fav)"
   );
   let result;
   try {
-    result = await statement.executeAsync({ $color: color, $name: name });
+    result = await statement.executeAsync({
+      $color: color,
+      $name: name,
+      $is_fav: is_fav,
+    });
   } finally {
     await statement.finalizeAsync();
     return result;

@@ -135,6 +135,8 @@ export default function StackScreen({
   addTaskButtonState,
   setAddTaskButtonState,
   gotoSettingsScreen,
+  categories,
+  setCategories,
   scheduleNotification = null,
 }) {
   const [todoModalVisible, setTodoModalVisible] = useState(false);
@@ -172,6 +174,8 @@ export default function StackScreen({
         refreshTodos={refreshTodos}
         modalVisible={todoModalVisible}
         setModalVisible={setTodoModalVisible}
+        categories={categories}
+        setCategories={setCategories}
       />
       <AddTaskModal
         todoId={todoId}

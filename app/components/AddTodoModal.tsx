@@ -28,9 +28,10 @@ export default function AddTodoModal({
   setTodos,
   refreshTodos,
   router,
+  categories,
+  setCategories,
 }) {
   const [todoTitle, setTodoTitle] = React.useState("");
-  const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const scrollViewRef = useRef(null);
 
@@ -42,12 +43,15 @@ export default function AddTodoModal({
         scrollViewRef.current?.scrollToEnd({ animated: true });
       }
     );
-    retrieveDBCategories();
 
     return () => {
       keyboardDidShowListener.remove();
     };
   }, []);
+
+  useEffect(() => {
+    retrieveDBCategories();
+  }, [modalVisible]);
 
   const createTodoHandler = async () => {
     if (todoTitle === "") {
@@ -78,8 +82,8 @@ export default function AddTodoModal({
 
   const retrieveDBCategories = async () => {
     console.log("Retrieving categories");
-    const dbCategories = await getCategories();
-    console.log("dbCategories: ", dbCategories);
+    const dbCategories = await getCategories(false);
+    console.log("..dbCategories: ", dbCategories);
     setCategories(dbCategories);
   };
 

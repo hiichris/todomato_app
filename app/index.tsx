@@ -23,7 +23,7 @@ import {
   LogBox,
 } from "react-native";
 
-import { initializeDatabase, getTodos } from "./services/db_service";
+import { initializeDatabase, getTodos, getCategories } from "./services/db_service";
 import { TodoItems } from "./components/TodoItems";
 import StackScreen from "./components/StackScreen";
 import { Todo } from "./models/todo";
@@ -59,6 +59,7 @@ export default function HomeScreen() {
   const [addTaskButtonState, setAddTaskButtonState] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
+  const [categories, setCategories] = useState([]);
 
   const refreshTodos = async () => {
     console.log("Refreshing todos");
@@ -85,6 +86,13 @@ export default function HomeScreen() {
     router.push("/settings");
   };
 
+  const retrieveDBCategories = async () => {
+    console.log("Retrieving categories");
+    const dbCategories = await getCategories(false);
+    console.log("..dbCategories: ", dbCategories);
+    setCategories(dbCategories);
+  };
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StackScreen
@@ -96,6 +104,8 @@ export default function HomeScreen() {
         addTaskButtonState={addTaskButtonState}
         setAddTaskButtonState={setAddTaskButtonState}
         gotoSettingsScreen={gotoSettingsScreen}
+        categories={categories}
+        setCategories={setCategories}
       />
 
       <TodoSearchBar
