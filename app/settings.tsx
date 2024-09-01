@@ -69,6 +69,7 @@ export default function SettingsScreen() {
       setAddNewCategoryName("");
       setAddNewCategoryColor("");
       await refreshCategories();
+      Alert.alert("🎉Success", "New category has been added!")
     } else {
         Alert.alert("Warning", "Please enter a category name and select a color.");
     }

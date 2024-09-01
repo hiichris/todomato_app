@@ -540,7 +540,7 @@ export const updateGeolocation = async (
 
 // CATEGORY OPERATIONS ////
 
-export const getCategories = async (is_fav: boolean) => {
+export const getCategories = async (is_fav: boolean = false) => {
   const db: SQLiteDatabase = await openDatabase(todos_db);
   let filter_query = "";
   console.log("is_fav: ", is_fav);

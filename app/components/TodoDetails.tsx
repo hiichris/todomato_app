@@ -251,6 +251,16 @@ export function TodoDetails({
           <Text style={styles.TodoTitle} ellipsizeMode="tail" numberOfLines={2}>
             {todoTitle}
           </Text>
+          <View
+        style={[
+          styles.categoryContainer,
+          {
+            backgroundColor: params.categoryColor,
+          },
+        ]}
+      >
+        <Text style={styles.categoryName}>{params.categoryName}</Text>
+      </View>
         </View>
 
         {/* Todo Details */}
@@ -319,7 +329,8 @@ const styles = StyleSheet.create({
     flex: 5,
     padding: 8,
   },
-  titleContainer: {},
+  titleContainer: {
+  },
   detailContentContainer: {
     flex: 200,
     paddingHorizontal: 0,
@@ -334,7 +345,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     margin: 8,
     marginHorizontal: 10,
-    height: 50,
+    height: 80,
     verticalAlign: "top",
   },
   sectionContainer: {
@@ -342,6 +353,7 @@ const styles = StyleSheet.create({
     borderColor: "gray",
     paddingBottom: 8,
     marginHorizontal: 12,
+    marginTop: 8,
     borderBottomColor: "lightgray",
     flexDirection: "row",
     justifyContent: "space-around",
@@ -524,5 +536,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
     color: "white",
+  },
+  categoryContainer: {
+    justifyContent: "center",
+    alignContent: "center",
+    width: 100,
+    backgroundColor: "gray",
+    borderRadius: 50,
+    marginHorizontal: 8,
+    marginVertical: 4,
+  },
+  categoryName: {
+    color: "white",
+    textAlign: "center",
   },
 });

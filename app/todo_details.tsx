@@ -157,7 +157,7 @@ export default function TodoDetailsScreen() {
   if (params.title.length > 26) {
    strippedTitle = params.title.substring(0, 26) + "...";
   }
-
+  console.log("param.color", params.categoryColor)
   return (
     <>
       <PagerView
@@ -191,6 +191,8 @@ export default function TodoDetailsScreen() {
               <TaskItems
                 tasks={tasks}
                 todoTitle={params.title}
+                categoryName={params.categoryName}
+                categoryColor={params.categoryColor}
                 refreshTasks={refreshTasks}
               />
             </View>

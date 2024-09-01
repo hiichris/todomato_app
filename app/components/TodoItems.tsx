@@ -54,6 +54,8 @@ const TodoItem = ({ index, item, todos, refreshTodos, refresh }) => {
         id: item.id,
         todos: todos,
         todoNotes: item.notes,
+        categoryName: item.category_name,
+        categoryColor: item.category_color,
         refreshTodos: refreshTodos,
       },
     });
