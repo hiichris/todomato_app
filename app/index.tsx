@@ -60,10 +60,19 @@ export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
   const [categories, setCategories] = useState([]);
+  const [refresh, setRefresh] = useState(false);
+  const [isEnabled, setIsEnabled] = useState(true);
+  
+  const toggleSwitch = async () => {
+    console.log("Toggling switch", isEnabled);
+    setIsEnabled((previousState) => !previousState)
+    refreshTodos(!isEnabled);
+  };
 
-  const refreshTodos = async () => {
+  const refreshTodos = async (show_completed) => {
     console.log("Refreshing todos");
-    await getTodos(setTodos, searchQuery);
+    console.log("----show_completed: ", show_completed);
+    await getTodos(setTodos, searchQuery, show_completed);
   };
 
   useEffect(() => {
@@ -74,7 +83,7 @@ export default function HomeScreen() {
     initDB();
 
     if (searchQuery.length > 0) {
-      refreshTodos();
+      refreshTodos(show_completed=isEnabled);
     }
   }, [searchQuery]);
 
@@ -116,7 +125,7 @@ export default function HomeScreen() {
       <FavCategories setSearchQuery={setSearchQuery} />
 
       <View style={styles.todoItemsContainer}>
-        <TodoItems todos={todos} refreshTodos={refreshTodos} />
+        <TodoItems todos={todos} refreshTodos={refreshTodos} toggleSwitch={toggleSwitch} isEnabled={isEnabled} />
       </View>
     </GestureHandlerRootView>
   );

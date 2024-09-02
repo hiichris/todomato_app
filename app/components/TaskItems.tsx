@@ -73,7 +73,6 @@ const TaskItem = ({ task, index, onLongPress }) => {
             {task.name}
           </Text>
           <View style={styles.attributeContainer}>
-            {/* <Text style={styles.iconContainer}>⏱️</Text> */}
             <Icon
               name="clock-o"
               size={16}
