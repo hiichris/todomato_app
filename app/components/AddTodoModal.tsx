@@ -83,7 +83,6 @@ export default function AddTodoModal({
   const retrieveDBCategories = async () => {
     console.log("Retrieving categories");
     const dbCategories = await getCategories(false);
-    console.log("..dbCategories: ", dbCategories);
     setCategories(dbCategories);
   };
 

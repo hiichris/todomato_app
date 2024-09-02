@@ -93,6 +93,7 @@ const TodoItem = ({
         todoNotes: item.notes,
         categoryName: item.category_name,
         categoryColor: item.category_color,
+        has_completed: item.has_completed,
         refreshTodos: refreshTodos,
       },
     });

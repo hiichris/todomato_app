@@ -40,6 +40,7 @@ export function TodoDetails({
   setImages,
   refreshImages,
   navigation,
+  has_completed,
 }) {
   const [updating, setUpdating] = useState(false);
   const [updateCompleted, setUpdateCompleted] = useState(false);
@@ -248,7 +249,10 @@ export function TodoDetails({
       <View style={styles.detailContentContainer}>
         {/* Todo Title */}
         <View style={styles.titleContainer}>
-          <Text style={styles.TodoTitle} ellipsizeMode="tail" numberOfLines={2}>
+          <Text style={[
+            styles.TodoTitle,
+            has_completed && styles.TotoTitleCrossed
+          ]} ellipsizeMode="tail" numberOfLines={2}>
             {todoTitle}
           </Text>
           <View
@@ -347,6 +351,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     height: 80,
     verticalAlign: "top",
+  },
+  TotoTitleCrossed: {
+    textDecorationLine: "line-through",
   },
   sectionContainer: {
     flex: 1,

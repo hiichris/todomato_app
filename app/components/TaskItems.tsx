@@ -18,10 +18,20 @@ import { Todo } from "../models/todo";
 import { Tasks } from "./Tasks";
 import { Link } from "expo-router";
 
-const TaskListHeader = ({ todoTitle, tasks, categoryName, categoryColor }) => {
+const TaskListHeader = ({
+  todoTitle,
+  tasks,
+  categoryName,
+  categoryColor,
+  has_completed,
+}) => {
+  console.log("has_completed: ", has_completed)
   return (
     <View style={styles.listHeaderContainer}>
-      <Text style={styles.TodoTitle}>{todoTitle}</Text>
+      <Text style={[
+        styles.TodoTitle, 
+        has_completed ? styles.TodoTitleCrossed : null
+      ]}>{todoTitle}</Text>
       <View
         style={[
           styles.categoryContainer,
@@ -102,7 +112,9 @@ const TaskList = ({
   onLongPress,
   categoryName,
   categoryColor,
+  has_completed,
 }) => {
+  console.log("has_completed: ", has_completed)
   return (
     <FlatList
       style={styles.listContainer}
@@ -116,6 +128,7 @@ const TaskList = ({
         tasks,
         categoryName,
         categoryColor,
+        has_completed,
       })}
       ListFooterComponent={TaskListFooter}
     />
@@ -129,7 +142,9 @@ export const TaskItems = ({
   todos,
   categoryName,
   categoryColor,
+  has_completed,
 }) => {
+  console.log("---has_completed: ", has_completed)
   const onLongPress =
     (taskId, index) => (event: LongPressGestureHandlerStateChangeEvent) => {
       if (event.nativeEvent.state === State.ACTIVE) {
@@ -170,6 +185,7 @@ export const TaskItems = ({
           onLongPress={onLongPress}
           categoryName={categoryName}
           categoryColor={categoryColor}
+          has_completed={has_completed}
         />
       );
     } else {
@@ -192,6 +208,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 8,
     height: 80,
+  },
+  TodoTitleCrossed: {
+    textDecorationLine: "line-through",
   },
   listHeaderContainer: {
     margin: 8,

@@ -71,14 +71,13 @@ export default function HomeScreen() {
 
   const refreshTodos = async (show_completed) => {
     console.log("Refreshing todos");
-    console.log("----show_completed: ", show_completed);
     await getTodos(setTodos, searchQuery, show_completed);
   };
 
   useEffect(() => {
     const initDB = async () => {
       await initializeDatabase();
-      refreshTodos();
+      refreshTodos(show_completed=isEnabled);
     };
     initDB();
 
@@ -88,7 +87,7 @@ export default function HomeScreen() {
   }, [searchQuery]);
 
   useFocusEffect(() => {
-    refreshTodos();
+    refreshTodos(show_completed=isEnabled);
   });
 
   const gotoSettingsScreen = () => {
@@ -96,9 +95,7 @@ export default function HomeScreen() {
   };
 
   const retrieveDBCategories = async () => {
-    console.log("Retrieving categories");
     const dbCategories = await getCategories(false);
-    console.log("..dbCategories: ", dbCategories);
     setCategories(dbCategories);
   };
 

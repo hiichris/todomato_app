@@ -392,13 +392,10 @@ export const getTodos = async (
   }
 
   // Additional query to filter by completed status
-  console.log("show_completed: ", show_completed);
   let hide_completed_query = "";
   if (!show_completed) {
     hide_completed_query = "AND t.has_completed = 0";
   }
-
-  console.log("11show_completed: ", show_completed, hide_completed_query);
 
   const query = `SELECT t.id, t.title, t.notes, t.attachment, t.geolocation, t.category_id, 
     t.index_no, c.name as 'category_name', c.color as 'category_color',
@@ -410,7 +407,6 @@ export const getTodos = async (
     ${hide_completed_query}
     ${keyword_query} ORDER BY index_no asc;`;
   const todos = await db.getAllAsync<Todo>(query);
-  console.log("query: ", query, "show_completed: ", show_completed);
   setTodos(todos);
 };
 
@@ -630,7 +626,6 @@ export const updateGeolocation = async (
 export const getCategories = async (is_fav: boolean = false) => {
   const db: SQLiteDatabase = await openDatabase(todos_db);
   let filter_query = "";
-  console.log("is_fav: ", is_fav);
   if (is_fav) {
     filter_query = "WHERE is_fav = 1";
   }
