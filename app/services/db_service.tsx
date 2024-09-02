@@ -405,7 +405,7 @@ export const getTodos = async (
     CASE WHEN t.geolocation IS "" THEN 0 ELSE 1 END as 'has_geolocation'
     FROM todos t JOIN categories c ON t.category_id == c.id 
     ${hide_completed_query}
-    ${keyword_query} ORDER BY index_no asc;`;
+    ${keyword_query} ORDER BY t.id DESC;`;
   const todos = await db.getAllAsync<Todo>(query);
   setTodos(todos);
 };

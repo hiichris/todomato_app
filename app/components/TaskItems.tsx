@@ -25,13 +25,17 @@ const TaskListHeader = ({
   categoryColor,
   has_completed,
 }) => {
-  console.log("aaa has_completed: ", has_completed)
+  console.log("aaa has_completed: ", has_completed);
   return (
     <View style={styles.listHeaderContainer}>
-      <Text style={[
-        styles.TodoTitle, 
-        has_completed == 1 ? styles.TodoTitleCrossed : null
-      ]}>{todoTitle}</Text>
+      <Text
+        style={[
+          styles.TodoTitle,
+          has_completed == 1 ? styles.TodoTitleCrossed : null,
+        ]}
+      >
+        {todoTitle}
+      </Text>
       <View
         style={[
           styles.categoryContainer,
@@ -69,40 +73,46 @@ const TaskListFooter = () => {
 
 const TaskItem = ({ task, index, onLongPress }) => {
   return (
-    <GestureHandlerRootView style={styles.taskItemsContainer}>
-      {/* Wrap a Longpress component here to remove the item */}
-      <LongPressGestureHandler
-        onHandlerStateChange={onLongPress(task.id, index)}
-        minDurationMs={800}
-      >
-        <View style={styles.taskItemContainer}>
-          <View style={styles.taskIndexContainer}>
-            <Text>{index + 1}</Text>
+    <View style={styles.taskItemsContainer}>
+      <GestureHandlerRootView>
+        {/* Wrap a Longpress component here to remove the item */}
+        <LongPressGestureHandler
+          onHandlerStateChange={onLongPress(task.id, index)}
+          minDurationMs={800}
+        >
+          <View style={styles.taskItemContainer}>
+            <View style={styles.taskIndexContainer}>
+              <Text>{index + 1}</Text>
+            </View>
+            <Text
+              style={styles.taskName}
+              ellipsizeMode="tail"
+              numberOfLines={2}
+            >
+              {task.name}
+            </Text>
+            <View style={styles.attributeContainer}>
+              <Icon
+                name="clock-o"
+                size={16}
+                color="gray"
+                style={styles.iconContainer}
+              />
+              <Text style={styles.duration}>{task.duration}m</Text>
+            </View>
+            <View style={styles.attributeContainer}>
+              <Icon
+                name="calendar"
+                size={16}
+                color="gray"
+                style={styles.iconContainer}
+              />
+              <Text style={styles.timestamp}>{task.scheduled_at}</Text>
+            </View>
           </View>
-          <Text style={styles.taskName} ellipsizeMode="tail" numberOfLines={2}>
-            {task.name}
-          </Text>
-          <View style={styles.attributeContainer}>
-            <Icon
-              name="clock-o"
-              size={16}
-              color="gray"
-              style={styles.iconContainer}
-            />
-            <Text style={styles.duration}>{task.duration}m</Text>
-          </View>
-          <View style={styles.attributeContainer}>
-            <Icon
-              name="calendar"
-              size={16}
-              color="gray"
-              style={styles.iconContainer}
-            />
-            <Text style={styles.timestamp}>{task.scheduled_at}</Text>
-          </View>
-        </View>
-      </LongPressGestureHandler>
-    </GestureHandlerRootView>
+        </LongPressGestureHandler>
+      </GestureHandlerRootView>
+    </View>
   );
 };
 
@@ -114,7 +124,7 @@ const TaskList = ({
   categoryColor,
   has_completed,
 }) => {
-  console.log("has_completed: ", has_completed)
+  console.log("has_completed: ", has_completed);
   return (
     <FlatList
       style={styles.listContainer}
@@ -144,7 +154,7 @@ export const TaskItems = ({
   categoryColor,
   has_completed,
 }) => {
-  console.log("---has_completed: ", has_completed)
+  console.log("---has_completed: ", has_completed);
   const onLongPress =
     (taskId, index) => (event: LongPressGestureHandlerStateChangeEvent) => {
       if (event.nativeEvent.state === State.ACTIVE) {
@@ -190,7 +200,11 @@ export const TaskItems = ({
       );
     } else {
       return (
-        <NoAssignedTasks todoTitle={todoTitle} refreshTasks={refreshTasks} has_completed={has_completed} />
+        <NoAssignedTasks
+          todoTitle={todoTitle}
+          refreshTasks={refreshTasks}
+          has_completed={has_completed}
+        />
       );
     }
   }
@@ -201,7 +215,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   taskItemsContainer: {
-    borderBottomColor: "#f0f0f0",
+    borderBottomColor: "lightgray",
+    borderBottomWidth: 1,
+    marginHorizontal: 4,
   },
   TodoTitle: {
     fontSize: 32,
@@ -229,15 +245,14 @@ const styles = StyleSheet.create({
     height: 70,
   },
   taskIndexContainer: {
-    backgroundColor: "#FFC6B2",
+    backgroundColor: "lightgray",
     marginRight: 8,
     borderRadius: 50,
     alignItems: "center",
     justifyContent: "center",
     width: 30,
     height: 30,
-    borderWidth: 1,
-    borderColor: "#FF5733",
+    borderColor: "gray",
   },
   taskName: {
     flex: 8,
@@ -265,7 +280,7 @@ const styles = StyleSheet.create({
     fontSize: 8,
   },
   attributeContainer: {
-    flex: 2,
+    flex: 3,
     flexDirection: "column",
     alignItems: "center",
   },
