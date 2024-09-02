@@ -128,7 +128,7 @@ const TodoItem = ({
         <Text
           style={[
             styles.todoTitle,
-            item.has_completed && styles.todoTitleCrossed,
+            item.has_completed == 1 ? styles.todoTitleCrossed : null
           ]}
           ellipsizeMode="tail"
           numberOfLines={2}

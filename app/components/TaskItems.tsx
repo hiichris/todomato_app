@@ -25,12 +25,12 @@ const TaskListHeader = ({
   categoryColor,
   has_completed,
 }) => {
-  console.log("has_completed: ", has_completed)
+  console.log("aaa has_completed: ", has_completed)
   return (
     <View style={styles.listHeaderContainer}>
       <Text style={[
         styles.TodoTitle, 
-        has_completed ? styles.TodoTitleCrossed : null
+        has_completed == 1 ? styles.TodoTitleCrossed : null
       ]}>{todoTitle}</Text>
       <View
         style={[

@@ -240,7 +240,7 @@ export function TodoDetails({
   const contentSizeChangeHandler = (contentWidth, contentHeight) => {
     setContentHeight(contentHeight);
   };
-
+  console.log("eee has_completed: ", has_completed);
   return (
     <View style={styles.detailsContainer}>
       {/* Tap Buttons */}
@@ -249,22 +249,26 @@ export function TodoDetails({
       <View style={styles.detailContentContainer}>
         {/* Todo Title */}
         <View style={styles.titleContainer}>
-          <Text style={[
-            styles.TodoTitle,
-            has_completed && styles.TotoTitleCrossed
-          ]} ellipsizeMode="tail" numberOfLines={2}>
+          <Text
+            style={[
+              styles.TodoTitle,
+              has_completed == 1 ? styles.TotoTitleCrossed : {},
+            ]}
+            ellipsizeMode="tail"
+            numberOfLines={2}
+          >
             {todoTitle}
           </Text>
           <View
-        style={[
-          styles.categoryContainer,
-          {
-            backgroundColor: params.categoryColor,
-          },
-        ]}
-      >
-        <Text style={styles.categoryName}>{params.categoryName}</Text>
-      </View>
+            style={[
+              styles.categoryContainer,
+              {
+                backgroundColor: params.categoryColor,
+              },
+            ]}
+          >
+            <Text style={styles.categoryName}>{params.categoryName}</Text>
+          </View>
         </View>
 
         {/* Todo Details */}
@@ -333,8 +337,7 @@ const styles = StyleSheet.create({
     flex: 5,
     padding: 8,
   },
-  titleContainer: {
-  },
+  titleContainer: {},
   detailContentContainer: {
     flex: 200,
     paddingHorizontal: 0,
