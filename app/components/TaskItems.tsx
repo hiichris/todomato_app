@@ -190,7 +190,7 @@ export const TaskItems = ({
       );
     } else {
       return (
-        <NoAssignedTasks todoTitle={todoTitle} refreshTasks={refreshTasks} />
+        <NoAssignedTasks todoTitle={todoTitle} refreshTasks={refreshTasks} has_completed={has_completed} />
       );
     }
   }
