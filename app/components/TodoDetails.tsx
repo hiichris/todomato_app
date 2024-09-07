@@ -542,7 +542,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   deleteButtonText: {
-    color: "red",
     fontSize: 16,
     textAlign: "center",
     color: "white",

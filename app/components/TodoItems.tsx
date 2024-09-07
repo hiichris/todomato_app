@@ -46,6 +46,21 @@ const TodoListHeader = ({ todoCount, toggleSwitch, isEnabled }) => {
   );
 };
 
+const TodoListFooter = ({ todoCount }) => {
+  // if todoCount is 0, show a message
+  return (
+    todoCount === 0 ? (
+      <View style={styles.notFoundContainer}>
+        <Text style={styles.notFoundText}>
+          😅 Uh oh! There's no matching to-dos.
+        </Text>
+      </View>
+    ) : (
+      <></>
+    )
+  )
+};
+
 const fetchTaskCount = async (todoId) => {
   try {
     const count = await getTaskCount(todoId);
@@ -204,52 +219,28 @@ export function TodoItems({ todos, refreshTodos, toggleSwitch, isEnabled }) {
 
   return (
     <>
-      {todos.length > 0 ? (
-        <FlatList
-          style={styles.todosListContainer}
-          data={todos}
-          keyExtractor={(item) => item.id.toString()}
-          ListHeaderComponent={() => (
-            <TodoListHeader
-              todoCount={todos.length}
-              toggleSwitch={toggleSwitch}
-              isEnabled={isEnabled}
-            />
-          )}
-          renderItem={({ index, item }) => (
-            <TodoItem
-              index={index}
-              item={item}
-              todos={todos}
-              refreshTodos={refreshTodos}
-              refresh={refresh}
-            />
-          )}
-        />
-      ) : (
-        <View style={styles.listHeaderContainer}>
-          <Text style={styles.listHeaderTitle}>My to-dos</Text>
-          <Text
-            style={[
-              styles.listHeaderDescription,
-            
-            ]}
-          >
-            Tap on a todo to view its details.
-          </Text>
-
-          <SwitchShowCompleted
-            isEnabled={isEnabled}
+      <FlatList
+        style={styles.todosListContainer}
+        data={todos}
+        keyExtractor={(item) => item.id.toString()}
+        ListHeaderComponent={() => (
+          <TodoListHeader
+            todoCount={todos.length}
             toggleSwitch={toggleSwitch}
+            isEnabled={isEnabled}
           />
-
-          <View style={styles.notFoundContainer}>
-            <Text style={styles.notFoundText}>
-              😅 Uh oh! There's no matching to-dos.
-            </Text>
-          </View>
-        </View>
-      )}
+        )}
+        ListFooterComponent={() => <TodoListFooter todoCount={todos.length} />}
+        renderItem={({ index, item }) => (
+          <TodoItem
+            index={index}
+            item={item}
+            todos={todos}
+            refreshTodos={refreshTodos}
+            refresh={refresh}
+          />
+        )}
+      />
     </>
   );
 }
@@ -368,11 +359,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   notFoundContainer: {
-    flex: 10,
-    marginVertical: 16,
+    flex: 15.5,
+    marginVertical: 30,
     justifyContent: "center",
     alignItems: "center",
-    padding: 16,
+    height: "100%",
   },
   notFoundText: {
     fontSize: 14,

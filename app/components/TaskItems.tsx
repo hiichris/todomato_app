@@ -8,7 +8,12 @@ import {
   Alert,
   Pressable,
 } from "react-native";
-import { getAllTodos, getAllTasks, deleteTask, updateTodoCompleted } from "../services/db_service";
+import {
+  getAllTodos,
+  getAllTasks,
+  deleteTask,
+  updateTodoCompleted,
+} from "../services/db_service";
 import {
   GestureHandlerRootView,
   LongPressGestureHandler,
@@ -25,7 +30,6 @@ import { Todo } from "../models/todo";
 import { Tasks } from "./Tasks";
 import { Link } from "expo-router";
 
-
 const updateTodoCompletedHandler =
   (todoId, completedStatus, setCompletedStatus) => async () => {
     console.log("Updating todo completed status", todoId, completedStatus);
@@ -35,7 +39,6 @@ const updateTodoCompletedHandler =
     updateTodoCompleted(todoId, completedStatus);
     setCompletedStatus(completedStatus);
   };
-
 
 const TaskListHeader = ({
   todoId,
@@ -55,7 +58,7 @@ const TaskListHeader = ({
             onPress={updateTodoCompletedHandler(
               todoId,
               completedStatus,
-              setCompletedStatus,
+              setCompletedStatus
             )}
           >
             {parseInt(completedStatus) === 1 ? (
@@ -163,7 +166,7 @@ const TaskList = ({
   categoryName,
   categoryColor,
   completedStatus,
-  setCompletedStatus
+  setCompletedStatus,
 }) => {
   return (
     <FlatList
@@ -367,6 +370,6 @@ const styles = StyleSheet.create({
   },
   headerStatusTitleContainer: {
     flexDirection: "row",
-    justifyContent: "space-start",
+    justifyContent: "flex-start",
   },
 });
