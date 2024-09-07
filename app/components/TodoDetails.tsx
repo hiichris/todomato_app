@@ -40,6 +40,8 @@ export function TodoDetails({
   setImages,
   refreshImages,
   navigation,
+  completedStatus,
+  setCompletedStatus,
 }) {
   const [updating, setUpdating] = useState(false);
   const [updateCompleted, setUpdateCompleted] = useState(false);
@@ -239,7 +241,6 @@ export function TodoDetails({
   const contentSizeChangeHandler = (contentWidth, contentHeight) => {
     setContentHeight(contentHeight);
   };
-
   return (
     <View style={styles.detailsContainer}>
       {/* Tap Buttons */}
@@ -248,19 +249,26 @@ export function TodoDetails({
       <View style={styles.detailContentContainer}>
         {/* Todo Title */}
         <View style={styles.titleContainer}>
-          <Text style={styles.TodoTitle} ellipsizeMode="tail" numberOfLines={2}>
+          <Text
+            style={[
+              styles.TodoTitle,
+              completedStatus == 1 ? styles.TotoTitleCrossed : {},
+            ]}
+            ellipsizeMode="tail"
+            numberOfLines={2}
+          >
             {todoTitle}
           </Text>
           <View
-        style={[
-          styles.categoryContainer,
-          {
-            backgroundColor: params.categoryColor,
-          },
-        ]}
-      >
-        <Text style={styles.categoryName}>{params.categoryName}</Text>
-      </View>
+            style={[
+              styles.categoryContainer,
+              {
+                backgroundColor: params.categoryColor,
+              },
+            ]}
+          >
+            <Text style={styles.categoryName}>{params.categoryName}</Text>
+          </View>
         </View>
 
         {/* Todo Details */}
@@ -329,8 +337,7 @@ const styles = StyleSheet.create({
     flex: 5,
     padding: 8,
   },
-  titleContainer: {
-  },
+  titleContainer: {},
   detailContentContainer: {
     flex: 200,
     paddingHorizontal: 0,
@@ -347,6 +354,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     height: 80,
     verticalAlign: "top",
+  },
+  TotoTitleCrossed: {
+    textDecorationLine: "line-through",
   },
   sectionContainer: {
     flex: 1,
@@ -532,7 +542,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   deleteButtonText: {
-    color: "red",
     fontSize: 16,
     textAlign: "center",
     color: "white",

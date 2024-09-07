@@ -22,7 +22,6 @@ import {
   AppRegistry,
   LogBox,
 } from "react-native";
-
 import { initializeDatabase, getTodos, getCategories } from "./services/db_service";
 import { TodoItems } from "./components/TodoItems";
 import StackScreen from "./components/StackScreen";
@@ -33,6 +32,7 @@ import { name as appName } from "./app.json";
 import { TodoSearchBar } from "./components/TodoSearchBar";
 import { useRouter } from "expo-router";
 import { FavCategories } from "./components/FavCategories";
+import * as ScreenOrientation from 'expo-screen-orientation';
 
 /*
   Image Reference and Credits:
@@ -60,26 +60,40 @@ export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
   const [categories, setCategories] = useState([]);
+  const [refresh, setRefresh] = useState(false);
+  const [isEnabled, setIsEnabled] = useState(true);
+  
+  const toggleSwitch = async () => {
+    console.log("Toggling switch", isEnabled);
+    setIsEnabled((previousState) => !previousState)
+    refreshTodos(!isEnabled);
+  };
 
-  const refreshTodos = async () => {
+  const refreshTodos = async (show_completed) => {
     console.log("Refreshing todos");
-    await getTodos(setTodos, searchQuery);
+    await getTodos(setTodos, searchQuery, show_completed);
   };
 
   useEffect(() => {
     const initDB = async () => {
       await initializeDatabase();
-      refreshTodos();
+      refreshTodos(show_completed=isEnabled);
     };
+
+    const lockOrientation = async () => {
+      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT);
+      console.log("Orientation locked to portrait");
+    }
     initDB();
+    lockOrientation();
 
     if (searchQuery.length > 0) {
-      refreshTodos();
+      refreshTodos(show_completed=isEnabled);
     }
   }, [searchQuery]);
 
   useFocusEffect(() => {
-    refreshTodos();
+    refreshTodos(show_completed=isEnabled);
   });
 
   const gotoSettingsScreen = () => {
@@ -87,9 +101,7 @@ export default function HomeScreen() {
   };
 
   const retrieveDBCategories = async () => {
-    console.log("Retrieving categories");
     const dbCategories = await getCategories(false);
-    console.log("..dbCategories: ", dbCategories);
     setCategories(dbCategories);
   };
 
@@ -116,7 +128,7 @@ export default function HomeScreen() {
       <FavCategories setSearchQuery={setSearchQuery} />
 
       <View style={styles.todoItemsContainer}>
-        <TodoItems todos={todos} refreshTodos={refreshTodos} />
+        <TodoItems todos={todos} refreshTodos={refreshTodos} toggleSwitch={toggleSwitch} isEnabled={isEnabled} />
       </View>
     </GestureHandlerRootView>
   );

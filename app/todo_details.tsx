@@ -58,6 +58,7 @@ export default function TodoDetailsScreen() {
   const [currentPage, setCurrentPage] = useState(0);
   const [todoNotes, setTodoNotes] = useState(params.todoNotes);
   const [images, setImages] = useState(null);
+  const [completedStatus, setCompletedStatus] = useState(params.has_completed);
 
   const goToPage = (pageIndex) => {
     if (pagerRef.current) {
@@ -157,7 +158,6 @@ export default function TodoDetailsScreen() {
   if (params.title.length > 26) {
    strippedTitle = params.title.substring(0, 26) + "...";
   }
-  console.log("param.color", params.categoryColor)
   return (
     <>
       <PagerView
@@ -190,9 +190,12 @@ export default function TodoDetailsScreen() {
             <View style={styles.TaskItemContainer}>
               <TaskItems
                 tasks={tasks}
+                todoId={params.id}
                 todoTitle={params.title}
                 categoryName={params.categoryName}
                 categoryColor={params.categoryColor}
+                completedStatus={completedStatus}
+                setCompletedStatus={setCompletedStatus}
                 refreshTasks={refreshTasks}
               />
             </View>
@@ -212,6 +215,8 @@ export default function TodoDetailsScreen() {
             images={images}
             setImages={setImages}
             refreshImages={refreshImages}
+            completedStatus={completedStatus}
+            setCompletedStatus={setCompletedStatus}
             navigation={navigation}
           />
         </View>
