@@ -40,7 +40,8 @@ export function TodoDetails({
   setImages,
   refreshImages,
   navigation,
-  has_completed,
+  completedStatus,
+  setCompletedStatus,
 }) {
   const [updating, setUpdating] = useState(false);
   const [updateCompleted, setUpdateCompleted] = useState(false);
@@ -240,7 +241,6 @@ export function TodoDetails({
   const contentSizeChangeHandler = (contentWidth, contentHeight) => {
     setContentHeight(contentHeight);
   };
-  console.log("eee has_completed: ", has_completed);
   return (
     <View style={styles.detailsContainer}>
       {/* Tap Buttons */}
@@ -252,7 +252,7 @@ export function TodoDetails({
           <Text
             style={[
               styles.TodoTitle,
-              has_completed == 1 ? styles.TotoTitleCrossed : {},
+              completedStatus == 1 ? styles.TotoTitleCrossed : {},
             ]}
             ellipsizeMode="tail"
             numberOfLines={2}

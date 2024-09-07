@@ -16,6 +16,22 @@ import { primaryColor } from "../helpers/constants";
 import { getTaskCount, updateTodoCompleted } from "../services/db_service";
 import Icon from "react-native-vector-icons/FontAwesome";
 
+const SwitchShowCompleted = ({ isEnabled, toggleSwitch }) => {
+  return (
+    <View style={styles.switchContainer}>
+      <Switch
+        style={styles.switchControl}
+        trackColor={{ false: "#767577", true: primaryColor }}
+        thumbColor={isEnabled ? "#f4f3f4" : "#f4f3f4"}
+        ios_backgroundColor="#3e3e3e"
+        onValueChange={toggleSwitch}
+        value={isEnabled}
+      />
+      <Text style={[styles.switchDescription]}>Show Completed</Text>
+    </View>
+  );
+};
+
 const TodoListHeader = ({ todoCount, toggleSwitch, isEnabled }) => {
   return (
     <View style={styles.listHeaderContainer}>
@@ -25,17 +41,7 @@ const TodoListHeader = ({ todoCount, toggleSwitch, isEnabled }) => {
           ? 'To add a new todo, tab the "Add Todo" button.'
           : "Tap on a todo to view its details."}
       </Text>
-      <View style={styles.switchContainer}>
-        <Switch
-        style={styles.switchControl}
-          trackColor={{ false: "#767577", true: primaryColor }}
-          thumbColor={isEnabled ? "#f4f3f4" : "#f4f3f4"}
-          ios_backgroundColor="#3e3e3e"
-          onValueChange={toggleSwitch}
-          value={isEnabled} 
-          />
-        <Text style={styles.switchDescription}>Show Completed</Text>
-      </View>
+      <SwitchShowCompleted isEnabled={isEnabled} toggleSwitch={toggleSwitch} />
     </View>
   );
 };
@@ -128,7 +134,7 @@ const TodoItem = ({
         <Text
           style={[
             styles.todoTitle,
-            item.has_completed == 1 ? styles.todoTitleCrossed : null
+            item.has_completed == 1 ? styles.todoTitleCrossed : null,
           ]}
           ellipsizeMode="tail"
           numberOfLines={2}
@@ -186,7 +192,7 @@ const TodoItem = ({
   );
 };
 
-export function TodoItems({ todos, refreshTodos, toggleSwitch, isEnabled}) {
+export function TodoItems({ todos, refreshTodos, toggleSwitch, isEnabled }) {
   const [refresh, setRefresh] = useState(false);
 
   useFocusEffect(
@@ -223,9 +229,20 @@ export function TodoItems({ todos, refreshTodos, toggleSwitch, isEnabled}) {
       ) : (
         <View style={styles.listHeaderContainer}>
           <Text style={styles.listHeaderTitle}>My to-dos</Text>
-          <Text style={styles.listHeaderDescription}>
-            To add a new todo, tap the "Add Todo" button.
+          <Text
+            style={[
+              styles.listHeaderDescription,
+            
+            ]}
+          >
+            Tap on a todo to view its details.
           </Text>
+
+          <SwitchShowCompleted
+            isEnabled={isEnabled}
+            toggleSwitch={toggleSwitch}
+          />
+
           <View style={styles.notFoundContainer}>
             <Text style={styles.notFoundText}>
               😅 Uh oh! There's no matching to-dos.
@@ -304,7 +321,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   listHeaderContainer: {
+    flex: 1,
     margin: 16,
+    justifyContent: "space-evenly",
   },
   listHeaderTitle: {
     fontSize: 36,
@@ -349,6 +368,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   notFoundContainer: {
+    flex: 10,
     marginVertical: 16,
     justifyContent: "center",
     alignItems: "center",
@@ -357,6 +377,7 @@ const styles = StyleSheet.create({
   notFoundText: {
     fontSize: 14,
     color: primaryColor,
+    marginTop: 24,
   },
   taskCountNumber: {
     fontWeight: "bold",
@@ -375,12 +396,14 @@ const styles = StyleSheet.create({
     margin: 0,
     marginLeft: -8,
     marginTop: -4,
-  }, 
+  },
   switchDescription: {
+    flex: 1,
     fontSize: 12,
     color: "gray",
     marginLeft: 4,
     alignContent: "center",
+    justifyContent: "center",
     paddingBottom: 6,
-  }
+  },
 });
