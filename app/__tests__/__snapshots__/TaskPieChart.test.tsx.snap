@@ -1,0 +1,130 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TaskPieChart renders correctly 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "flex": 1,
+      "justifyContent": "center",
+    }
+  }
+>
+  <RNSVGSvgView
+    align="xMidYMid"
+    bbHeight={450}
+    bbWidth={450}
+    focusable={false}
+    height={450}
+    meetOrSlice={0}
+    minX={0}
+    minY={0}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        {
+          "flex": 0,
+          "height": 450,
+          "width": 450,
+        },
+      ]
+    }
+    vbHeight={110}
+    vbWidth={110}
+    width={450}
+  >
+    <RNSVGGroup
+      fill={
+        {
+          "payload": 4278190080,
+          "type": 0,
+        }
+      }
+    >
+      <RNSVGCircle
+        cx="55"
+        cy="55"
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+          ]
+        }
+        r="50"
+        stroke={
+          {
+            "payload": 4294954943,
+            "type": 0,
+          }
+        }
+        strokeWidth={8}
+      />
+      <RNSVGPath
+        d="M 55,55 L 5,55 A 50,50 0 0,1 55,5 Z"
+        fill={
+          {
+            "payload": 4294962920,
+            "type": 0,
+          }
+        }
+        propList={
+          [
+            "fill",
+          ]
+        }
+      />
+      <RNSVGPath
+        d="M 55,55 L 55,5 A 50,50 0 0,1 105,55 Z"
+        fill={
+          {
+            "payload": 4294962920,
+            "type": 0,
+          }
+        }
+        propList={
+          [
+            "fill",
+          ]
+        }
+      />
+      <RNSVGPath
+        d="M 55,55 L 105,55 A 50,50 0 0,1 55,105 Z"
+        fill={
+          {
+            "payload": 4294962920,
+            "type": 0,
+          }
+        }
+        propList={
+          [
+            "fill",
+          ]
+        }
+      />
+      <RNSVGPath
+        d="M 55,55 L 55,105 A 50,50 0 0,1 5,55 Z"
+        fill={
+          {
+            "payload": 4294962920,
+            "type": 0,
+          }
+        }
+        propList={
+          [
+            "fill",
+          ]
+        }
+      />
+      <View />
+      <View />
+      <View />
+      <View />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;

@@ -40,10 +40,10 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 */
 
 // Ignore all logs for demoing purposes
-LogBox.ignoreAllLogs();
+// LogBox.ignoreAllLogs();
 
 function useFocusEffect(callback: () => void) {
-  // Ref: https://reactnavigation.org/docs/use-is-focused/
+  // Ref: (https://reactnavigation.org/docs/use-is-focused/)
   const isFocused = useIsFocused();
 
   useEffect(() => {
@@ -82,7 +82,12 @@ export default function HomeScreen() {
     };
 
     const lockOrientation = async () => {
-      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT);
+      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT).then((result) => {
+        console.log("Orientation locked to portrait");
+      }).catch((error) => {
+        console.log("Error locking orientation to portrait", error);
+      });
+        
       console.log("Orientation locked to portrait");
     }
     initDB();

@@ -1,0 +1,406 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NoAssignedTasks renders correctly 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "height": "100%",
+      "justifyContent": "center",
+    }
+  }
+>
+  <Text
+    style={
+      {
+        "color": "#FF5733",
+        "fontWeight": "bold",
+        "marginTop": 20,
+        "textAlign": "center",
+      }
+    }
+  >
+    Currently, there are no assigned tasks for
+  </Text>
+  <Text
+    style={
+      [
+        {
+          "color": "#FF5733",
+          "fontSize": 24,
+          "fontWeight": "bold",
+          "padding": 10,
+          "textAlign": "center",
+          "width": "80%",
+        },
+        null,
+      ]
+    }
+  />
+  <Text
+    style={
+      {
+        "color": "gray",
+        "padding": 20,
+        "textAlign": "center",
+      }
+    }
+  >
+    Add your first task (comes with a notification) is a great way to start!
+  </Text>
+  <View
+    style={
+      {
+        "flex": 1,
+        "height": 375,
+        "marginBottom": 20,
+        "width": 375,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flex": 1,
+          "justifyContent": "center",
+        }
+      }
+    >
+      <RNSVGSvgView
+        align="xMidYMid"
+        bbHeight={450}
+        bbWidth={450}
+        focusable={false}
+        height={450}
+        meetOrSlice={0}
+        minX={0}
+        minY={0}
+        style={
+          [
+            {
+              "backgroundColor": "transparent",
+              "borderWidth": 0,
+            },
+            {
+              "flex": 0,
+              "height": 450,
+              "width": 450,
+            },
+          ]
+        }
+        vbHeight={110}
+        vbWidth={110}
+        width={450}
+      >
+        <RNSVGGroup
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+        >
+          <RNSVGCircle
+            cx="55"
+            cy="55"
+            fill={null}
+            propList={
+              [
+                "fill",
+                "stroke",
+                "strokeWidth",
+              ]
+            }
+            r="50"
+            stroke={
+              {
+                "payload": 4294954943,
+                "type": 0,
+              }
+            }
+            strokeWidth={8}
+          />
+          <RNSVGPath
+            d="M 55,55 L 5,55 A 50,50 0 0,1 55,5 Z"
+            fill={
+              {
+                "payload": 4292556547,
+                "type": 0,
+              }
+            }
+            propList={
+              [
+                "fill",
+              ]
+            }
+          />
+          <RNSVGPath
+            d="M 55,55 L 55,5 A 50,50 0 0,1 105,55 Z"
+            fill={
+              {
+                "payload": 4293085205,
+                "type": 0,
+              }
+            }
+            propList={
+              [
+                "fill",
+              ]
+            }
+          />
+          <RNSVGPath
+            d="M 55,55 L 105,55 A 50,50 0 0,1 55,105 Z"
+            fill={
+              {
+                "payload": 4293221938,
+                "type": 0,
+              }
+            }
+            propList={
+              [
+                "fill",
+              ]
+            }
+          />
+          <RNSVGPath
+            d="M 55,55 L 55,105 A 50,50 0 0,1 5,55 Z"
+            fill={
+              {
+                "payload": 4293425235,
+                "type": 0,
+              }
+            }
+            propList={
+              [
+                "fill",
+              ]
+            }
+          />
+          <RNSVGText
+            content={null}
+            dx={[]}
+            dy={[]}
+            fill={
+              {
+                "payload": 4294967295,
+                "type": 0,
+              }
+            }
+            font={
+              {
+                "fontSize": "16",
+                "textAnchor": "middle",
+              }
+            }
+            propList={
+              [
+                "fill",
+              ]
+            }
+            rotate={[]}
+            x={
+              [
+                "35",
+              ]
+            }
+            y={
+              [
+                "38",
+              ]
+            }
+          >
+            <RNSVGTSpan
+              content="1"
+              dx={[]}
+              dy={[]}
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+              font={{}}
+              rotate={[]}
+              x={[]}
+              y={[]}
+            />
+          </RNSVGText>
+          <RNSVGText
+            content={null}
+            dx={[]}
+            dy={[]}
+            fill={
+              {
+                "payload": 4294967295,
+                "type": 0,
+              }
+            }
+            font={
+              {
+                "fontSize": "16",
+                "textAnchor": "middle",
+              }
+            }
+            propList={
+              [
+                "fill",
+              ]
+            }
+            rotate={[]}
+            x={
+              [
+                "75",
+              ]
+            }
+            y={
+              [
+                "38",
+              ]
+            }
+          >
+            <RNSVGTSpan
+              content="2"
+              dx={[]}
+              dy={[]}
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+              font={{}}
+              rotate={[]}
+              x={[]}
+              y={[]}
+            />
+          </RNSVGText>
+          <RNSVGText
+            content={null}
+            dx={[]}
+            dy={[]}
+            fill={
+              {
+                "payload": 4294967295,
+                "type": 0,
+              }
+            }
+            font={
+              {
+                "fontSize": "16",
+                "textAnchor": "middle",
+              }
+            }
+            propList={
+              [
+                "fill",
+              ]
+            }
+            rotate={[]}
+            x={
+              [
+                "75",
+              ]
+            }
+            y={
+              [
+                "80",
+              ]
+            }
+          >
+            <RNSVGTSpan
+              content="3"
+              dx={[]}
+              dy={[]}
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+              font={{}}
+              rotate={[]}
+              x={[]}
+              y={[]}
+            />
+          </RNSVGText>
+          <RNSVGText
+            content={null}
+            dx={[]}
+            dy={[]}
+            fill={
+              {
+                "payload": 4294967295,
+                "type": 0,
+              }
+            }
+            font={
+              {
+                "fontSize": "16",
+                "textAnchor": "middle",
+              }
+            }
+            propList={
+              [
+                "fill",
+              ]
+            }
+            rotate={[]}
+            x={
+              [
+                "35",
+              ]
+            }
+            y={
+              [
+                "80",
+              ]
+            }
+          >
+            <RNSVGTSpan
+              content="4"
+              dx={[]}
+              dy={[]}
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+              font={{}}
+              rotate={[]}
+              x={[]}
+              y={[]}
+            />
+          </RNSVGText>
+        </RNSVGGroup>
+      </RNSVGSvgView>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "height": 20,
+      }
+    }
+  />
+  <Text
+    style={
+      {
+        "color": "gray",
+        "padding": 20,
+        "textAlign": "center",
+      }
+    }
+  >
+    🎯 Splitting your goal into smaller tasks helps you achieve it faster.
+  </Text>
+  <View
+    style={
+      {
+        "height": 20,
+      }
+    }
+  />
+</View>
+`;

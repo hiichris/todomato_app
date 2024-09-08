@@ -33,7 +33,7 @@ export default function AddTaskModal({
   const [taskName, setTaskName] = React.useState("");
   const [duration, setDuration] = React.useState(5);
   const scrollViewRef = useRef(null);
-  const durationInterval = [5, 15, 20, 30, 60];
+  const durationInterval = [1, 5, 15, 20, 30, 60];
   const [selectedStartOption, setSelectedStartOption] = useState("now");
   const [selectedDate, setSelectedDate] = useState("");
 
