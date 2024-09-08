@@ -7,6 +7,7 @@ import {
   FlatList,
   Alert,
   Pressable,
+  Platform,
 } from "react-native";
 import {
   getAllTodos,
@@ -116,19 +117,24 @@ const TaskListFooter = () => {
 };
 
 const TaskItem = ({ task, index, onLongPress }) => {
+  const [latestCompletionState, setLatestCompletionState] = useState(0);
   // Check if this task is an passive assignment
   // If it is, send a request to the server to check if it is completed
   useEffect(() => {
+    // To save API calls, only check if the task is passive assignment
     if (task.is_passiveassign === 1 && task.pa_completed === 0) {
       checkPassiveAssignmentCompletion(task.uid, task.todo_id, task.id)
         .then((result) => {
-          task.pa_completed = result.is_completed ? 1 : 0;
+          setLatestCompletionState(result.is_completed ? 1 : 0);
         })
         .catch((error) => {
           console.log("Error checking passive assignment completion: ", error);
         });
+    } else {
+      // Otherwise, just set the latest completion state from the database
+      setLatestCompletionState(task.pa_completed);
     }
-  }, []);
+  }, [task.is_passiveassign]);
 
   return (
     <View style={styles.taskItemsContainer}>
@@ -171,7 +177,7 @@ const TaskItem = ({ task, index, onLongPress }) => {
               />
               {task.is_passiveassign === 1 ? (
                 <Text style={styles.timestamp}>
-                  {task.pa_completed == 1 ? "Completed" : "Pending"}
+                  {latestCompletionState == 1 ? "✅ Completed" : "⌛️ Pending"}
                 </Text>
               ) : (
                 <Text style={styles.timestamp}>{task.scheduled_at}</Text>
@@ -380,6 +386,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingVertical: 12,
     paddingRight: 10,
+    marginTop: Platform.OS === "ios" ? -4 : -2,
   },
   todoCompleteCircleContainer: {
     justifyContent: "center",

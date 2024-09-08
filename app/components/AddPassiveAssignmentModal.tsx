@@ -375,7 +375,12 @@ export default function AddPassiveAssignmentModal({
 
                   <View style={styles.buttonsContainer}>
                     <Pressable
-                      style={[styles.button, styles.buttonCreate]}
+                      style={({pressed})=>[
+                        styles.button, styles.buttonCreate,
+                        {
+                            backgroundColor: pressed ? "#9a2800" : "#B2361B",
+                        }
+                    ]}
                       onPress={createPassiveAssignmentHandler}
                     >
                       <Text style={styles.createButtonText}>Create</Text>
