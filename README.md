@@ -1,4 +1,4 @@
-# Discover Todomato: A Practical Approach to Productivity with Proven Time Management Strategies
+# Discover 🍅Todomato: A Practical Approach to Productivity with Proven Time Management Strategies
 
 # Overview
 Get ready to dive into a hands-on experience with this innovative time management-focused to-do mobile app. This app is designed to help you break down your goals into manageable tasks, rather than simply tackling a single objective. It also integrates the renowned Eisenhower Matrix, a technique that encourages you to pause and consider whether each to-do item you create is truly important and urgent. By prompting you to think critically about your tasks, the app aims to enhance your productivity and help you avoid wasting time on non-essential activities.
@@ -12,6 +12,9 @@ Get ready to dive into a hands-on experience with this innovative time managemen
 
 ### Access the Demo
 * Scan the QR code (see below) using your device’s camera (for iOS) or through the Expo app’s "Scan QR Code" feature (for Android).
+* <img src="https://github.com/user-attachments/assets/61def907-bf59-4a3e-81c5-71e35639430e" width="300" height="300" alt="QR Code">
+* Alternatively, you can access the demo by visiting [this URL](https://expo.dev/preview/update?message=Merge%20pull%20request%20%2314%20from%20hiichris%2Fdev%0A%0AFinal%20Update&updateRuntimeVersion=1.0.0&createdAt=2024-09-08T21%3A41%3A03.872Z&slug=exp&projectId=ab26227b-b0ff-4ea0-929b-f0ffddd8f692&group=7e34a9cc-f347-4101-8776-db87ff28949c) and get the QR Code.
+
 
 ### Grant Permissions
 
