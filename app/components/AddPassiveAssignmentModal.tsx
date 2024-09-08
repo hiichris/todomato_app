@@ -14,10 +14,6 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { v4 as uuidv4 } from "uuid";
-import { Link } from "expo-router";
-import { useSQLiteContext } from "expo-sqlite";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { primaryColor } from "../helpers/constants";
 import {
@@ -26,10 +22,10 @@ import {
   getCategories,
   getTodoById,
 } from "../services/db_service";
-import { SQLiteProvider } from "expo-sqlite";
 import { Todo } from "../models/todo";
 import { sendPassiveAssignmentRequest } from "../services/api_service";
 
+// Add Passive Assignment Modal Component
 export default function AddPassiveAssignmentModal({
   modalVisible,
   setModalVisible,
@@ -47,9 +43,9 @@ export default function AddPassiveAssignmentModal({
   const [asigneeEmail, setAsigneeEmail] = React.useState("");
   const scrollViewRef = useRef(null);
   const inputRef = useRef(null);
-  const [uid, setUid] = useState("");
 
   useEffect(() => {
+    // Scroll to the input field with a small adjustment position when the keyboard is shown
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
       () => {
@@ -67,12 +63,14 @@ export default function AddPassiveAssignmentModal({
     };
   }, []);
 
+  // Generate a random id for Passive Assignment Service to identify each request
   const generateRandomId = (length = 16) => {
+    // All possible characters
     const characters =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.!^*_-";
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     let result = "";
     const charactersLength = characters.length;
-
+    // Generate a random id with the given length
     for (let i = 0; i < length; i++) {
       const randomIndex = Math.floor(Math.random() * charactersLength);
       result += characters.charAt(randomIndex);
@@ -81,6 +79,7 @@ export default function AddPassiveAssignmentModal({
     return result;
   };
 
+  // Cleanup and close the modal
   const cleanupAndCloseModal = () => {
     setTodoTitle("");
     setSelectedCategory(null);
@@ -91,7 +90,9 @@ export default function AddPassiveAssignmentModal({
     setModalVisible(!modalVisible);
   };
 
+  // Create Passive Assignment Handler
   const createPassiveAssignmentHandler = async () => {
+    // Sanity checks
     if (todoTitle === "") {
       Alert.alert("Todo Title is required");
       return;
@@ -112,6 +113,7 @@ export default function AddPassiveAssignmentModal({
       Alert.alert("Task Description is required");
       return;
     }
+    // Ensure the email is valid
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (asigneeEmail === "" || !emailRegex.test(asigneeEmail)) {
       Alert.alert("Asignee Email is required and must be a valid email.");
@@ -128,6 +130,7 @@ export default function AddPassiveAssignmentModal({
       asigneeEmail
     );
 
+    // Add new todo
     addNewTodo(setTodos, todoTitle, selectedCategory)
       .then((result) => {
         console.log("result: ", result);
@@ -135,8 +138,7 @@ export default function AddPassiveAssignmentModal({
 
         // Get last inserted todo_id
         const todo_id = result?.lastInsertRowId;
-
-        // Send the task to Passive Assignment Service API
+        // Generate a unique id for the task
         const uid = generateRandomId();
 
         // Add new task
@@ -162,6 +164,7 @@ export default function AddPassiveAssignmentModal({
                 // Clear the todoTitle
                 cleanupAndCloseModal();
 
+                // Send passive assignment request to the API
                 sendPassiveAssignmentRequest(
                   uid,
                   todo_id,
@@ -216,12 +219,7 @@ export default function AddPassiveAssignmentModal({
     cleanupAndCloseModal();
   };
 
-  const retrieveDBCategories = async () => {
-    console.log("Retrieving categories");
-    const dbCategories = await getCategories(false);
-    setCategories(dbCategories);
-  };
-
+  // On Focus Handler
   const onFocusHandler = () => {
     if (selectedCategory === null) {
       Alert.alert("Please select a category first!");
@@ -375,12 +373,13 @@ export default function AddPassiveAssignmentModal({
 
                   <View style={styles.buttonsContainer}>
                     <Pressable
-                      style={({pressed})=>[
-                        styles.button, styles.buttonCreate,
+                      style={({ pressed }) => [
+                        styles.button,
+                        styles.buttonCreate,
                         {
-                            backgroundColor: pressed ? "#9a2800" : "#B2361B",
-                        }
-                    ]}
+                          backgroundColor: pressed ? "#9a2800" : "#B2361B",
+                        },
+                      ]}
                       onPress={createPassiveAssignmentHandler}
                     >
                       <Text style={styles.createButtonText}>Create</Text>

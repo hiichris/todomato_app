@@ -6,7 +6,6 @@ import {
 } from "expo-sqlite";
 import { Todo } from "../models/todo";
 import { Task } from "../models/task";
-import { getObjectType } from "../helpers/utils";
 import * as FileSystem from "expo-file-system";
 
 const todos_db = "todos.db";

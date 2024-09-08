@@ -1,4 +1,3 @@
-import { SQLiteProvider, useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState, useCallback } from "react";
 import {
   View,
@@ -9,13 +8,12 @@ import {
   Switch,
   Platform,
 } from "react-native";
-import { Task } from "../models/task";
-import { Todo } from "../models/todo";
-import { Link, useFocusEffect, useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { primaryColor } from "../helpers/constants";
 import { getTaskCount, updateTodoCompleted } from "../services/db_service";
 import Icon from "react-native-vector-icons/FontAwesome";
 
+// Switch component to toggle the show completed tasks
 const SwitchShowCompleted = ({ isEnabled, toggleSwitch }) => {
   return (
     <View style={styles.switchContainer}>
@@ -32,6 +30,7 @@ const SwitchShowCompleted = ({ isEnabled, toggleSwitch }) => {
   );
 };
 
+// Header component for the todo list
 const TodoListHeader = ({ todoCount, toggleSwitch, isEnabled }) => {
   return (
     <View style={styles.listHeaderContainer}>
@@ -46,39 +45,41 @@ const TodoListHeader = ({ todoCount, toggleSwitch, isEnabled }) => {
   );
 };
 
+// Footer component for the todo list
 const TodoListFooter = ({ todoCount }) => {
   // if todoCount is 0, show a message
-  return (
-    todoCount === 0 ? (
-      <View style={styles.notFoundContainer}>
-        <Text style={styles.notFoundText}>
-          😅 Uh oh! There's no matching to-dos.
-        </Text>
-      </View>
-    ) : (
-      <></>
-    )
-  )
+  return todoCount === 0 ? (
+    <View style={styles.notFoundContainer}>
+      <Text style={styles.notFoundText}>
+        😅 Uh oh! There's no matching to-dos.
+      </Text>
+    </View>
+  ) : (
+    <></>
+  );
 };
 
+// Fetch the task count for a todo
 const fetchTaskCount = async (todoId) => {
   try {
     const count = await getTaskCount(todoId);
     return count;
   } catch (error) {
-    console.error("Error fetching task count:", error);
+    console.log("Error fetching task count:", error);
 
     // Return 0 if there's an error
     return 0;
   }
 };
 
+// Update the todo completed status
 const updateTodoCompletedHandler =
   (todoId, isCompleted, refreshTodos, isEnabled) => async () => {
     console.log("Updating todo completed status", todoId, isCompleted);
-    // reverse the completed status
+    // Reverse the completed status
     isCompleted = isCompleted === 1 ? 0 : 1;
     console.log("Updated todo completed status", todoId, isCompleted);
+    // Update the todo completed status in the database
     updateTodoCompleted(todoId, isCompleted);
     refreshTodos(isEnabled);
   };
@@ -96,6 +97,7 @@ const TodoItem = ({
   const router = useRouter();
 
   useEffect(() => {
+    // Fetch the task count for the todo if refresh is triggered
     const getCount = async () => {
       const count = await fetchTaskCount(item.id);
       setTaskCount(count);
@@ -104,6 +106,7 @@ const TodoItem = ({
     getCount();
   }, [item.id, refresh]);
 
+  // Route to the todo details screen with params
   const routingTodoDetailHandler = () => {
     router.push({
       pathname: "/todo_details",

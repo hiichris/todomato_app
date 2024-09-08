@@ -1,15 +1,12 @@
-import React, { useEffect, useRef, useState } from "react";
 import {
   ScrollView,
-  StyleSheet,
   Text,
-  TextInput,
   View,
   Pressable,
-  ActivityIndicator,
   Image,
 } from "react-native";
 
+// Thumbnail Images Component
 export const ThumbnailImages = ({
   images,
   styles,

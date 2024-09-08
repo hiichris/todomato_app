@@ -1,8 +1,9 @@
-import { View, Text, Image, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { primaryColor } from "../helpers/constants";
 import { Dimensions } from "react-native";
 import { TaskPieChart } from "./TaskPieChart";
 
+// NoAssigned Tasks Component 
 export const NoAssignedTasks = ({ todoTitle, refreshTasks, has_completed }) => {
   return (
     <View style={styles.noAssignedTaskContainer}>

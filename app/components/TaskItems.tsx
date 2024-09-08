@@ -1,4 +1,3 @@
-import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
 import {
   View,
@@ -9,12 +8,7 @@ import {
   Pressable,
   Platform,
 } from "react-native";
-import {
-  getAllTodos,
-  getAllTasks,
-  deleteTask,
-  updateTodoCompleted,
-} from "../services/db_service";
+import { deleteTask, updateTodoCompleted } from "../services/db_service";
 import { checkPassiveAssignmentCompletion } from "../services/api_service";
 import {
   GestureHandlerRootView,
@@ -25,24 +19,20 @@ import {
 import { TaskPieChart } from "./TaskPieChart";
 import { NoAssignedTasks } from "./NoAssignTasks";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { TodoSearchBar } from "./TodoSearchBar";
-
-import { Task } from "../models/task";
-import { Todo } from "../models/todo";
-import { Tasks } from "./Tasks";
-import { Link } from "expo-router";
 import { primaryColor } from "../helpers/constants";
 
+// Update the completed status of the todo
 const updateTodoCompletedHandler =
   (todoId, completedStatus, setCompletedStatus) => async () => {
     console.log("Updating todo completed status", todoId, completedStatus);
-    // reverse the completed status
+    // Reverse the completed status
     completedStatus = completedStatus === 1 ? 0 : 1;
     console.log("Updated todo completed status", todoId, completedStatus);
     updateTodoCompleted(todoId, completedStatus);
     setCompletedStatus(completedStatus);
   };
 
+// TaskListHeader component
 const TaskListHeader = ({
   todoId,
   todoTitle,
@@ -106,6 +96,7 @@ const TaskListHeader = ({
   );
 };
 
+// TaskListFooter component
 const TaskListFooter = () => {
   return (
     <View style={styles.listFooterContainer}>
@@ -116,6 +107,7 @@ const TaskListFooter = () => {
   );
 };
 
+// TaskItem component
 const TaskItem = ({ task, index, onLongPress }) => {
   const [latestCompletionState, setLatestCompletionState] = useState(0);
   // Check if this task is an passive assignment
@@ -190,6 +182,7 @@ const TaskItem = ({ task, index, onLongPress }) => {
   );
 };
 
+// TaskList component
 const TaskList = ({
   tasks,
   todoId,
@@ -222,6 +215,7 @@ const TaskList = ({
   );
 };
 
+// TaskItems component
 export const TaskItems = ({
   tasks,
   todoId,
