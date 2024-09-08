@@ -1,15 +1,3 @@
-/*
-  TODO:
-  - Ensures that the app is working on both iOS and Android devices
-  - Run with flushed database
-  - Run depcheck for unused dependencies
-  - Remove unused imports
-  - Remove unused code
-  - Publish expo app using ens for demo
-  - Add comments to the code
-  - Update README.md
-*/
-
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, LogBox } from "react-native";
 import { initializeDatabase, getTodos } from "./services/db_service";
