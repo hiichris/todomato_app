@@ -56,7 +56,9 @@
       "eas": {
         "projectId": "ab26227b-b0ff-4ea0-929b-f0ffddd8f692"
       },
-      "googleMapsApiKey": "AIzaSyAp0iQc5oKArkL-vhwI4Ml1P1TXwgzzlpI"
+      "googleMapsApiKey": "AIzaSyAp0iQc5oKArkL-vhwI4Ml1P1TXwgzzlpI",
+      "PAS_URL": "https://pasapi-dev.up.railway.app/api/assignment",
+      "PAS_Token": "03512d1d-e0c0-43ed-b499-671ec5ae9baa"
     },
     "owner": "yaostyle",
     "updates": {

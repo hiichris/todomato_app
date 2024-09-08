@@ -1,7 +1,9 @@
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { primaryColor } from "../helpers/constants";
 
+// Tap Buttons Component
 export const TapButtons = ({ goToPage, currentPage }) => {
+  // Switch between the pages
   return (
     <View style={styles.tabViewButtonsContainer}>
       <Pressable onPress={() => goToPage(0)}>

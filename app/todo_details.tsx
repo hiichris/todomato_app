@@ -1,39 +1,18 @@
 import {
   Stack,
   useLocalSearchParams,
-  useRouter,
   useNavigation,
+  useGlobalSearchParams,
 } from "expo-router";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Button,
-  TextInput,
-  FlatList,
-  ScrollView,
-  AppRegistry,
-  Image,
-  Dimensions,
-  useWindowDimensions,
-  Pressable,
-} from "react-native";
+import { View, StyleSheet } from "react-native";
 import { useEffect, useState, useRef } from "react";
-import { useSQLiteContext, SQLiteProvider } from "expo-sqlite";
-import {
-  getAllTasks,
-  addNewTask,
-  deleteTodo,
-  getImages,
-} from "./services/db_service";
-import { PickerIOS } from "@react-native-picker/picker";
+import { getAllTasks, getImages } from "./services/db_service";
 import { Task } from "./models/task";
 import StackScreen from "./components/StackScreen";
 import { TaskItems } from "./components/TaskItems";
 import { TapButtons } from "./components/TapButtons";
 import { TodoDetails } from "./components/TodoDetails";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { primaryColor } from "./helpers/constants";
 import PagerView from "react-native-pager-view";
 import * as Notifications from "expo-notifications";
 import "react-native-gesture-handler";
@@ -41,14 +20,12 @@ import "react-native-gesture-handler";
 /* 
   Image Reference and Credits:
   not_found.png - https://freesvgillustration.com/product/404-not-found/
-
 */
 
+// Todo Details Screen Component
 export default function TodoDetailsScreen() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const params = useLocalSearchParams();
-  const [selectedTimer, setSelectedTimer] = useState(5);
-  const [taskName, setTaskName] = useState("");
   const notificationListener = useRef();
   const responseListener = useRef();
   const navigation = useNavigation();
@@ -58,7 +35,10 @@ export default function TodoDetailsScreen() {
   const [currentPage, setCurrentPage] = useState(0);
   const [todoNotes, setTodoNotes] = useState(params.todoNotes);
   const [images, setImages] = useState(null);
+  const [completedStatus, setCompletedStatus] = useState(params.has_completed);
+  const { passiveTask = false } = useGlobalSearchParams();
 
+  // Function to navigate to a specific page using pagerRef
   const goToPage = (pageIndex) => {
     if (pagerRef.current) {
       pagerRef.current.setPage(pageIndex);
@@ -73,10 +53,13 @@ export default function TodoDetailsScreen() {
         await Notifications.requestPermissionsAsync();
       }
     }
+
+    // Run on component mount
     getPermissions();
     refreshTasks();
     refreshImages(parseInt(params.id));
 
+    // Configure notification behavior
     Notifications.setNotificationHandler({
       handleNotification: async () => ({
         shouldShowAlert: true,
@@ -98,18 +81,22 @@ export default function TodoDetailsScreen() {
       });
 
     return () => {
+      // Remove notification listeners on component unmount
       Notifications.removeNotificationSubscription(
         notificationListener.current
       );
+      // Remove response listeners
       Notifications.removeNotificationSubscription(responseListener.current);
     };
   }, []);
 
+  // Function to schedule a notification
   const scheduleNotification = async (
     taskName: string,
     duration: number,
     titleType = ""
   ) => {
+    // Schedule a notification
     console.log("Scheduling notification...", taskName, duration);
     await Notifications.scheduleNotificationAsync({
       content: {
@@ -124,25 +111,24 @@ export default function TodoDetailsScreen() {
     });
   };
 
+  // Function to refresh images from the database
   const refreshImages = async (todoId: number) => {
     const images = await getImages(todoId);
     console.log("Images refr: ", images);
     setImages(images);
   };
 
+  // Function to refresh tasks from the database
   const refreshTasks = async () => {
     console.log("refreshTasks...");
     await getAllTasks(setTasks, parseInt(params.id));
   };
 
-  const refreshTodos = async () => {
-    console.log("refreshTodos...");
-    await getTodos(params.setTodos);
-  };
-
+  // Function to handle page selection
   const handlePageSelected = (event) => {
     event.persist();
 
+    // Set the current page and update the add button state
     setCurrentPage(event.nativeEvent.position);
     if (event.nativeEvent.position === 0) {
       setAddTodoButtonState(false);
@@ -153,11 +139,14 @@ export default function TodoDetailsScreen() {
     }
   };
 
+  // If the title is too long, trim it
   let strippedTitle = params.title;
-  if (params.title.length > 26) {
-   strippedTitle = params.title.substring(0, 26) + "...";
+  if (params.title && params.title.length > 26) {
+    strippedTitle = params.title.substring(0, 26) + "...";
+  } else {
+    strippedTitle = params.title;
   }
-  console.log("param.color", params.categoryColor)
+
   return (
     <>
       <PagerView
@@ -184,15 +173,19 @@ export default function TodoDetailsScreen() {
               setAddTodoButtonState={setAddTodoButtonState}
               addTaskButtonState={addTaskButtonState}
               setAddTaskButtonState={setAddTaskButtonState}
+              expandPassiveAssignmentModal={passiveTask}
             />
             <TapButtons goToPage={goToPage} currentPage={currentPage} />
 
             <View style={styles.TaskItemContainer}>
               <TaskItems
                 tasks={tasks}
+                todoId={params.id}
                 todoTitle={params.title}
                 categoryName={params.categoryName}
                 categoryColor={params.categoryColor}
+                completedStatus={completedStatus}
+                setCompletedStatus={setCompletedStatus}
                 refreshTasks={refreshTasks}
               />
             </View>
@@ -200,6 +193,7 @@ export default function TodoDetailsScreen() {
             <View style={styles.SpaceContainer}></View>
           </GestureHandlerRootView>
         </View>
+
         <View key="2">
           <TodoDetails
             goToPage={goToPage}
@@ -212,6 +206,8 @@ export default function TodoDetailsScreen() {
             images={images}
             setImages={setImages}
             refreshImages={refreshImages}
+            completedStatus={completedStatus}
+            setCompletedStatus={setCompletedStatus}
             navigation={navigation}
           />
         </View>

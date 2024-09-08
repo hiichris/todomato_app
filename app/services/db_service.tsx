@@ -6,7 +6,6 @@ import {
 } from "expo-sqlite";
 import { Todo } from "../models/todo";
 import { Task } from "../models/task";
-import { getObjectType } from "../helpers/utils";
 import * as FileSystem from "expo-file-system";
 
 const todos_db = "todos.db";
@@ -128,9 +127,6 @@ const migrateDatabase = async (db: SQLiteDatabase, version: number = -1) => {
     await db.execAsync("DROP TABLE IF EXISTS settings;").catch((error) => {
       console.log("Error dropping version table", error);
     });
-    await db.execAsync("DROP TABLE IF EXISTS passive_assignments;").catch((error) => {
-      console.log("Error dropping version table", error);
-    });
 
     // Create the todos and tasks tables
     await db
@@ -143,6 +139,7 @@ const migrateDatabase = async (db: SQLiteDatabase, version: number = -1) => {
         attachment TEXT DEFAULT "",
         geolocation TEXT DEFAULT "",
         category_id INTEGER DEFAULT -1,
+        has_completed INTEGER DEFAULT 0,
         index_no INTEGER NOT NULL DEFAULT 0
       );
     `
@@ -163,6 +160,9 @@ const migrateDatabase = async (db: SQLiteDatabase, version: number = -1) => {
         scheduled_at TEXT DEFAULT "",
         duration INTEGER DEFAULT 15,
         todo_id INTEGER,
+        is_passiveassign INTEGER DEFAULT 0,
+        pa_completed INTEGER DEFAULT 0,
+        uid TEXT DEFAULT "",
         index_no INTEGER DEFAULT 0,
         FOREIGN KEY(todo_id) REFERENCES todos(id)
       );
@@ -233,25 +233,6 @@ const migrateDatabase = async (db: SQLiteDatabase, version: number = -1) => {
       })
       .catch((error) => {
         console.log("Error creating table settings", error);
-      });
-    
-    // Create passive_assignments table
-    await db
-      .execAsync(
-        `
-      CREATE TABLE IF NOT EXISTS passive_assignments (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        request_ref TEXT DEFAULT "",
-        request_token TEXT DEFAULT "",
-        todo_id_ref INTEGER,
-      );
-    `
-      )
-      .then(() => {
-        console.log("Table passive_assignments created");
-      })
-      .catch((error) => {
-        console.log("Error creating table passive_assignments", error);
       });
 
     //Insert sample categories
@@ -325,7 +306,7 @@ const migrateDatabase = async (db: SQLiteDatabase, version: number = -1) => {
     await db
       .execAsync(
         `
-      INSERT INTO todos (title, index_no, category_id) values ('Take a walk in the park', 2, (SELECT id FROM categories WHERE name = 'Personal'));
+      INSERT INTO todos (title, index_no, category_id, has_completed) values ('Take a walk in the park', 2, (SELECT id FROM categories WHERE name = 'Personal'), 1);
     `
       )
       .then(() => {
@@ -376,23 +357,48 @@ export const initializeDatabase = async () => {
 
 // TODO OPERATIONS ////
 
-export const getTodos = async (setTodos: Function, keyword = "") => {
+export const getTodos = async (
+  setTodos: Function,
+  keyword: string = "",
+  show_completed: boolean = true
+) => {
   const db: SQLiteDatabase = await openDatabase(todos_db);
   // Additional query to filter by keyword
-  let additional_query = "";
+  let keyword_query = "";
   if (keyword.length > 0) {
-    additional_query = `WHERE (t.title LIKE '%${keyword}%' OR (c.name LIKE '%${keyword}%'))`;
+    keyword_query = `WHERE (t.title LIKE '%${keyword}%' OR (c.name LIKE '%${keyword}%'))`;
+  }
+
+  // Additional query to filter by completed status
+  let hide_completed_query = "";
+  if (!show_completed) {
+    hide_completed_query = "AND t.has_completed = 0";
   }
 
   const query = `SELECT t.id, t.title, t.notes, t.attachment, t.geolocation, t.category_id, 
     t.index_no, c.name as 'category_name', c.color as 'category_color',
+    t.has_completed,
     CASE WHEN t.notes IS "" THEN 0 ELSE 1 END as 'has_notes',
     (SELECT count(*) FROM images WHERE todo_id = t.id) as 'image_count',
     CASE WHEN t.geolocation IS "" THEN 0 ELSE 1 END as 'has_geolocation'
-    FROM todos t LEFT JOIN categories c ON t.category_id == c.id 
-    ${additional_query} ORDER BY index_no asc`;
+    FROM todos t JOIN categories c ON t.category_id == c.id 
+    ${hide_completed_query}
+    ${keyword_query} ORDER BY t.id DESC;`;
   const todos = await db.getAllAsync<Todo>(query);
   setTodos(todos);
+};
+
+export const getTodoById = async (todo_id: number) => {
+  const db: SQLiteDatabase = await openDatabase(todos_db);
+  const query = `SELECT t.id, t.title, t.notes, t.attachment, t.geolocation, t.category_id, 
+    t.index_no, c.name as 'category_name', c.color as 'category_color',
+    t.has_completed,
+    CASE WHEN t.notes IS "" THEN 0 ELSE 1 END as 'has_notes',
+    (SELECT count(*) FROM images WHERE todo_id = t.id) as 'image_count',
+    CASE WHEN t.geolocation IS "" THEN 0 ELSE 1 END as 'has_geolocation'
+    FROM todos t JOIN categories c ON t.category_id == c.id WHERE t.id = $todo_id;`;
+  const todo = await db.getFirstAsync<Todo>(query, { $todo_id: todo_id });
+  return todo;
 };
 
 export const addNewTodo = async (
@@ -432,6 +438,26 @@ export const updateTodoNotes = async (
   } finally {
     await statement.finalizeAsync();
     setTodoNotes(notes);
+    return result;
+  }
+};
+
+export const updateTodoCompleted = async (
+  todo_id: number,
+  has_completed: number
+) => {
+  const db: SQLiteDatabase = await openDatabase(todos_db);
+  const statement = await db.prepareAsync(
+    "UPDATE todos set has_completed = $has_completed where id = $id"
+  );
+  let result;
+  try {
+    result = await statement.executeAsync({
+      $has_completed: has_completed,
+      $id: todo_id,
+    });
+  } finally {
+    await statement.finalizeAsync();
     return result;
   }
 };
@@ -478,9 +504,31 @@ export const deleteTodo = async (todo_id: number) => {
 export const getAllTasks = async (setTasks: Function, todo_id: number) => {
   const db: SQLiteDatabase = await openDatabase(todos_db);
   const query =
-    "SELECT t2.id, t2.name, t2.duration, t2.todo_id, t2.index_no, t2.scheduled_at FROM todos AS t1 JOIN tasks AS t2 ON t1.id == t2.todo_id WHERE t1.id == $todo_id ORDER by t2.index_no desc, t2.id asc";
+    `SELECT t2.id, t2.name, t2.duration, t2.todo_id, t2.index_no, t2.scheduled_at, 
+    t2.is_passiveassign, t2.pa_completed, t2.uid 
+    FROM todos AS t1 
+    JOIN tasks AS t2 ON t1.id == t2.todo_id 
+    WHERE t1.id == $todo_id ORDER by t2.index_no desc, t2.id asc`;
   const tasks = await db.getAllAsync<Task>(query, { $todo_id: todo_id });
   setTasks(tasks);
+};
+
+// Update the task completion status by task_id
+export const updateTaskCompleted = async (
+  task_id: number,
+  is_completed: number
+) => {
+  const db: SQLiteDatabase = await openDatabase(todos_db);
+  const statement = await db.prepareAsync(
+    "UPDATE tasks set pa_completed = $completed where id = $id"
+  );
+  let result;
+  try {
+    result = await statement.executeAsync({ $completed: is_completed, $id: task_id });
+  } finally {
+    await statement.finalizeAsync();
+    return result;
+  }
 };
 
 export const addNewTask = async (
@@ -488,12 +536,15 @@ export const addNewTask = async (
   todo_id: number,
   name: string,
   duration: number,
-  scheduled_at: string
+  scheduled_at: string,
+  is_passiveassign: number = 0,
+  pa_completed: number = 0,
+  uid: string = ""
 ) => {
   console.log("scheduled_at: ", scheduled_at);
   const db: SQLiteDatabase = await openDatabase(todos_db);
   const statement = await db.prepareAsync(
-    "INSERT INTO tasks (name, duration, todo_id, scheduled_at) values ($name, $duration, $todo_id, $scheduled_at)"
+    "INSERT INTO tasks (name, duration, todo_id, scheduled_at, is_passiveassign, pa_completed, uid) values ($name, $duration, $todo_id, $scheduled_at, $is_passiveassign, $pa_completed, $uid)"
   );
   try {
     result = await statement.executeAsync({
@@ -501,6 +552,9 @@ export const addNewTask = async (
       $duration: duration,
       $todo_id: todo_id,
       $scheduled_at: scheduled_at,
+      $is_passiveassign: is_passiveassign,
+      $pa_completed: pa_completed,
+      $uid: uid,
     });
   } finally {
     await statement.finalizeAsync();
@@ -591,7 +645,6 @@ export const updateGeolocation = async (
 export const getCategories = async (is_fav: boolean = false) => {
   const db: SQLiteDatabase = await openDatabase(todos_db);
   let filter_query = "";
-  console.log("is_fav: ", is_fav);
   if (is_fav) {
     filter_query = "WHERE is_fav = 1";
   }

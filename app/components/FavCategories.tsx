@@ -9,16 +9,17 @@ import {
 import { getCategories } from "../services/db_service";
 import { useState, useEffect } from "react";
 
-export const FavCategories = ({setSearchQuery}) => {
+// Fav Categories Component
+export const FavCategories = ({ setSearchQuery }) => {
   const [categories, setCategories] = useState([]);
 
+  // Retrieve categories from the database
   const retrieveDBCategories = async () => {
-    console.log("Retrieving categories");
     const dbCategories = await getCategories(true);
-    console.log("dbCategories: ", dbCategories);
     setCategories(dbCategories);
   };
 
+  // Get the screen width
   const screenWidth = Dimensions.get("window").width; // Get the screen width
 
   useEffect(() => {

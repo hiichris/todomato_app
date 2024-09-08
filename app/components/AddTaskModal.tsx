@@ -14,7 +14,6 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
-import { Link } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { primaryColor } from "../helpers/constants";
 import { addNewTask } from "../services/db_service";
@@ -33,11 +32,12 @@ export default function AddTaskModal({
   const [taskName, setTaskName] = React.useState("");
   const [duration, setDuration] = React.useState(5);
   const scrollViewRef = useRef(null);
-  const durationInterval = [5, 15, 20, 30, 60];
+  const durationInterval = [1, 5, 15, 20, 30, 60];
   const [selectedStartOption, setSelectedStartOption] = useState("now");
   const [selectedDate, setSelectedDate] = useState("");
 
   useEffect(() => {
+    // Add a listener to the keyboard
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
       () => {
@@ -51,6 +51,7 @@ export default function AddTaskModal({
     };
   }, []);
 
+  // Get the time difference in seconds
   const getTimeDifferenceInSeconds = (
     dateString: string,
     inputFormat: string = "MMM D YYYY, h:mm A"
@@ -69,6 +70,7 @@ export default function AddTaskModal({
     return [differenceInSeconds, dateString];
   };
 
+  // Add a new task
   const addNewTaskHandler = async () => {
     // Validate the input
     if (taskName === "") {
@@ -80,15 +82,15 @@ export default function AddTaskModal({
       Alert.alert("Duration must be greater than 0!");
       return;
     }
-
+    // Get the difference in seconds from selected date
     const [differenceInSeconds, selectedDateString] =
       getTimeDifferenceInSeconds(selectedDate);
     console.log("differenceInSeconds: ", differenceInSeconds);
 
-    // If the user selected "schedule" option, we will have to schedule the notification based on the selected date and time. Then scheduel another notification after the duration ends.
+    // If the user selected "schedule" option, we will have to schedule the
+    // notification based on the selected date and time. Then, schedule another
+    // notification after the duration ends.
     if (selectedStartOption === "scheduled") {
-      // Get the difference in seconds from selected date
-
       console.log("seelctedstartoption ", selectedStartOption);
       // Schedule the 1st reminder notification
       scheduleNotification(taskName, differenceInSeconds, "Reminder")
@@ -116,7 +118,7 @@ export default function AddTaskModal({
 
     console.log("alaramDuration::: ", alaramDuration);
 
-    // Schedule the alarm notification
+    // Schedule the alarm (2nd) notification
     scheduleNotification(taskName, alaramDuration, "Times up!")
       .then((result) => {
         console.log(
@@ -264,7 +266,13 @@ export default function AddTaskModal({
 
                   <View style={styles.buttonsContainer}>
                     <Pressable
-                      style={[styles.button, styles.buttonCreate]}
+                      style={({ pressed }) => [
+                        styles.button,
+                        styles.buttonCreate,
+                        {
+                          backgroundColor: pressed ? "#9a2800" : "#B2361B",
+                        },
+                      ]}
                       onPress={addNewTaskHandler}
                     >
                       <Text style={styles.createButtonContainer}>Create</Text>

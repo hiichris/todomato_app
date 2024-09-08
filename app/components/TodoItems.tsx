@@ -1,14 +1,37 @@
-import { SQLiteProvider, useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState, useCallback } from "react";
-import { View, Text, StyleSheet, FlatList, Pressable } from "react-native";
-import { Task } from "../models/task";
-import { Todo } from "../models/todo";
-import { Link, useFocusEffect, useRouter } from "expo-router";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Pressable,
+  Switch,
+  Platform,
+} from "react-native";
+import { useFocusEffect, useRouter } from "expo-router";
 import { primaryColor } from "../helpers/constants";
-import { getTaskCount } from "../services/db_service";
+import { getTaskCount, updateTodoCompleted } from "../services/db_service";
 import Icon from "react-native-vector-icons/FontAwesome";
 
-const TodoListHeader = ({ todoCount }) => {
+// Switch component to toggle the show completed tasks
+const SwitchShowCompleted = ({ isEnabled, toggleSwitch }) => {
+  return (
+    <View style={styles.switchContainer}>
+      <Switch
+        style={styles.switchControl}
+        trackColor={{ false: "#767577", true: primaryColor }}
+        thumbColor={isEnabled ? "#f4f3f4" : "#f4f3f4"}
+        ios_backgroundColor="#3e3e3e"
+        onValueChange={toggleSwitch}
+        value={isEnabled}
+      />
+      <Text style={[styles.switchDescription]}>Show Completed</Text>
+    </View>
+  );
+};
+
+// Header component for the todo list
+const TodoListHeader = ({ todoCount, toggleSwitch, isEnabled }) => {
   return (
     <View style={styles.listHeaderContainer}>
       <Text style={styles.listHeaderTitle}>My to-dos</Text>
@@ -17,27 +40,64 @@ const TodoListHeader = ({ todoCount }) => {
           ? 'To add a new todo, tab the "Add Todo" button.'
           : "Tap on a todo to view its details."}
       </Text>
+      <SwitchShowCompleted isEnabled={isEnabled} toggleSwitch={toggleSwitch} />
     </View>
   );
 };
 
+// Footer component for the todo list
+const TodoListFooter = ({ todoCount }) => {
+  // if todoCount is 0, show a message
+  return todoCount === 0 ? (
+    <View style={styles.notFoundContainer}>
+      <Text style={styles.notFoundText}>
+        😅 Uh oh! There's no matching to-dos.
+      </Text>
+    </View>
+  ) : (
+    <></>
+  );
+};
+
+// Fetch the task count for a todo
 const fetchTaskCount = async (todoId) => {
   try {
     const count = await getTaskCount(todoId);
     return count;
   } catch (error) {
-    console.error("Error fetching task count:", error);
+    console.log("Error fetching task count:", error);
 
     // Return 0 if there's an error
     return 0;
   }
 };
 
-const TodoItem = ({ index, item, todos, refreshTodos, refresh }) => {
+// Update the todo completed status
+const updateTodoCompletedHandler =
+  (todoId, isCompleted, refreshTodos, isEnabled) => async () => {
+    console.log("Updating todo completed status", todoId, isCompleted);
+    // Reverse the completed status
+    isCompleted = isCompleted === 1 ? 0 : 1;
+    console.log("Updated todo completed status", todoId, isCompleted);
+    // Update the todo completed status in the database
+    updateTodoCompleted(todoId, isCompleted);
+    refreshTodos(isEnabled);
+  };
+
+const TodoItem = ({
+  index,
+  item,
+  todos,
+  refreshTodos,
+  refresh,
+  toggleSwitch,
+  isEnabled,
+}) => {
   const [taskCount, setTaskCount] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
+    // Fetch the task count for the todo if refresh is triggered
     const getCount = async () => {
       const count = await fetchTaskCount(item.id);
       setTaskCount(count);
@@ -46,6 +106,7 @@ const TodoItem = ({ index, item, todos, refreshTodos, refresh }) => {
     getCount();
   }, [item.id, refresh]);
 
+  // Route to the todo details screen with params
   const routingTodoDetailHandler = () => {
     router.push({
       pathname: "/todo_details",
@@ -56,11 +117,11 @@ const TodoItem = ({ index, item, todos, refreshTodos, refresh }) => {
         todoNotes: item.notes,
         categoryName: item.category_name,
         categoryColor: item.category_color,
+        has_completed: item.has_completed,
         refreshTodos: refreshTodos,
       },
     });
   };
-
   return (
     <Pressable
       style={({ pressed }) => [
@@ -71,8 +132,32 @@ const TodoItem = ({ index, item, todos, refreshTodos, refresh }) => {
       ]}
       onPress={routingTodoDetailHandler}
     >
+      <View style={styles.todoCompleteContainer}>
+        <Pressable
+          style={styles.todoCompleteCircleContainer}
+          onPress={updateTodoCompletedHandler(
+            item.id,
+            item.has_completed,
+            refreshTodos,
+            isEnabled
+          )}
+        >
+          {item.has_completed === 1 ? (
+            <Icon name="check-circle" style={styles.todoCompleteIcon} />
+          ) : (
+            <></>
+          )}
+        </Pressable>
+      </View>
       <View style={styles.titleContainer}>
-        <Text style={styles.todoTitle} ellipsizeMode="tail" numberOfLines={2}>
+        <Text
+          style={[
+            styles.todoTitle,
+            item.has_completed == 1 ? styles.todoTitleCrossed : null,
+          ]}
+          ellipsizeMode="tail"
+          numberOfLines={2}
+        >
           {item.title}
         </Text>
 
@@ -112,17 +197,21 @@ const TodoItem = ({ index, item, todos, refreshTodos, refresh }) => {
           </View>
         </View>
       </View>
-      {/* </Link> */}
+
+      {/* Tasks indicator */}
       <View style={styles.taskCountsContainer}>
         <Text style={styles.taskCountText}>
-          <Text style={styles.taskCountNumber}>{taskCount !== null ? taskCount : "..."}</Text> Tasks
+          <Text style={styles.taskCountNumber}>
+            {taskCount !== null ? taskCount : "..."}
+          </Text>{" "}
+          Tasks
         </Text>
       </View>
     </Pressable>
   );
 };
 
-export function TodoItems({ todos, refreshTodos }) {
+export function TodoItems({ todos, refreshTodos, toggleSwitch, isEnabled }) {
   const [refresh, setRefresh] = useState(false);
 
   useFocusEffect(
@@ -134,35 +223,29 @@ export function TodoItems({ todos, refreshTodos }) {
 
   return (
     <>
-      {todos.length > 0 ? (
-        <FlatList
-          style={styles.todosListContainer}
-          data={todos}
-          renderItem={({ index, item }) => (
-            <TodoItem
-              index={index}
-              item={item}
-              todos={todos}
-              refreshTodos={refreshTodos}
-              refresh={refresh}
-            />
-          )}
-          keyExtractor={(item) => item.id.toString()}
-          ListHeaderComponent={TodoListHeader(todos.length)}
-        />
-      ) : (
-        <View style={styles.listHeaderContainer}>
-          <Text style={styles.listHeaderTitle}>My to-dos</Text>
-          <Text style={styles.listHeaderDescription}>
-            To add a new todo, tap the "Add Todo" button.
-          </Text>
-          <View style={styles.notFoundContainer}>
-            <Text style={styles.notFoundText}>
-              😅 Uh oh! There's no matching to-dos.
-            </Text>
-          </View>
-        </View>
-      )}
+      <FlatList
+        style={styles.todosListContainer}
+        data={todos}
+        keyExtractor={(item) => item.id.toString()}
+        ListHeaderComponent={() => (
+          <TodoListHeader
+            todoCount={todos.length}
+            toggleSwitch={toggleSwitch}
+            isEnabled={isEnabled}
+          />
+        )}
+        ListFooterComponent={() => <TodoListFooter todoCount={todos.length} />}
+        renderItem={({ index, item }) => (
+          <TodoItem
+            index={index}
+            item={item}
+            todos={todos}
+            refreshTodos={refreshTodos}
+            refresh={refresh}
+            isEnabled={isEnabled}
+          />
+        )}
+      />
     </>
   );
 }
@@ -183,23 +266,29 @@ const styles = StyleSheet.create({
     flex: 1,
     marginBottom: 24,
   },
-  todoIndexContainer: {
+  todoCompleteContainer: {
+    flex: 1,
+    flexDirection: "row",
+    paddingVertical: 12,
+    paddingRight: 10,
+  },
+  todoCompleteCircleContainer: {
     justifyContent: "center",
-    width: 26,
-    height: 26,
+    width: 28,
+    height: 28,
     borderRadius: 50,
-    backgroundColor: primaryColor,
-    marginRight: 8,
+    borderWidth: 1,
+    borderColor: "green",
+  },
+  todoCompleteIcon: {
+    textAlign: "center",
+    color: "green",
+    fontSize: 26,
   },
   titleContainer: {
     flex: 8,
     flexDirection: "column",
     justifyContent: "space-between",
-  },
-  todoIndexText: {
-    textAlign: "center",
-    color: "white",
-    fontSize: 10,
   },
   todoItemContainer: {},
   todoTitle: {
@@ -210,6 +299,9 @@ const styles = StyleSheet.create({
     padding: 0,
     margin: 0,
     marginRight: 8,
+  },
+  todoTitleCrossed: {
+    textDecorationLine: "line-through",
   },
   taskCountsContainer: {
     flex: 2,
@@ -225,7 +317,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   listHeaderContainer: {
+    flex: 1,
     margin: 16,
+    justifyContent: "space-evenly",
   },
   listHeaderTitle: {
     fontSize: 36,
@@ -270,16 +364,42 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   notFoundContainer: {
-    marginVertical: 16,
+    flex: 15.5,
+    marginVertical: 30,
     justifyContent: "center",
     alignItems: "center",
-    padding: 16,
+    height: "100%",
   },
   notFoundText: {
     fontSize: 14,
     color: primaryColor,
+    marginTop: 24,
   },
   taskCountNumber: {
     fontWeight: "bold",
-  }
+  },
+  switchContainer: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    marginTop: 8,
+    marginBottom: -8,
+  },
+  switchControl: {
+    transform: Platform.OS === "ios" ? [{ scale: 0.8 }] : [{ scale: 1.2 }],
+    padding: 0,
+    margin: 0,
+    marginLeft: -8,
+    marginTop: -4,
+  },
+  switchDescription: {
+    flex: 1,
+    fontSize: 12,
+    color: "gray",
+    marginLeft: 4,
+    alignContent: "center",
+    justifyContent: "center",
+    paddingBottom: 6,
+  },
 });

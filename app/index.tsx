@@ -1,38 +1,15 @@
-/*
-  TODO:
-  - Ensures that the app is working on both iOS and Android devices
-  - Run with flushed database
-  - Run depcheck for unused dependencies
-  - Remove unused imports
-  - Remove unused code
-  - Publish expo app using ens for demo
-  - Add comments to the code
-  - Update README.md
-*/
-
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Button,
-  Alert,
-  Modal,
-  Pressable,
-  AppRegistry,
-  LogBox,
-} from "react-native";
-
-import { initializeDatabase, getTodos, getCategories } from "./services/db_service";
+import { View, StyleSheet, LogBox } from "react-native";
+import { initializeDatabase, getTodos } from "./services/db_service";
 import { TodoItems } from "./components/TodoItems";
 import StackScreen from "./components/StackScreen";
 import { Todo } from "./models/todo";
 import { useIsFocused } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { name as appName } from "./app.json";
 import { TodoSearchBar } from "./components/TodoSearchBar";
 import { useRouter } from "expo-router";
 import { FavCategories } from "./components/FavCategories";
+import * as ScreenOrientation from "expo-screen-orientation";
 
 /*
   Image Reference and Credits:
@@ -43,7 +20,7 @@ import { FavCategories } from "./components/FavCategories";
 LogBox.ignoreAllLogs();
 
 function useFocusEffect(callback: () => void) {
-  // Ref: https://reactnavigation.org/docs/use-is-focused/
+  // Ref: (https://reactnavigation.org/docs/use-is-focused/)
   const isFocused = useIsFocused();
 
   useEffect(() => {
@@ -53,6 +30,7 @@ function useFocusEffect(callback: () => void) {
   }, [isFocused]);
 }
 
+// Home Screen Component
 export default function HomeScreen() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [addTodoButtonState, setAddTodoButtonState] = useState(true);
@@ -60,37 +38,63 @@ export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
   const [categories, setCategories] = useState([]);
+  const [isEnabled, setIsEnabled] = useState(true);
+  const [isPassiveAssignment, setIsPassiveAssignment] = useState(false);
 
-  const refreshTodos = async () => {
+  // Toggle switch to show completed tasks
+  const toggleSwitch = async () => {
+    console.log("Toggling switch", isEnabled);
+    setIsEnabled((previousState) => !previousState);
+    refreshTodos(!isEnabled);
+  };
+
+  // Refresh todos
+  const refreshTodos = async (show_completed) => {
     console.log("Refreshing todos");
-    await getTodos(setTodos, searchQuery);
+    await getTodos(setTodos, searchQuery, show_completed);
   };
 
   useEffect(() => {
+    // Initialize database and lock orientation
     const initDB = async () => {
       await initializeDatabase();
-      refreshTodos();
+      refreshTodos(isEnabled);
     };
-    initDB();
 
+    const lockOrientation = async () => {
+      // Lock orientation to portrait
+      await ScreenOrientation.lockAsync(
+        ScreenOrientation.OrientationLock.PORTRAIT
+      )
+        .then((result) => {
+          console.log("Orientation locked to portrait");
+        })
+        .catch((error) => {
+          console.log("Error locking orientation to portrait", error);
+        });
+
+      console.log("Orientation locked to portrait");
+    };
+
+    // Run the functions
+    initDB();
+    lockOrientation();
+
+    // If search query is present, refresh todos
     if (searchQuery.length > 0) {
-      refreshTodos();
+      refreshTodos(isEnabled);
     }
   }, [searchQuery]);
 
+  // Refresh the screen when focused; this is useful when the user navigates
+  // back to the screen and needs to see the updated todos
   useFocusEffect(() => {
-    refreshTodos();
+    refreshTodos(isEnabled);
   });
 
+  // Navigate to settings screen
   const gotoSettingsScreen = () => {
     router.push("/settings");
-  };
-
-  const retrieveDBCategories = async () => {
-    console.log("Retrieving categories");
-    const dbCategories = await getCategories(false);
-    console.log("..dbCategories: ", dbCategories);
-    setCategories(dbCategories);
   };
 
   return (
@@ -106,6 +110,9 @@ export default function HomeScreen() {
         gotoSettingsScreen={gotoSettingsScreen}
         categories={categories}
         setCategories={setCategories}
+        setIsPassiveAssignment={setIsPassiveAssignment}
+        isPassiveAssignment={isPassiveAssignment}
+        router={router}
       />
 
       <TodoSearchBar
@@ -116,7 +123,12 @@ export default function HomeScreen() {
       <FavCategories setSearchQuery={setSearchQuery} />
 
       <View style={styles.todoItemsContainer}>
-        <TodoItems todos={todos} refreshTodos={refreshTodos} />
+        <TodoItems
+          todos={todos}
+          refreshTodos={refreshTodos}
+          toggleSwitch={toggleSwitch}
+          isEnabled={isEnabled}
+        />
       </View>
     </GestureHandlerRootView>
   );

@@ -1,5 +1,6 @@
 import { Text, TouchableOpacity, View, StyleSheet } from "react-native";
 
+// Radio Button Component
 export const RadioButton = ({ selected, onPress, label }) => {
   return (
     <TouchableOpacity onPress={onPress} style={styles.radioButtonContainer}>

@@ -3,10 +3,7 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TextInput,
   Pressable,
-  ActivityIndicator,
-  Image,
   Dimensions,
   KeyboardAvoidingView,
   Keyboard,
@@ -40,6 +37,8 @@ export function TodoDetails({
   setImages,
   refreshImages,
   navigation,
+  completedStatus,
+  setCompletedStatus,
 }) {
   const [updating, setUpdating] = useState(false);
   const [updateCompleted, setUpdateCompleted] = useState(false);
@@ -51,11 +50,14 @@ export function TodoDetails({
   const [focusedInput, setFocusedInput] = useState(null);
   const [noteChanged, setNoteChanged] = useState(false);
 
+  // Handle the content size change
   const handleContentSizeChange = (contentWidth, contentHeight) => {
     setContentWidth(contentWidth);
   };
 
   useEffect(() => {
+    // Scroll to the about 2/3 of the image position when a new image is added
+    // with a delay for the visual animation effect.
     if (scrollToEnd) {
       setTimeout(() => {
         const scrollPosition = contentWidth - imageWidth - imageWidth / 2 + 48;
@@ -67,7 +69,9 @@ export function TodoDetails({
       setScrollToEnd(false);
     }
 
+    // Handle the keyboard show event
     if (focusedInput) {
+      // If the focused input is the map, scroll to the middle of the content
       if (focusedInput === "map") {
         const keyboardDidShowListener = Keyboard.addListener(
           "keyboardDidShow",
@@ -86,6 +90,7 @@ export function TodoDetails({
           keyboardDidShowListener.remove();
         };
       }
+      // If the focused input is the note, scroll to the top of the content
       if (focusedInput === "note") {
         const keyboardDidShowListener = Keyboard.addListener(
           "keyboardDidShow",
@@ -104,6 +109,7 @@ export function TodoDetails({
     }
   }, [scrollToEnd, focusedInput]);
 
+  // Add or update the todo notes
   const addUpdateTodoNotesHandler = () => {
     // Set updating to true and stay for 2 seconds
     setUpdating(true);
@@ -131,6 +137,7 @@ export function TodoDetails({
       });
   };
 
+  // Save the image to the file system
   const saveImage = async (uri: string) => {
     console.log("uri: ", uri);
     try {
@@ -173,6 +180,7 @@ export function TodoDetails({
     }
   };
 
+  // Image picker handler
   const pickImageHandler = async () => {
     // Request permission to access the camera and media library
     const permissionResult =
@@ -201,6 +209,7 @@ export function TodoDetails({
     saveImage(pickerResult.assets[0].uri);
   };
 
+  // Delete the todo
   const deleteTodoHandler = async () => {
     // Confirm if the user really wants to delete the todo
     Alert.alert(
@@ -236,6 +245,7 @@ export function TodoDetails({
     );
   };
 
+  // Content size change handler
   const contentSizeChangeHandler = (contentWidth, contentHeight) => {
     setContentHeight(contentHeight);
   };
@@ -248,19 +258,26 @@ export function TodoDetails({
       <View style={styles.detailContentContainer}>
         {/* Todo Title */}
         <View style={styles.titleContainer}>
-          <Text style={styles.TodoTitle} ellipsizeMode="tail" numberOfLines={2}>
+          <Text
+            style={[
+              styles.TodoTitle,
+              completedStatus == 1 ? styles.TotoTitleCrossed : {},
+            ]}
+            ellipsizeMode="tail"
+            numberOfLines={2}
+          >
             {todoTitle}
           </Text>
           <View
-        style={[
-          styles.categoryContainer,
-          {
-            backgroundColor: params.categoryColor,
-          },
-        ]}
-      >
-        <Text style={styles.categoryName}>{params.categoryName}</Text>
-      </View>
+            style={[
+              styles.categoryContainer,
+              {
+                backgroundColor: params.categoryColor,
+              },
+            ]}
+          >
+            <Text style={styles.categoryName}>{params.categoryName}</Text>
+          </View>
         </View>
 
         {/* Todo Details */}
@@ -329,8 +346,7 @@ const styles = StyleSheet.create({
     flex: 5,
     padding: 8,
   },
-  titleContainer: {
-  },
+  titleContainer: {},
   detailContentContainer: {
     flex: 200,
     paddingHorizontal: 0,
@@ -347,6 +363,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     height: 80,
     verticalAlign: "top",
+  },
+  TotoTitleCrossed: {
+    textDecorationLine: "line-through",
   },
   sectionContainer: {
     flex: 1,
@@ -532,7 +551,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   deleteButtonText: {
-    color: "red",
     fontSize: 16,
     textAlign: "center",
     color: "white",

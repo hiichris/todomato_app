@@ -14,14 +14,11 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
-import { Link } from "expo-router";
-import { useSQLiteContext } from "expo-sqlite";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { primaryColor } from "../helpers/constants";
-import { addNewTodo, getCategories } from "../services/db_service";
-import { SQLiteProvider } from "expo-sqlite";
-import { Todo } from "../models/todo";
+import { addNewTodo, getCategories, getTodoById } from "../services/db_service";
 
+// Add Todo Modal Component
 export default function AddTodoModal({
   modalVisible,
   setModalVisible,
@@ -30,12 +27,14 @@ export default function AddTodoModal({
   router,
   categories,
   setCategories,
+  isPassiveAssignment,
 }) {
   const [todoTitle, setTodoTitle] = React.useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
   const scrollViewRef = useRef(null);
 
   useEffect(() => {
+    // Add a listener to the keyboard
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
       () => {
@@ -50,10 +49,14 @@ export default function AddTodoModal({
   }, []);
 
   useEffect(() => {
+    // Retrieve latest categories from the database when the modal is visible
     retrieveDBCategories();
   }, [modalVisible]);
 
+  // Create a new todo
   const createTodoHandler = async () => {
+    let lastCreatedTodoId = null;
+    // Sanity check
     if (todoTitle === "") {
       Alert.alert("Todo Title is required");
       return;
@@ -63,12 +66,42 @@ export default function AddTodoModal({
       return;
     }
 
-    console.log("Todo Title: ", todoTitle, "selectedCategory: ", selectedCategory);
-
+    console.log(
+      "Todo Title: ",
+      todoTitle,
+      "selectedCategory: ",
+      selectedCategory
+    );
+    // Add the new todo to the database
     addNewTodo(setTodos, todoTitle, selectedCategory)
       .then((result) => {
         console.log("result: ", result);
+        lastCreatedTodoId = result.lastInsertRowId;
         refreshTodos();
+
+        // Clear the todoTitle and selectedCategory
+        setTodoTitle("");
+        setSelectedCategory(null);
+        setModalVisible(!modalVisible);
+
+        // Get the last created todo details and navigate to the details screen
+        getTodoById(lastCreatedTodoId)
+          .then((todo) => {
+            router.push({
+              pathname: "/todo_details",
+              params: {
+                passiveTask: isPassiveAssignment,
+                title: todo?.title,
+                id: todo?.id,
+                categoryName: todo?.category_name,
+                categoryColor: todo?.category_color,
+                refreshTodos: refreshTodos,
+              },
+            });
+          })
+          .catch((error) => {
+            console.log("Error: ", error);
+          });
       })
       .catch((error) => {
         console.log("Error: ", error);
@@ -80,13 +113,18 @@ export default function AddTodoModal({
     setModalVisible(!modalVisible);
   };
 
+  // Retrieve categories from the database
   const retrieveDBCategories = async () => {
-    console.log("Retrieving categories");
-    const dbCategories = await getCategories(false);
-    console.log("..dbCategories: ", dbCategories);
-    setCategories(dbCategories);
+    const dbCategories = await getCategories(false)
+      .then((result) => {
+        setCategories(result);
+      })
+      .catch((error) => {
+        console.log("Error: ", error);
+      });
   };
 
+  // Handle the onFocus event
   const onFocusHandler = () => {
     if (selectedCategory === null) {
       Alert.alert("Please select a category first!");
@@ -185,7 +223,11 @@ export default function AddTodoModal({
 
                   <View style={styles.buttonsContainer}>
                     <Pressable
-                      style={[styles.button, styles.buttonCreate]}
+                      style={({ pressed }) => [
+                        styles.button,
+                        styles.buttonCreate,
+                        { backgroundColor: pressed ? "#9a2800" : "#B2361B" },
+                      ]}
                       onPress={createTodoHandler}
                     >
                       <Text style={styles.createButtonText}>Create</Text>

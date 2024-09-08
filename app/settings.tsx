@@ -8,7 +8,7 @@ import {
   Alert,
 } from "react-native";
 import React, { useEffect, useState } from "react";
-import { router, Stack } from "expo-router";
+import { router, Stack, useRouter } from "expo-router";
 import { primaryColor, colorArray } from "./helpers/constants";
 import {
   getCategories,
@@ -16,25 +16,29 @@ import {
   deleteCategory,
   addCategory,
 } from "./services/db_service";
-import { useRouter } from "expo-router";
 
+// Settings Screen Component
 export default function SettingsScreen() {
   const [categories, setCategories] = useState(null);
   const [addNewCategoryName, setAddNewCategoryName] = useState("");
   const [addNewCategoryColor, setAddNewCategoryColor] = useState("");
   const router = useRouter();
 
+  // Refresh categories on load
   useEffect(() => {
     refreshCategories();
   }, []);
 
+  // Retrieve categories from database and set to the categories state
   const refreshCategories = async () => {
     console.log("Refreshing categories");
     const dbCategories = await getCategories();
     setCategories(dbCategories);
   };
 
+  // Reset database
   const resetDatabaseHandler = async () => {
+    // Show alert to confirm reset process
     Alert.alert(
       "Reset Database",
       "Are you sure you want to reset the database?",
@@ -56,22 +60,33 @@ export default function SettingsScreen() {
     );
   };
 
+  // Delete category handler
   const deleteCategoryHandler = async (categoryId) => {
     console.log("Deleting category: ", categoryId);
     await deleteCategory(categoryId);
     await refreshCategories();
   };
 
+  // Add new category handler
   const addNewCategoryHandler = async () => {
+    // Check if category name and color are provided
     if (addNewCategoryName && addNewCategoryColor) {
-      console.log("Adding new category: ", addNewCategoryName, addNewCategoryColor);
+      console.log(
+        "Adding new category: ",
+        addNewCategoryName,
+        addNewCategoryColor
+      );
       await addCategory(addNewCategoryColor, addNewCategoryName, 0);
       setAddNewCategoryName("");
       setAddNewCategoryColor("");
       await refreshCategories();
-      Alert.alert("🎉Success", "New category has been added!")
+      Alert.alert("🎉Success", "New category has been added!");
     } else {
-        Alert.alert("Warning", "Please enter a category name and select a color.");
+      // Show alert if category name and color are not provided
+      Alert.alert(
+        "Warning",
+        "Please enter a category name and select a color."
+      );
     }
   };
 
@@ -125,10 +140,10 @@ export default function SettingsScreen() {
                           {category.name}
                         </Text>
                         <Pressable
-                          style={(pressed) => [
+                          style={({ pressed }) => [
                             styles.categoryDeleteButton,
                             {
-                              backgroundColor: pressed ? "white" : "gray",
+                              backgroundColor: pressed ? "lightgray" : "white",
                             },
                           ]}
                           onPress={() => deleteCategoryHandler(category.id)}
