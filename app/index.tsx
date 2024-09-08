@@ -62,6 +62,7 @@ export default function HomeScreen() {
   const [categories, setCategories] = useState([]);
   const [refresh, setRefresh] = useState(false);
   const [isEnabled, setIsEnabled] = useState(true);
+  const [isPassiveAssignment, setIsPassiveAssignment] = useState(false);
   
   const toggleSwitch = async () => {
     console.log("Toggling switch", isEnabled);
@@ -118,6 +119,9 @@ export default function HomeScreen() {
         gotoSettingsScreen={gotoSettingsScreen}
         categories={categories}
         setCategories={setCategories}
+        setIsPassiveAssignment={setIsPassiveAssignment}
+        isPassiveAssignment={isPassiveAssignment}
+        router={router}
       />
 
       <TodoSearchBar

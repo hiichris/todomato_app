@@ -14,6 +14,7 @@ import {
   deleteTask,
   updateTodoCompleted,
 } from "../services/db_service";
+import { checkPassiveAssignmentCompletion } from "../services/api_service";
 import {
   GestureHandlerRootView,
   LongPressGestureHandler,
@@ -29,6 +30,7 @@ import { Task } from "../models/task";
 import { Todo } from "../models/todo";
 import { Tasks } from "./Tasks";
 import { Link } from "expo-router";
+import { primaryColor } from "../helpers/constants";
 
 const updateTodoCompletedHandler =
   (todoId, completedStatus, setCompletedStatus) => async () => {
@@ -114,6 +116,20 @@ const TaskListFooter = () => {
 };
 
 const TaskItem = ({ task, index, onLongPress }) => {
+  // Check if this task is an passive assignment
+  // If it is, send a request to the server to check if it is completed
+  useEffect(() => {
+    if (task.is_passiveassign === 1 && task.pa_completed === 0) {
+      checkPassiveAssignmentCompletion(task.uid, task.todo_id, task.id)
+        .then((result) => {
+          task.pa_completed = result.is_completed ? 1 : 0;
+        })
+        .catch((error) => {
+          console.log("Error checking passive assignment completion: ", error);
+        });
+    }
+  }, []);
+
   return (
     <View style={styles.taskItemsContainer}>
       <GestureHandlerRootView>
@@ -140,7 +156,11 @@ const TaskItem = ({ task, index, onLongPress }) => {
                 color="gray"
                 style={styles.iconContainer}
               />
-              <Text style={styles.duration}>{task.duration}m</Text>
+              {task.is_passiveassign === 1 ? (
+                <Text style={styles.passiveAssignText}>Passive Assignment</Text>
+              ) : (
+                <Text style={styles.duration}>{task.duration}m</Text>
+              )}
             </View>
             <View style={styles.attributeContainer}>
               <Icon
@@ -149,7 +169,13 @@ const TaskItem = ({ task, index, onLongPress }) => {
                 color="gray"
                 style={styles.iconContainer}
               />
-              <Text style={styles.timestamp}>{task.scheduled_at}</Text>
+              {task.is_passiveassign === 1 ? (
+                <Text style={styles.timestamp}>
+                  {task.pa_completed == 1 ? "Completed" : "Pending"}
+                </Text>
+              ) : (
+                <Text style={styles.timestamp}>{task.scheduled_at}</Text>
+              )}
             </View>
           </View>
         </LongPressGestureHandler>
@@ -371,5 +397,11 @@ const styles = StyleSheet.create({
   headerStatusTitleContainer: {
     flexDirection: "row",
     justifyContent: "flex-start",
+  },
+  passiveAssignText: {
+    flex: 1,
+    textAlign: "center",
+    fontSize: 8,
+    color: primaryColor,
   },
 });

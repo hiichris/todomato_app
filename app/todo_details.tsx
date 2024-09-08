@@ -3,6 +3,7 @@ import {
   useLocalSearchParams,
   useRouter,
   useNavigation,
+  useGlobalSearchParams,
 } from "expo-router";
 import {
   View,
@@ -59,6 +60,9 @@ export default function TodoDetailsScreen() {
   const [todoNotes, setTodoNotes] = useState(params.todoNotes);
   const [images, setImages] = useState(null);
   const [completedStatus, setCompletedStatus] = useState(params.has_completed);
+  const {passiveTask = false} = useGlobalSearchParams();
+
+  console.log("000 Passive task: ", passiveTask);
 
   const goToPage = (pageIndex) => {
     if (pagerRef.current) {
@@ -77,6 +81,11 @@ export default function TodoDetailsScreen() {
     getPermissions();
     refreshTasks();
     refreshImages(parseInt(params.id));
+
+    console.log("Passive task: ", passiveTask);
+    // if passive task is true, set addpassiveassignment modal to true
+
+
 
     Notifications.setNotificationHandler({
       handleNotification: async () => ({
@@ -155,8 +164,10 @@ export default function TodoDetailsScreen() {
   };
 
   let strippedTitle = params.title;
-  if (params.title.length > 26) {
+  if (params.title && params.title.length > 26) {
    strippedTitle = params.title.substring(0, 26) + "...";
+  } else {
+    strippedTitle = params.title;
   }
   return (
     <>
@@ -184,6 +195,7 @@ export default function TodoDetailsScreen() {
               setAddTodoButtonState={setAddTodoButtonState}
               addTaskButtonState={addTaskButtonState}
               setAddTaskButtonState={setAddTaskButtonState}
+              expandPassiveAssignmentModal={passiveTask}
             />
             <TapButtons goToPage={goToPage} currentPage={currentPage} />
 
@@ -203,6 +215,7 @@ export default function TodoDetailsScreen() {
             <View style={styles.SpaceContainer}></View>
           </GestureHandlerRootView>
         </View>
+
         <View key="2">
           <TodoDetails
             goToPage={goToPage}
