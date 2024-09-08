@@ -18,7 +18,7 @@ import { Link } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { primaryColor } from "../helpers/constants";
-import { addNewTodo, getCategories } from "../services/db_service";
+import { addNewTodo, getCategories, getTodoById } from "../services/db_service";
 import { SQLiteProvider } from "expo-sqlite";
 import { Todo } from "../models/todo";
 
@@ -30,10 +30,13 @@ export default function AddTodoModal({
   router,
   categories,
   setCategories,
+  isPassiveAssignment,
 }) {
   const [todoTitle, setTodoTitle] = React.useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
   const scrollViewRef = useRef(null);
+
+  console.log("### isPassiveAssignment: ", isPassiveAssignment);
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -54,6 +57,8 @@ export default function AddTodoModal({
   }, [modalVisible]);
 
   const createTodoHandler = async () => {
+    let lastCreatedTodoId = null;
+
     if (todoTitle === "") {
       Alert.alert("Todo Title is required");
       return;
@@ -63,12 +68,42 @@ export default function AddTodoModal({
       return;
     }
 
-    console.log("Todo Title: ", todoTitle, "selectedCategory: ", selectedCategory);
+    console.log(
+      "Todo Title: ",
+      todoTitle,
+      "selectedCategory: ",
+      selectedCategory
+    );
 
     addNewTodo(setTodos, todoTitle, selectedCategory)
       .then((result) => {
         console.log("result: ", result);
+        lastCreatedTodoId = result.lastInsertRowId;
         refreshTodos();
+
+        console.log("___isPassiveAssignment: ", isPassiveAssignment);
+        // Clear the todoTitle
+        setTodoTitle("");
+        setSelectedCategory(null);
+        setModalVisible(!modalVisible);
+
+        getTodoById(lastCreatedTodoId)
+          .then((todo) => {
+            router.push({
+              pathname: "/todo_details",
+              params: {
+                passiveTask: isPassiveAssignment,
+                title: todo?.title,
+                id: todo?.id,
+                categoryName: todo?.category_name,
+                categoryColor: todo?.category_color,
+                refreshTodos: refreshTodos,
+              },
+            });
+          })
+          .catch((error) => {
+            console.log("Error: ", error);
+          });
       })
       .catch((error) => {
         console.log("Error: ", error);
@@ -184,7 +219,11 @@ export default function AddTodoModal({
 
                   <View style={styles.buttonsContainer}>
                     <Pressable
-                      style={[styles.button, styles.buttonCreate]}
+                      style={({pressed}) => [
+                        styles.button,
+                        styles.buttonCreate,
+                        { backgroundColor: pressed ? "#9a2800" : "#B2361B" },
+                      ]}
                       onPress={createTodoHandler}
                     >
                       <Text style={styles.createButtonText}>Create</Text>

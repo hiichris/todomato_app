@@ -125,10 +125,10 @@ export default function SettingsScreen() {
                           {category.name}
                         </Text>
                         <Pressable
-                          style={(pressed) => [
+                          style={({pressed}) => [
                             styles.categoryDeleteButton,
                             {
-                              backgroundColor: pressed ? "white" : "gray",
+                              backgroundColor: pressed ? "lightgray" : "white",
                             },
                           ]}
                           onPress={() => deleteCategoryHandler(category.id)}

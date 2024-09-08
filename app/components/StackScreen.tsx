@@ -16,8 +16,14 @@ import { primaryColor } from "../helpers/constants";
 import AddTaskModal from "./AddTaskModal";
 import { StatusBar } from "expo-status-bar";
 import Icon from "react-native-vector-icons/FontAwesome";
+import AddPassiveAssignmentModal from "./AddPassiveAssignmentModal";
 
-const todoButton = (setTodoModalVisible, setImportant, setUrgent) => {
+const todoButton = (
+  setTodoModalVisible,
+  setPassiveAssignmentModalVisible,
+  setImportant,
+  setUrgent
+) => {
   return (
     <Pressable
       onPress={() => {
@@ -33,12 +39,9 @@ const todoButton = (setTodoModalVisible, setImportant, setUrgent) => {
                   text: "No",
                   onPress: () => {
                     setUrgent(false);
-                    console.log("No pressed");
 
-                    Alert.alert(
-                      "Unfortunately...",
-                      "Events that are not important and not urgent can wait. Todo creation is skipped for now. A future feature will allow you to create this event in a different category. Stay tuned.🥹"
-                    );
+                    console.log("Set passive assignment modal visible");
+                    setPassiveAssignmentModalVisible(true);
                   },
                   style: "cancel",
                 },
@@ -48,7 +51,7 @@ const todoButton = (setTodoModalVisible, setImportant, setUrgent) => {
                     setUrgent(true);
                     console.log("Yes pressed");
 
-                    console.log("Set modal visible");
+                    console.log("Set add todo modal visible");
                     setTodoModalVisible(true);
                   },
                 },
@@ -137,16 +140,45 @@ export default function StackScreen({
   gotoSettingsScreen,
   categories,
   setCategories,
+  router,
+  expandPassiveAssignmentModal = null,
   scheduleNotification = null,
 }) {
   const [todoModalVisible, setTodoModalVisible] = useState(false);
   const [taskModalVisible, setTaskModalVisible] = useState(false);
+  const [passiveAssignmentModalVisible, setPassiveAssignmentModalVisible] =
+    useState(false);
   const [important, setImportant] = useState(false);
   const [urgent, setUrgent] = useState(false);
 
+  console.log(
+    "^^^ Expand passive assignment modal",
+    expandPassiveAssignmentModal
+  );
+
+  useEffect(() => {
+    console.log(
+      "(urgent",
+      urgent,
+      "important",
+      important,
+      "expand",
+      expandPassiveAssignmentModal,
+      ")"
+    );
+    if (expandPassiveAssignmentModal) {
+      setPassiveAssignmentModalVisible(true);
+    }
+  }, [expandPassiveAssignmentModal]);
+
   let headerRightComponent = () => {
     if (addTodoButtonState) {
-      return todoButton(setTodoModalVisible, setImportant, setUrgent);
+      return todoButton(
+        setTodoModalVisible,
+        setPassiveAssignmentModalVisible,
+        setImportant,
+        setUrgent
+      );
     }
     if (addTaskButtonState) {
       return taskButton(setTaskModalVisible);
@@ -169,6 +201,7 @@ export default function StackScreen({
           headerRight: headerRightComponent,
         }}
       ></Stack.Screen>
+
       <AddTodoModal
         setTodos={setTodos}
         refreshTodos={refreshTodos}
@@ -176,6 +209,7 @@ export default function StackScreen({
         setModalVisible={setTodoModalVisible}
         categories={categories}
         setCategories={setCategories}
+        router={router}
       />
       <AddTaskModal
         todoId={todoId}
@@ -185,6 +219,15 @@ export default function StackScreen({
         modalVisible={taskModalVisible}
         setModalVisible={setTaskModalVisible}
         scheduleNotification={scheduleNotification}
+      />
+      <AddPassiveAssignmentModal
+        setTodos={setTodos}
+        refreshTodos={refreshTodos}
+        modalVisible={passiveAssignmentModalVisible}
+        setModalVisible={setPassiveAssignmentModalVisible}
+        categories={categories}
+        setCategories={setCategories}
+        router={router}
       />
     </View>
   );

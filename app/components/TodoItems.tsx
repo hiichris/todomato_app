@@ -74,13 +74,13 @@ const fetchTaskCount = async (todoId) => {
 };
 
 const updateTodoCompletedHandler =
-  (todoId, isCompleted, refreshTodos) => async () => {
+  (todoId, isCompleted, refreshTodos, isEnabled) => async () => {
     console.log("Updating todo completed status", todoId, isCompleted);
     // reverse the completed status
     isCompleted = isCompleted === 1 ? 0 : 1;
     console.log("Updated todo completed status", todoId, isCompleted);
     updateTodoCompleted(todoId, isCompleted);
-    refreshTodos();
+    refreshTodos(isEnabled);
   };
 
 const TodoItem = ({
@@ -135,7 +135,8 @@ const TodoItem = ({
           onPress={updateTodoCompletedHandler(
             item.id,
             item.has_completed,
-            refreshTodos
+            refreshTodos,
+            isEnabled
           )}
         >
           {item.has_completed === 1 ? (
@@ -238,6 +239,7 @@ export function TodoItems({ todos, refreshTodos, toggleSwitch, isEnabled }) {
             todos={todos}
             refreshTodos={refreshTodos}
             refresh={refresh}
+            isEnabled={isEnabled}
           />
         )}
       />
