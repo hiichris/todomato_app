@@ -11,7 +11,7 @@
 */
 
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, LogBox } from "react-native";
 import { initializeDatabase, getTodos } from "./services/db_service";
 import { TodoItems } from "./components/TodoItems";
 import StackScreen from "./components/StackScreen";
@@ -29,7 +29,7 @@ import * as ScreenOrientation from "expo-screen-orientation";
 */
 
 // Ignore all logs for demoing purposes
-// LogBox.ignoreAllLogs();
+LogBox.ignoreAllLogs();
 
 function useFocusEffect(callback: () => void) {
   // Ref: (https://reactnavigation.org/docs/use-is-focused/)
