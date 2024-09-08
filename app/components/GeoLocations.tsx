@@ -20,7 +20,12 @@ const googleMapsApiKey = Constants.expoConfig?.extra.googleMapsApiKey;
 // Init the Geocoder
 Geocoder.init(googleMapsApiKey);
 
-export const GeoLocations = ({ styles, setFocusedInput, todoId, setGeoInputYpos }) => {
+export const GeoLocations = ({
+  styles,
+  setFocusedInput,
+  todoId,
+  setGeoInputYpos,
+}) => {
   const [marker, setMarker] = useState(null);
   const [address, setAddress] = useState("");
   const mapRef = useRef(null);
@@ -36,9 +41,11 @@ export const GeoLocations = ({ styles, setFocusedInput, todoId, setGeoInputYpos 
   });
 
   useEffect(() => {
+    // Get the geolocation from the database
     getGeolocationFromDB(todoId);
   }, [todoId]);
 
+  // Update the region and marker
   const updateRegionAndMarker = (latitude: number, longitude: number) => {
     setMarker({
       latitude: latitude,
@@ -50,10 +57,12 @@ export const GeoLocations = ({ styles, setFocusedInput, todoId, setGeoInputYpos 
       latitudeDelta: defaultLatDelta,
       longitudeDelta: defaultLongDelta,
     };
+    // Animate the map to the new region
     mapRef.current?.animateToRegion(newRegion, 1000);
     setRegion(newRegion);
   };
 
+  // Get the geolocation from the database
   const getGeolocationFromDB = async (todoId: number) => {
     console.log("todoId: ", todoId);
     const location = await getGeolocation(todoId);
@@ -61,21 +70,25 @@ export const GeoLocations = ({ styles, setFocusedInput, todoId, setGeoInputYpos 
     const parsedAddress = locationArray[0];
     const latitude = parseFloat(locationArray[1]);
     const longitude = parseFloat(locationArray[2]);
+    // If the latitude and longitude are valid, update the region and marker
     if (latitude && longitude) {
       updateRegionAndMarker(latitude, longitude);
     }
+    // Set the address
     console.log("Addres: ", parsedAddress);
     setSavedAddress(parsedAddress);
   };
 
+  // Update the geolocation to the database
   const updateGeolocationToDB = async (todoId: number, geolocation: string) => {
+    // Update the geolocation
     console.log("updating geolocation: ", geolocation);
     await updateGeolocation(todoId, geolocation)
       .then(() => {
         console.log("Geolocation updated");
       })
       .catch((error) => {
-        console.error("Error updating geolocation: ", error);
+        console.log("Error updating geolocation: ", error);
       });
   };
 
@@ -84,15 +97,17 @@ export const GeoLocations = ({ styles, setFocusedInput, todoId, setGeoInputYpos 
     try {
       const location = await getLocation(todoId);
       console.log("location:", location);
+      // If the location is valid, update the address, region, and marker
       if (location) {
         setAddress(location.address);
         updateRegionAndMarker(location.latitude, location.longitude);
       }
     } catch (error) {
-      console.error("Error getting geolocation:", error);
+      console.log("Error getting geolocation:", error);
     }
   };
 
+  // Disable searching effect
   const disableSearching = () => {
     setTimeout(() => {
       setSearchingLocation(false);
@@ -101,11 +116,15 @@ export const GeoLocations = ({ styles, setFocusedInput, todoId, setGeoInputYpos 
     setAddress("");
   };
 
+  // Find the coordinates of the address
   const findCoordinates = async () => {
+    // Set the searching effect to true so the loading spinner appears
     setSearchingLocation(true);
     try {
+      // Get the geocode of the address
       let geocode = await Location.geocodeAsync(address);
 
+      // If the geocode is valid, update the region
       if (geocode.length > 0) {
         const { latitude, longitude } = geocode[0];
         const newRegion = {
@@ -114,6 +133,7 @@ export const GeoLocations = ({ styles, setFocusedInput, todoId, setGeoInputYpos 
           latitudeDelta: defaultLatDelta,
           longitudeDelta: defaultLongDelta,
         };
+        // Animate the map to the new region and update the marker
         mapRef.current?.animateToRegion(newRegion, 1000);
         setRegion(newRegion);
         setMarker({ latitude: latitude, longitude: longitude });
@@ -125,8 +145,10 @@ export const GeoLocations = ({ styles, setFocusedInput, todoId, setGeoInputYpos 
         await updateGeolocationToDB(todoId, geolocation);
         setSavedAddress(address);
 
+        // Disable the searching effect
         disableSearching();
       } else {
+        // Otherwise, no geocode was found, alert the user and disable the searching effect
         console.log("No geocode found");
         disableSearching();
         Alert.alert(
@@ -143,8 +165,10 @@ export const GeoLocations = ({ styles, setFocusedInput, todoId, setGeoInputYpos 
         );
       }
     } catch (error) {
-      console.log("error code:", error.code)
-      if (error.code === 'ERR_LOCATION_UNAUTHORIZED') {
+      // Handle a special edge case where the user denies location permissions
+      // or the location services are disabled
+      console.log("error code:", error.code);
+      if (error.code === "ERR_LOCATION_UNAUTHORIZED") {
         Alert.alert(
           "⚠️ Permission Denied",
           "Please enable location services in your device settings.",
@@ -162,32 +186,37 @@ export const GeoLocations = ({ styles, setFocusedInput, todoId, setGeoInputYpos 
     }
   };
 
+  // Handle the enter key press
   const handleKeyPress = ({ nativeEvent }) => {
     if (nativeEvent.key === "Enter") {
       findCoordinates();
     }
   };
 
+  // Function to handle the marker drag end event
   const markerDragEndHandler = async (event) => {
+    // Get the new coordinates from the marker
     const newCoords = event.nativeEvent.coordinate;
     setMarker(newCoords);
 
-    // Reverse geocode to get the address
+    // Reverse geocode to get the address by calling the Google Maps API
     try {
       const response = await Geocoder.from(
         newCoords.latitude,
         newCoords.longitude
       );
+      // Save the formatted address
       const newAddress = response.results[0].formatted_address;
       setAddress(newAddress);
       setSavedAddress(newAddress);
 
       // Save the geolocation to the database
+      // Format: address|latitude|longitude
       const geolocation = `${newAddress}|${newCoords.latitude}|${newCoords.longitude}`;
       console.log("Pinned geolocation updated:", geolocation);
       await updateGeolocationToDB(todoId, geolocation);
     } catch (error) {
-      console.error("Error reverse geocoding:", error);
+      console.log("Error reverse geocoding:", error);
     }
   };
 

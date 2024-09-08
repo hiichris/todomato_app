@@ -1,29 +1,22 @@
-import { Stack, Link } from "expo-router";
-import { useSQLiteContext, SQLiteProvider } from "expo-sqlite";
+import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
-import {
-  Text,
-  StyleSheet,
-  Pressable,
-  Modal,
-  View,
-  Alert,
-  Button,
-} from "react-native";
+import { Text, StyleSheet, Pressable, View, Alert } from "react-native";
 
 import AddTodoModal from "./AddTodoModal";
 import { primaryColor } from "../helpers/constants";
 import AddTaskModal from "./AddTaskModal";
-import { StatusBar } from "expo-status-bar";
 import Icon from "react-native-vector-icons/FontAwesome";
 import AddPassiveAssignmentModal from "./AddPassiveAssignmentModal";
 
+// Todo Button Component
 const todoButton = (
   setTodoModalVisible,
   setPassiveAssignmentModalVisible,
   setImportant,
   setUrgent
 ) => {
+  // Ask the user if the todo is important and urgent by incorporating the Eisenhower Matrix
+  // for better time management. https://en.wikipedia.org/wiki/Time_management#The_Eisenhower_Method
   return (
     <Pressable
       onPress={() => {
@@ -98,6 +91,7 @@ const todoButton = (
   );
 };
 
+// Task Button Component
 const taskButton = (setTaskModalVisible) => {
   return (
     <Pressable
@@ -111,6 +105,7 @@ const taskButton = (setTaskModalVisible) => {
   );
 };
 
+// Settings Button Component
 const settingsButton = ({ gotoSettingsScreen }) => {
   return (
     <Pressable
@@ -127,6 +122,7 @@ const settingsButton = ({ gotoSettingsScreen }) => {
   );
 };
 
+// Custom Stack Screen Component
 export default function StackScreen({
   title,
   todoId,
@@ -151,11 +147,6 @@ export default function StackScreen({
   const [important, setImportant] = useState(false);
   const [urgent, setUrgent] = useState(false);
 
-  console.log(
-    "^^^ Expand passive assignment modal",
-    expandPassiveAssignmentModal
-  );
-
   useEffect(() => {
     console.log(
       "(urgent",
@@ -166,11 +157,13 @@ export default function StackScreen({
       expandPassiveAssignmentModal,
       ")"
     );
+    // If expandPassiveAssignmentModal is true, show the modal
     if (expandPassiveAssignmentModal) {
       setPassiveAssignmentModalVisible(true);
     }
   }, [expandPassiveAssignmentModal]);
 
+  // Header right component
   let headerRightComponent = () => {
     if (addTodoButtonState) {
       return todoButton(
@@ -185,6 +178,7 @@ export default function StackScreen({
     }
   };
 
+  // Header left component
   let headerLeftComponent = () => {
     if (addTodoButtonState && !addTaskButtonState) {
       return settingsButton({ gotoSettingsScreen });

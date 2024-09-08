@@ -14,7 +14,6 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    // TODO: To research on how to resolve: 
     // TypeError: _ExpoSQLiteNext.default.NativeDatabase is not a constructor
     // Therefore commenting out the console.error
 

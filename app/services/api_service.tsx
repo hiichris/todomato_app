@@ -1,8 +1,9 @@
 import axios from "axios";
 import { updateTaskCompleted } from "../services/db_service";
+import Constants from "expo-constants";
 
-const PAS_API_URL = "https://pasapi-dev.up.railway.app/api/assignment";
-const PAS_API_TOKEN = "03512d1d-e0c0-43ed-b499-671ec5ae9baa";
+const PAS_API_URL = Constants.expoConfig?.extra.PAS_URL;
+const PAS_API_TOKEN = Constants.expoConfig?.extra.PAS_Token;
 
 export const sendPassiveAssignmentRequest = async (
   uid,
@@ -35,7 +36,7 @@ export const sendPassiveAssignmentRequest = async (
     console.log("Passive assignment request sent:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error sending passive assignment request:", error);
+    console.log("Error sending passive assignment request:", error);
     throw error;
   }
 };
@@ -65,7 +66,7 @@ export const checkPassiveAssignmentCompletion = async (
         console.log("Task completion status updated in database");
       })
       .catch((error) => {
-        console.error(
+        console.log(
           "Error updating task completion status in database:",
           error
         );
@@ -73,7 +74,7 @@ export const checkPassiveAssignmentCompletion = async (
 
     return response.data;
   } catch (error) {
-    console.error("Error checking passive assignment completion:", error);
+    console.log("Error checking passive assignment completion:", error);
     throw error;
   }
 };
