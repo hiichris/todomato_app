@@ -12,8 +12,9 @@ Get ready to dive into a hands-on experience with this innovative time managemen
 
 ### Access the Demo
 * Scan the QR code (see below) using your device’s camera (for iOS) or through the Expo app’s "Scan QR Code" feature (for Android).
-* <img src="https://github.com/user-attachments/assets/61def907-bf59-4a3e-81c5-71e35639430e" width="300" height="300" alt="QR Code">
-* Alternatively, you can access the demo by visiting [this URL](https://expo.dev/preview/update?message=Merge%20pull%20request%20%2314%20from%20hiichris%2Fdev%0A%0AFinal%20Update&updateRuntimeVersion=1.0.0&createdAt=2024-09-08T21%3A41%3A03.872Z&slug=exp&projectId=ab26227b-b0ff-4ea0-929b-f0ffddd8f692&group=7e34a9cc-f347-4101-8776-db87ff28949c) and get the QR Code.
+* <img src="https://github.com/user-attachments/assets/7141b117-f28c-41ec-95b2-ecfba96e434b" width="300" height="300" alt="QR Code">
+
+* Alternatively, you can access the demo by visiting [this URL](https://expo.dev/preview/update?message=Final%20update&updateRuntimeVersion=1.0.0&createdAt=2024-09-09T00%3A22%3A40.825Z&slug=exp&projectId=ab26227b-b0ff-4ea0-929b-f0ffddd8f692&group=aaf4126c-2e63-4a2c-bbbb-dce2d027eed7) and get the QR Code.
 
 
 ### Grant Permissions
