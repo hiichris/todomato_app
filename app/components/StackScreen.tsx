@@ -33,8 +33,10 @@ const todoButton = (
                   onPress: () => {
                     setUrgent(false);
 
-                    console.log("Set passive assignment modal visible");
-                    setPassiveAssignmentModalVisible(true);
+                    Alert.alert(
+                      "😌 Relax!",
+                      "It seems this event isn't a top priority for you right now. Feel free to come back and create a task when it becomes important or urgent."
+                    );
                   },
                   style: "cancel",
                 },
@@ -43,9 +45,11 @@ const todoButton = (
                   onPress: () => {
                     setUrgent(true);
                     console.log("Yes pressed");
-
-                    console.log("Set add todo modal visible");
-                    setTodoModalVisible(true);
+                    // Not important but urgent can be deligated to someone else
+                    // This Passive Assignment is for the purpose of delegation
+                    // and an implmentation of the Eisenhower Matrix on the Quadrant III.
+                    console.log("Set passive assignment modal visible");
+                    setPassiveAssignmentModalVisible(true);
                   },
                 },
               ]);
